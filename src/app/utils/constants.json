@@ -1,0 +1,70 @@
+{
+  "officeTypes": [
+    {
+      "name": "Unit",
+      "code": "U"
+    },
+    {
+      "name": "Section",
+      "code": "S"
+    },
+    {
+      "name": "Division",
+      "code": "D"
+    },
+    {
+      "name": "Irrigation System",
+      "code": "IS"
+    },
+    {
+      "name": "Satellite Office",
+      "code": "SO"
+    },
+    {
+      "name": "Irrigation Management Office",
+      "code": "IMO"
+    },
+    {
+      "name": "Regional Office",
+      "code": "RO"
+    }
+  ],
+  "taskTypes": [
+    {
+      "name": "Assistance",
+      "code": "AT"
+    },
+    {
+      "name": "Computer Repair",
+      "code": "CR"
+    },
+    {
+      "name": "Computer Software Troubleshooting",
+      "code": "CST"
+    },
+    {
+      "name": "Computer Hardware Troubleshooting",
+      "code": "CHT"
+    },
+    {
+      "name": "Information System",
+      "code": "IS"
+    },
+    {
+      "name": "Network",
+      "code": "NW"
+    },
+    {
+      "name": "Internet",
+      "code": "ITN"
+    },
+    {
+      "name": "Printer",
+      "code": "PT"
+    },
+    {
+      "name": "Others",
+      "code": "OT"
+    }
+  ]
+}
