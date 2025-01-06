@@ -35,9 +35,9 @@ export interface IOfficeBody {
   name: string
   alias: string
   officeType: "unit" | "section" | "division" | "irrigation system" | "satellite office" | "irrigation management office" | "regional office"
-  parentOfficeId: string
-  createdById?: string
-  updatedById?: string
+  parentOffice: string
+  createdBy?: string
+  updatedBy?: string
 }
 
 export interface IOfficeResults {

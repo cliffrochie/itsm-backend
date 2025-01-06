@@ -91,7 +91,7 @@ export async function createClient(req: IUserIdRequest, res: Response) {
     const body: IClientBody = req.body
 
     const client = new Client({
-      user: body.userId ? new Types.ObjectId(body.userId) : undefined,
+      user: body.user ? new Types.ObjectId(body.user) : undefined,
       firstName: body.firstName,
       middleName: body.middleName,
       lastName: body.lastName,
@@ -122,7 +122,7 @@ export async function updateClient(req: IUserIdRequest, res: Response) {
       return
     }
     
-    client.user = body.userId ? new Types.ObjectId(body.userId) : undefined
+    client.user = body.user ? new Types.ObjectId(body.user) : undefined
     client.firstName = body.firstName
     client.middleName = body.middleName
     client.lastName = body.lastName

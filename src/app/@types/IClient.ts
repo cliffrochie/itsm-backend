@@ -19,6 +19,7 @@ export interface IClient extends Document {
 }
 
 export interface IClientQueryParams {
+  user?: string
   firstName?: string
   middleName?: string
   lastName?: string
@@ -38,7 +39,7 @@ export interface IClientFilter {
 }
 
 export interface IClientBody {
-  userId: string
+  user?: string
   firstName: string
   middleName?: string
   lastName: string

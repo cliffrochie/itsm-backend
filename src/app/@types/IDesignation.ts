@@ -23,8 +23,8 @@ export interface IDesignationFilter {
 
 export interface IDesignationBody {
   title?: string
-  createdById?: string
-  updatedById?: string
+  createdBy?: string
+  updatedBy?: string
 }
 
 export interface IDesignationResults {

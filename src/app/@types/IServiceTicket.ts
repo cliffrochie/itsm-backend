@@ -82,10 +82,10 @@ export interface IServiceTicketBody {
   isFinished: boolean
   priority: "low" | "medium" | "high"
   remarks?: string
-  serviceEngineerId?: string
-  clientId?: string
-  createdById?: string
-  updatedById?: string
+  serviceEngineer?: string
+  client?: string
+  createdBy?: string
+  updatedBy?: string
 }
 
 export interface IServiceTicketResults {

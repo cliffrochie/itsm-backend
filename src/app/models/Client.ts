@@ -9,6 +9,7 @@ const ClientSchema = new Schema<IClient>({
   extensionName: { type: String, default: null },
   designation: { type: mongoose.Schema.ObjectId, ref: 'Designation', default: null }, 
   office: { type: mongoose.Schema.Types.ObjectId, ref: 'Office', default: null },
+  user: { type: mongoose.Schema.Types.ObjectId, ref: 'User', default: null },
   createdBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User', default: null },
   updatedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User', default: null },
   createdAt: { type: Date, immutable: true, default: () => Date.now() },

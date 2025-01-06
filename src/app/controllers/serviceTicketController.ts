@@ -106,8 +106,8 @@ export async function createServiceTicket(req: IUserIdRequest, res: Response) {
       isActive: body.isActive,
       isFinished: body.isFinished,
       remarks: body.remarks,
-      serviceEngineer: body.serviceEngineerId ? new Types.ObjectId(body.serviceEngineerId) : undefined,
-      client: body.clientId ? new Types.ObjectId(body.clientId) : undefined,
+      serviceEngineer: body.serviceEngineer ? new Types.ObjectId(body.serviceEngineer) : undefined,
+      client: body.client ? new Types.ObjectId(body.client) : undefined,
       createdBy: new Types.ObjectId(req.userId),
     })
     await serviceTicket.save()

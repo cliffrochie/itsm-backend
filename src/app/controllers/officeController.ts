@@ -83,7 +83,7 @@ export async function createOffice(req: IUserIdRequest, res: Response) {
       name: body.name,
       alias: body.alias,
       officeType: body.officeType,
-      parentOffice: body.parentOfficeId ? new Types.ObjectId(body.parentOfficeId) : undefined,
+      parentOffice: body.parentOffice ? new Types.ObjectId(body.parentOffice) : undefined,
       createdBy: new Types.ObjectId(req.userId)
     })
 
@@ -111,7 +111,7 @@ export async function updateOffice(req: IUserIdRequest, res: Response) {
     office.name = body.name
     office.alias = body.alias
     office.officeType = body.officeType
-    office.parentOffice = body.parentOfficeId ? new Types.ObjectId(body.parentOfficeId) : undefined
+    office.parentOffice = body.parentOffice ? new Types.ObjectId(body.parentOffice) : undefined
     office.updatedBy = new Types.ObjectId(req.userId)
     
     await office.save()
