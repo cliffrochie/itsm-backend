@@ -70,8 +70,19 @@ export async function getClients(req: Request<{}, {}, {}, IClientQueryParams>, r
 
 export async function getClient(req: Request, res: Response) {
   try {
+
+    const { includes } = req.query
+
     const clientId = req.params.clientId
-    const client = await Client.findById(clientId)
+    let client = null
+
+    if(includes === 'all') {
+      client = await Client.findById(clientId).populate('designation').populate('office')
+    }
+    else {
+      client = await Client.findById(clientId)
+    }
+
     if(!client) {
       res.status(404).json({ message: '`Client` not found' })
     }

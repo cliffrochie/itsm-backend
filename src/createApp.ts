@@ -9,6 +9,8 @@ import designationRouter from './app/routers/designationRouter'
 import officeRouter from './app/routers/officeRouter'
 import clientRouter from './app/routers/clientRouter'
 import serviceTicketRouter from './app/routers/serviceTicketRouter'
+import logMiddleware from './app/middlewares/action-log'
+
 
 export function createApp() {
   dotenv.config()
@@ -17,6 +19,7 @@ export function createApp() {
   const app: Express = express()
   app.use(express.json())
   app.use(cors({ origin: process.env.CORS_ORIGIN }))
+  app.use(logMiddleware)
   
   app.use('/api/users', userRouter)
   app.use('/api/designations', designationRouter)
