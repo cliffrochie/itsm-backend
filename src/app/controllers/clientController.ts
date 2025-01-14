@@ -107,6 +107,8 @@ export async function createClient(req: IUserIdRequest, res: Response) {
       middleName: body.middleName,
       lastName: body.lastName,
       extensionName: body.extensionName,
+      contactNo: body.contactNo,
+      email: body.email,
       designation: body.designation ? new Types.ObjectId(body.designation) : undefined, 
       office: body.office ? new Types.ObjectId(body.office): undefined,
       createdBy: new Types.ObjectId(req.userId)
@@ -138,6 +140,8 @@ export async function updateClient(req: IUserIdRequest, res: Response) {
     client.middleName = body.middleName
     client.lastName = body.lastName
     client.extensionName = body.extensionName
+    client.contactNo = body.contactNo
+    client.email = body.email
     client.designation = body.designation ? new Types.ObjectId(body.designation): undefined
     client.office = body.office ? new Types.ObjectId(body.office) : undefined
     client.updatedBy = new Types.ObjectId(req.userId)

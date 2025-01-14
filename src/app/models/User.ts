@@ -12,6 +12,7 @@ const UserSchema: Schema = new Schema<IUser>({
   middleName: { type: String, default: null },
   lastName: { type: String, required: true },
   extensionName: { type: String, default: null },
+  contactNo: { type: String, default: null },
   role: { type: String, default: 'user'},
   createdAt: { type: Date, immutable: true, default: () => Date.now() },
   updatedAt: { type: Date, default: null },

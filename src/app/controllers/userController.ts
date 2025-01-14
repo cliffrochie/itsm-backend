@@ -132,6 +132,8 @@ export async function updateUser(req: Request, res: Response) {
     user.middleName = req.body.middleName
     user.lastName = req.body.lastName
     user.extensionName = req.body.extensionName
+    user.contactNo = req.body.contactNo
+    user.email = req.body.email
     user.role = req.body.role
     user.save()
     

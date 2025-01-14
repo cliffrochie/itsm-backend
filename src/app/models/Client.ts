@@ -7,6 +7,8 @@ const ClientSchema = new Schema<IClient>({
   middleName: { type: String, default: null },
   lastName: { type: String, required: true },
   extensionName: { type: String, default: null },
+  contactNo: { type: String, default: null },
+  email: { type: String, default: null },
   designation: { type: mongoose.Schema.ObjectId, ref: 'Designation', default: null }, 
   office: { type: mongoose.Schema.Types.ObjectId, ref: 'Office', default: null },
   user: { type: mongoose.Schema.Types.ObjectId, ref: 'User', default: null },

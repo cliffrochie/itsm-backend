@@ -10,6 +10,8 @@ export interface IClient extends Document {
   middleName?: string
   lastName: string
   extensionName?: string
+  contactNo?: string,
+  email?: string,
   designation?: Types.ObjectId
   office?: Types.ObjectId
   createdBy?: Types.ObjectId
@@ -44,6 +46,8 @@ export interface IClientBody {
   middleName?: string
   lastName: string
   extensionName?: string
+  contactNo?: string,
+  email?: string,
   designation?: string
   office?: string
   createdBy?: string

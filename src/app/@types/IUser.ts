@@ -11,6 +11,7 @@ export interface IUser extends Document {
   middleName?: string
   lastName: string
   extensionName?: string
+  contactNo?: string
   role: "user" | "staff" | "admin"
   createdAt?: Date
   updatedAt?: Date
@@ -24,6 +25,7 @@ export interface IUserQueryParams {
   extensionName?: string
   username?: string
   email?: string
+  contactNo?: string
   role?: string
   sort?: string
   page?: number
@@ -38,6 +40,7 @@ export interface IUserFilter {
   extensionName?: object
   username?: object
   email?: object
+  contactNo?: object
   role?: object
 }
 
