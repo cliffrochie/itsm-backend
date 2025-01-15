@@ -160,8 +160,14 @@ export async function updateServiceTicket(req: IUserIdRequest, res: Response) {
 export async function removeServiceTicket(req: Request, res: Response) {
   try {
     const serviceTicketId = req.params.serviceTicketId
-    await ServiceTicket.findByIdAndDelete(serviceTicketId)
-    res.status(204).json({})
+    const deleted = await ServiceTicket.findByIdAndDelete(serviceTicketId)
+    
+    if(deleted) {
+      res.status(204).json({})
+    }
+    else {
+      res.status(500).json({message: 'Error [removeServiceTicket]: Something went wrong.'})
+    }
   }
   catch(error) {
     console.error(`Error [removeServiceTicket]: ${error}`)

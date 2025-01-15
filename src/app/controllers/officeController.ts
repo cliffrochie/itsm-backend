@@ -127,8 +127,14 @@ export async function updateOffice(req: IUserIdRequest, res: Response) {
 export async function removeOffice(req: Request, res: Response) {
   try {
     const officeId = req.params.officeId
-    await Office.findByIdAndDelete(officeId)
-    res.status(204).json({})
+    const deleted = await Office.findByIdAndDelete(officeId)
+  
+    if(deleted) {
+      res.status(204).json({})
+    }
+    else {
+      res.status(500).json({message: 'Error [removeOffice]: Something went wrong.'})
+    }
   }
   catch(error) {
     console.error(`Error [removeOffice]: ${error}`)

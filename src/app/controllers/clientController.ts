@@ -158,8 +158,14 @@ export async function updateClient(req: IUserIdRequest, res: Response) {
 export async function removeClient(req: Request, res: Response) {
   try {
     const clientId = req.params.clientId
-    Client.findByIdAndDelete(clientId)
-    res.status(204).json({})
+    const deleted = await Client.findByIdAndDelete(clientId)
+    
+    if(deleted) {
+      res.status(204).json({})
+    }
+    else {
+      res.status(500).json({message: 'Error [removeClient]: Something went wrong.'})
+    }
   }
   catch(error) {
     console.error(`Error [removeClient]: ${error}`)

@@ -103,8 +103,14 @@ export async function updateDesignation(req: IUserIdRequest, res: Response) {
 export async function removeDesignation(req: Request, res: Response) {
   try {
     const designationId = req.params.designationId
-    await Designation.findByIdAndDelete(designationId)
-    res.status(204).json({})
+    const deleted = await Designation.findByIdAndDelete(designationId)
+
+    if(deleted) {
+      res.status(204).json({})
+    }
+    else {
+      res.status(500).json({message: 'Error [removeDesignation]: Something went wrong.'})
+    }
   }
   catch(error) {
     console.error(`Error [removeDesignation]: ${error}`)
