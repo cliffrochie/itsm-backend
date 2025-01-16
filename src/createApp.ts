@@ -9,6 +9,7 @@ import designationRouter from './app/routers/designationRouter'
 import officeRouter from './app/routers/officeRouter'
 import clientRouter from './app/routers/clientRouter'
 import serviceTicketRouter from './app/routers/serviceTicketRouter'
+import serviceTicketHistory from './app/routers/serviceTicketHistoryRouter'
 import logMiddleware from './app/middlewares/action-log'
 
 
@@ -26,6 +27,7 @@ export function createApp() {
   app.use('/api/offices', officeRouter)
   app.use('/api/clients', clientRouter)
   app.use('/api/service-tickets', serviceTicketRouter)
+  app.use('/api/service-ticket-histories', serviceTicketHistory)
 
   app.get('/', async (req: Request, res: Response) => {
     res.json({ message: 'hello it service ticket' })

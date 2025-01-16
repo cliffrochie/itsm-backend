@@ -51,6 +51,12 @@ export async function getClients(req: Request<{}, {}, {}, IClientQueryParams>, r
     if(includes === 'all') {
       clients = await Client.find(filter).populate('designation').populate('office').sort(sortResult).skip(skip).limit(limit)
     }
+    else if(includes === 'designation') {
+      clients = await Client.find(filter).populate('designation').sort(sortResult).skip(skip).limit(limit)
+    }
+    else if(includes === 'office') {
+      clients = await Client.find(filter).populate('office').sort(sortResult).skip(skip).limit(limit)
+    }
     else {
       clients = await Client.find(filter).sort(sortResult).skip(skip).limit(limit)
     }

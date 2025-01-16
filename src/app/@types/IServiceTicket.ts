@@ -5,12 +5,12 @@ import { IClient } from './IClient'
 
 export interface IServiceTicket extends Document {
   ticketNo: string
-  date: Date
+  date: string
   time?: string
-  taskType: "incident" | "service request" | "problem" | "maintenance" | "training" | "consultation"
+  taskType?: "" | "incident" | "service request" | "problem" | "maintenance" | "training" | "consultation"
   natureOfWork: string
   serialNo?: string
-  equipmentType: "computer" | "software application" | "printer" | "phone" | "network" | "others"
+  equipmentType: "computer" | "printer" | "mobile device" | "network related" | "software application" | "others"
   equipmentTypeOthers?: string
   defectsFound?: string
   serviceRendered?: string
@@ -19,8 +19,8 @@ export interface IServiceTicket extends Document {
   isFinished: boolean
   priority: "low" | "medium" | "high"
   remarks?: string
-  serviceEngineer?: Types.ObjectId
-  client?: Types.ObjectId
+  serviceEngineer?: Types.ObjectId 
+  client?: Types.ObjectId 
   createdBy?: Types.ObjectId
   updatedBy?: Types.ObjectId
   createdAt?: Date
@@ -44,6 +44,7 @@ export interface IServiceTicketQueryParams {
   priority?: string
   remarks?: string
   sort?: string
+  includes?: string
   page?: number
   limit?: number
   noPage?: boolean
@@ -70,10 +71,10 @@ export interface IServiceTicketBody {
   ticketNo: string
   date: string
   time?: string
-  taskType?: "incident" | "service request" | "problem" | "maintenance" | "training" | "consultation"
+  taskType?: "" | "incident" | "service request" | "problem" | "maintenance" | "training" | "consultation"
   natureOfWork: string
   serialNo?: string
-  equipmentType: "computer" | "software application" | "printer" | "phone" | "network" | "others"
+  equipmentType: "computer" | "printer" | "mobile device" | "network related" | "software application" | "others"
   equipmentTypeOthers?: string
   defectsFound?: string
   serviceRendered?: string

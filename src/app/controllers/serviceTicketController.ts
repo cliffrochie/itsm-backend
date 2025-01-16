@@ -1,5 +1,5 @@
 import { Request, Response } from "express-serve-static-core";
-import { IServiceTicket, IServiceTicketBody, IServiceTicketFilter, IServiceTicketQueryParams, IServiceTicketResults } from "../@types/IServiceTicket";
+import { IServiceTicketBody, IServiceTicketFilter, IServiceTicketQueryParams, IServiceTicketResults } from "../@types/IServiceTicket";
 import sorter from "../utils/sorter";
 import ServiceTicket from "../models/ServiceTicket";
 import { IUserIdRequest } from "../@types/IUser";
@@ -21,10 +21,14 @@ export async function getServiceTickets(req: Request<{}, {}, {}, IServiceTicketQ
       serviceStatus,
       isActive,
       isFinished,
+      priority,
       remarks,
       sort,
+      includes,
       noPage
     } = req.query
+
+    console.log(req.query)
 
     const filter: IServiceTicketFilter = {}
     const sortResult = await sorter(sort)
@@ -41,6 +45,7 @@ export async function getServiceTickets(req: Request<{}, {}, {}, IServiceTicketQ
     if(serviceStatus) filter.serviceStatus = { $regex: serviceStatus + '.*', $options: 'i' }
     if(isActive) filter.isActive = { $regex: isActive + '.*', $options: 'i' }
     if(isFinished) filter.isFinished = { $regex: isFinished + '.*', $options: 'i' }
+    if(priority) filter.priority = { $regex: priority + '.*', $options: 'i' }
     if(remarks) filter.remarks = { $regex: remarks + '.*', $options: 'i' }
 
     const page: number = Number(req.query.page) || 1
@@ -55,7 +60,19 @@ export async function getServiceTickets(req: Request<{}, {}, {}, IServiceTicketQ
       return
     }
 
-    offices = await ServiceTicket.find(filter).sort(sortResult).skip(skip).limit(limit)
+    if(includes === 'all') {
+      offices = await ServiceTicket.find(filter).populate('serviceEngineer').populate('client').sort(sortResult).skip(skip).limit(limit)
+    }
+    else if(includes === 'serviceEngineer') {
+      offices = await ServiceTicket.find(filter).populate('serviceEngineer').sort(sortResult).skip(skip).limit(limit)
+    }
+    else if(includes === 'client') {
+      offices = await ServiceTicket.find(filter).populate('client').sort(sortResult).skip(skip).limit(limit)
+    }
+    else {
+      offices = await ServiceTicket.find(filter).sort(sortResult).skip(skip).limit(limit)
+    }
+ 
     const total = await ServiceTicket.find(filter).countDocuments()
 
     const results: IServiceTicketResults = { results: offices, page, totalPages: Math.ceil(total / limit), total }
@@ -91,7 +108,7 @@ export async function getServiceTicket(req: Request, res: Response) {
 export async function createServiceTicket(req: IUserIdRequest, res: Response) {
   try {
     const body: IServiceTicketBody = req.body
-
+    
     const serviceTicket = new ServiceTicket({
       ticketNo: body.ticketNo,
       date: body.date,
@@ -105,6 +122,7 @@ export async function createServiceTicket(req: IUserIdRequest, res: Response) {
       serviceStatus: body.serviceStatus,
       isActive: body.isActive,
       isFinished: body.isFinished,
+      priority: body.priority,
       remarks: body.remarks,
       serviceEngineer: body.serviceEngineer ? new Types.ObjectId(body.serviceEngineer) : undefined,
       client: body.client ? new Types.ObjectId(body.client) : undefined,
@@ -121,7 +139,7 @@ export async function createServiceTicket(req: IUserIdRequest, res: Response) {
 
 export async function updateServiceTicket(req: IUserIdRequest, res: Response) {
   try {
-    const body = req.body
+    const body: IServiceTicketBody = req.body
 
     const serviceTicketId = req.params.serviceTicketId
     const serviceTicket = await ServiceTicket.findById(serviceTicketId)
@@ -133,18 +151,19 @@ export async function updateServiceTicket(req: IUserIdRequest, res: Response) {
     serviceTicket.ticketNo = body.ticketNo
     serviceTicket.date = body.date
     serviceTicket.time = body.time
-    serviceTicket.taskType = body.taskType
+    serviceTicket.taskType = body.taskType ? body.taskType : ''
     serviceTicket.natureOfWork = body.natureOfWork
     serviceTicket.serialNo = body.serialNo
     serviceTicket.equipmentType = body.equipmentType
-    serviceTicket.defectsFound = body.defects
+    serviceTicket.defectsFound = body.defectsFound
     serviceTicket.serviceRendered = body.serviceRendered
     serviceTicket.serviceStatus = body.serviceStatus
     serviceTicket.isActive = body.isActive
     serviceTicket.isFinished = body.isFinished
+    priority: body.priority,
     serviceTicket.remarks = body.remarks
-    serviceTicket.serviceEngineer = body.serviceEngineerId ? new Types.ObjectId(body.serviceEngineerId) : undefined
-    serviceTicket.client = body.clientId ? new Types.ObjectId(body.clientId) : undefined
+    serviceTicket.serviceEngineer = body.serviceEngineer ? new Types.ObjectId(body.serviceEngineer) : undefined
+    serviceTicket.client = body.client ? new Types.ObjectId(body.client) : undefined
     serviceTicket.updatedBy = new Types.ObjectId(req.userId)
 
     await serviceTicket.save()
