@@ -61,8 +61,6 @@ export interface IServiceTicketFilter {
   defectsFound?: object
   serviceRendered?: object
   serviceStatus?: object
-  isActive?: object
-  isFinished?: object
   priority?: object
   remarks?: object
 }

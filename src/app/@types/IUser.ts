@@ -23,10 +23,12 @@ export interface IUserQueryParams {
   middleName?: string
   lastName?: string
   extensionName?: string
+  fullName?: string
   username?: string
   email?: string
   contactNo?: string
   role?: string
+  personnel?: boolean
   sort?: string
   page?: number
   limit?: number
@@ -42,6 +44,9 @@ export interface IUserFilter {
   email?: object
   contactNo?: object
   role?: object
+  $or?: any
+  $in?: any
+  personnel?: any
 }
 
 export interface IUserResults {

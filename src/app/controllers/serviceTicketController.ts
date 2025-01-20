@@ -19,8 +19,6 @@ export async function getServiceTickets(req: Request<{}, {}, {}, IServiceTicketQ
       defectsFound,
       serviceRendered,
       serviceStatus,
-      isActive,
-      isFinished,
       priority,
       remarks,
       sort,
@@ -43,8 +41,6 @@ export async function getServiceTickets(req: Request<{}, {}, {}, IServiceTicketQ
     if(defectsFound) filter.defectsFound = { $regex: defectsFound + '.*', $options: 'i' }
     if(serviceRendered) filter.serviceRendered = { $regex: serviceRendered + '.*', $options: 'i' }
     if(serviceStatus) filter.serviceStatus = { $regex: serviceStatus + '.*', $options: 'i' }
-    if(isActive) filter.isActive = { $regex: isActive + '.*', $options: 'i' }
-    if(isFinished) filter.isFinished = { $regex: isFinished + '.*', $options: 'i' }
     if(priority) filter.priority = { $regex: priority + '.*', $options: 'i' }
     if(remarks) filter.remarks = { $regex: remarks + '.*', $options: 'i' }
 
@@ -120,8 +116,6 @@ export async function createServiceTicket(req: IUserIdRequest, res: Response) {
       defectsFound: body.defectsFound,
       serviceRendered: body.serviceRendered,
       serviceStatus: body.serviceStatus,
-      isActive: body.isActive,
-      isFinished: body.isFinished,
       priority: body.priority,
       remarks: body.remarks,
       serviceEngineer: body.serviceEngineer ? new Types.ObjectId(body.serviceEngineer) : undefined,
@@ -158,8 +152,6 @@ export async function updateServiceTicket(req: IUserIdRequest, res: Response) {
     serviceTicket.defectsFound = body.defectsFound
     serviceTicket.serviceRendered = body.serviceRendered
     serviceTicket.serviceStatus = body.serviceStatus
-    serviceTicket.isActive = body.isActive
-    serviceTicket.isFinished = body.isFinished
     priority: body.priority,
     serviceTicket.remarks = body.remarks
     serviceTicket.serviceEngineer = body.serviceEngineer ? new Types.ObjectId(body.serviceEngineer) : undefined

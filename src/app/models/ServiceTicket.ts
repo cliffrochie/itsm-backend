@@ -14,8 +14,6 @@ const ServiceTicketSchema = new Schema<IServiceTicket>({
   defectsFound: { type: String, default: null },
   serviceRendered: { type: String, default: null },
   serviceStatus: { type: String, required: true, default: "open" },
-  isActive: { type: Boolean, default: true },
-  isFinished: { type: Boolean, default: false },
   priority: { type: String, default: "low" },
   remarks: { type: String, default: null },
   serviceEngineer: { type: mongoose.Schema.Types.ObjectId, ref: 'User', default: null },

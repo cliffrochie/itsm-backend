@@ -68,7 +68,19 @@ export async function getCurrentUser(req: IUserIdRequest, res: Response) {
 
 export async function getUsers(req: Request<{}, {}, {}, IUserQueryParams>, res: Response) {
   try {
-    const { firstName, middleName, lastName, username, email, extensionName, role, noPage } = req.query
+    const { 
+      firstName, 
+      middleName, 
+      lastName, 
+      extensionName, 
+      fullName,
+      username, 
+      email, 
+      role, 
+      personnel, 
+      noPage 
+    } = req.query
+
     const filter: IUserFilter = {}
     const sortResult = await sorter(req.query.sort)
 
@@ -79,14 +91,25 @@ export async function getUsers(req: Request<{}, {}, {}, IUserQueryParams>, res: 
     if(email) filter.email = { $regex: email + '.*', $options: 'i' }
     if(extensionName) filter.extensionName = { $regex: extensionName + '.*', $options: 'i' }
     if(role) filter.role = { $regex: role + '.*', $options: 'i' }
-
+    if(personnel) filter.role = { $in: ['staff', 'admin'] }
+    if(fullName) filter.$or = [{ firstName : { $regex: fullName, $options: 'i' } }, { lastName : { $regex: fullName, $options: 'i' } }]
+   
     const page: number = Number(req.query.page) || 1
     const limit: number = req.query.limit || 10
     const skip: number = (page - 1) * limit
 
     let users = []
 
-    if(noPage) {
+    console.log(filter)
+
+    if(role && personnel) {
+      console.log('1')
+      res.status(400).json({message: 'Query parameters are conflict, role and personnel should not be used at the same time.'})
+      return
+    }
+
+    if(noPage && !personnel) {
+      console.log('4')
       users = await User.find(filter).select('-password').sort(sortResult)
       res.json(users)
       return
