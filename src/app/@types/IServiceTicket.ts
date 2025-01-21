@@ -48,6 +48,8 @@ export interface IServiceTicketQueryParams {
   page?: number
   limit?: number
   noPage?: boolean
+  client?: string
+  serviceEngineer?: string
 }
 
 export interface IServiceTicketFilter {

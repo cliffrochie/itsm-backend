@@ -4,6 +4,7 @@ import sorter from "../utils/sorter";
 import ServiceTicket from "../models/ServiceTicket";
 import { IUserIdRequest } from "../@types/IUser";
 import { Types } from "mongoose";
+import { generateTicketNo } from "../utils";
 
 
 export async function getServiceTickets(req: Request<{}, {}, {}, IServiceTicketQueryParams>, res: Response) {
@@ -23,7 +24,9 @@ export async function getServiceTickets(req: Request<{}, {}, {}, IServiceTicketQ
       remarks,
       sort,
       includes,
-      noPage
+      noPage,
+      client,
+      serviceEngineer
     } = req.query
 
     console.log(req.query)
@@ -43,6 +46,7 @@ export async function getServiceTickets(req: Request<{}, {}, {}, IServiceTicketQ
     if(serviceStatus) filter.serviceStatus = { $regex: serviceStatus + '.*', $options: 'i' }
     if(priority) filter.priority = { $regex: priority + '.*', $options: 'i' }
     if(remarks) filter.remarks = { $regex: remarks + '.*', $options: 'i' }
+
 
     const page: number = Number(req.query.page) || 1
     const limit: number = req.query.limit || 10
@@ -80,7 +84,6 @@ export async function getServiceTickets(req: Request<{}, {}, {}, IServiceTicketQ
   }
 }
 
-
 export async function getServiceTicket(req: Request, res: Response) {
   try {
     const serviceTicketId = req.params.serviceTicketId
@@ -100,13 +103,27 @@ export async function getServiceTicket(req: Request, res: Response) {
   }
 }
 
+export async function getGeneratedTicketNo(req: Request, res: Response) {
+  try {
+    console.log('----')
+    const ticket = await generateTicketNo('01/21/2025')
+    console.log(ticket)
+    res.json({ ticket: ticket })
+  }
+  catch(error) {
+    console.error(`Error [getGeneratedTicketNo]: ${error}`)
+    res.status(400).json(error)
+  }
+}
+
 
 export async function createServiceTicket(req: IUserIdRequest, res: Response) {
   try {
     const body: IServiceTicketBody = req.body
-    
+    const ticket = await generateTicketNo(body.date)
+
     const serviceTicket = new ServiceTicket({
-      ticketNo: body.ticketNo,
+      ticketNo: ticket,
       date: body.date,
       time: body.time,
       taskType: body.taskType,

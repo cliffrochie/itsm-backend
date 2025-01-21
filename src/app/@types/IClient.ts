@@ -31,6 +31,9 @@ export interface IClientQueryParams {
   limit?: number
   includes?: string
   noPage?: boolean
+  fullName?: string
+  office?: string
+  designation?: string
 }
 
 export interface IClientFilter {
@@ -38,6 +41,10 @@ export interface IClientFilter {
   middleName?: object
   lastName?: object
   extensionName?: object
+  $or?: any
+  $in?: any
+  'office.alias'?: object
+  'designation.title'?: object
 }
 
 export interface IClientBody {

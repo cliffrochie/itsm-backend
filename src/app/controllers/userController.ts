@@ -108,7 +108,7 @@ export async function getUsers(req: Request<{}, {}, {}, IUserQueryParams>, res: 
       return
     }
 
-    if(noPage && !personnel) {
+    if(noPage) {
       console.log('4')
       users = await User.find(filter).select('-password').sort(sortResult)
       res.json(users)

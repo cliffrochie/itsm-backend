@@ -1,5 +1,5 @@
 import { Request, Response } from "express-serve-static-core";
-import { IClientBody, IClientFilter, IClientQueryParams, IClientResults } from "../@types/IClient";
+import { IClientBody, IClientFilter, IClientQueryParams, IClientResults, IClient } from "../@types/IClient";
 import sorter from "../utils/sorter";
 import Client from "../models/Client";
 import { IUserIdRequest } from "../@types/IUser";
@@ -22,48 +22,101 @@ async function getOffice(filter: any) {
 
 export async function getClients(req: Request<{}, {}, {}, IClientQueryParams>, res: Response) {
   try {
-    const { firstName, lastName, includes, sort, noPage } = req.query
+    const { firstName, lastName, includes, sort, noPage, fullName, office, designation } = req.query
 
     const filter: IClientFilter = {}
     const sortResult = await sorter(sort)
 
     if(firstName) filter.firstName = { $regex: firstName + '.*', $options: 'i' }
     if(lastName) filter.lastName = { $regex: lastName + '.*', $options: 'i' }
+    if(fullName) filter.$or = [{ firstName : { $regex: fullName, $options: 'i' } }, { lastName : { $regex: fullName, $options: 'i' } }]
+
+    const officeFilter = office
+      ? { alias: { $regex: office, $options: 'i' } }
+      : {}
+ 
+    const designationFilter = designation
+      ? { title: { $regex: designation, $options: 'i'} }
+      : {}
 
     const page: number = Number(req.query.page) || 1
     const limit: number = req.query.limit || 10
     const skip: number = (page - 1) * limit
 
-    let clients = []
+    let clients: IClient[] = []
+    let filteredClients: IClient[] = []
 
     if(noPage) {
       if(includes === 'all') {
-        clients = await Client.find(filter).populate('designation').populate('office').sort(sortResult)
+          clients = await Client
+          .find(filter)
+          .populate({ path: 'designation', match: designationFilter })
+          .populate({ path: 'office', match: officeFilter })
+          .sort(sortResult)
       }
       else {
         clients = await Client.find(filter).sort(sortResult)
       }
+
+      filteredClients = clients.filter(client => {
+        const hasMatchingOffice = office ? client.office : true
+        const hasMatchingDesignation = designation ? client.designation : true
+        return hasMatchingOffice && hasMatchingDesignation        
+      })
   
-      res.json(clients)
+      res.json(filteredClients)
       return
     }
     
     if(includes === 'all') {
-      clients = await Client.find(filter).populate('designation').populate('office').sort(sortResult).skip(skip).limit(limit)
+      clients = await Client
+        .find(filter)
+        .populate({ path: 'designation', match: designationFilter })
+        .populate({ path: 'office', match: officeFilter })
+        .sort(sortResult)
+        .skip(skip)
+        .limit(limit)
     }
     else if(includes === 'designation') {
-      clients = await Client.find(filter).populate('designation').sort(sortResult).skip(skip).limit(limit)
+      clients = await Client
+        .find(filter)
+        .populate({ path: 'designation', match: designationFilter })
+        .sort(sortResult)
+        .skip(skip)
+        .limit(limit)
     }
     else if(includes === 'office') {
-      clients = await Client.find(filter).populate('office').sort(sortResult).skip(skip).limit(limit)
+      clients = await Client
+        .find(filter)
+        .populate({ path: 'office', match: officeFilter })
+        .sort(sortResult)
+        .skip(skip)
+        .limit(limit)
     }
     else {
-      clients = await Client.find(filter).sort(sortResult).skip(skip).limit(limit)
+      clients = await Client
+        .find(filter)
+        .sort(sortResult)
+        .skip(skip)
+        .limit(limit)
     }
 
-    const total = await Client.find(filter).countDocuments()
+    if(filteredClients.length === 0) {
+      filteredClients = clients
+    }
 
-    const results: IClientResults = { results: clients, page, totalPages: Math.ceil(total / limit), total }
+    filteredClients = clients.filter(client => {
+      const hasMatchingOffice = office ? client.office : true
+      const hasMatchingDesignation = designation ? client.designation : true
+      return hasMatchingOffice && hasMatchingDesignation        
+    })
+
+    const total = await Client
+      .find(filter)
+      .countDocuments()
+
+
+    const results: IClientResults = { results: filteredClients, page, totalPages: Math.ceil(total / limit), total }
     res.json(results)
     
   } 
@@ -178,3 +231,7 @@ export async function removeClient(req: Request, res: Response) {
     res.status(400).json(error)
   }
 }
+
+
+
+
