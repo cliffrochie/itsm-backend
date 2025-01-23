@@ -47,35 +47,89 @@ export async function getServiceTickets(req: Request<{}, {}, {}, IServiceTicketQ
     if(priority) filter.priority = { $regex: priority + '.*', $options: 'i' }
     if(remarks) filter.remarks = { $regex: remarks + '.*', $options: 'i' }
 
+    const clientFilter = client
+      ? { $or: [{firstName: {$regex: client, $options: 'i'}}, {lastName: {$regex: client, $options: 'i'}}] }
+      : {}
+ 
+    const serviceEngineerFilter = serviceEngineer
+      ? { $or: [{firstName: {$regex: serviceEngineer, $options: 'i'}}, {lastName: {$regex: serviceEngineer, $options: 'i'}}] }
+      : {}
+
 
     const page: number = Number(req.query.page) || 1
     const limit: number = req.query.limit || 10
     const skip: number = (page - 1) * limit
 
-    let offices = []
+    let serviceTickets = []
+    let filteredServiceTickets = []
 
     if(noPage) {
-      offices = await ServiceTicket.find(filter).sort(sortResult)
-      res.json(offices)
+      serviceTickets = await ServiceTicket.find(filter).sort(sortResult)
+      res.json(serviceTickets)
       return
     }
 
     if(includes === 'all') {
-      offices = await ServiceTicket.find(filter).populate('serviceEngineer').populate('client').sort(sortResult).skip(skip).limit(limit)
+      serviceTickets = await ServiceTicket
+        .find(filter)
+        .populate({
+          path: 'serviceEngineer',
+          match: serviceEngineerFilter
+        })
+        .populate({
+          path: 'client',
+          match: clientFilter
+        })
+        .sort(sortResult)
+        .skip(skip)
+        .limit(limit)
     }
     else if(includes === 'serviceEngineer') {
-      offices = await ServiceTicket.find(filter).populate('serviceEngineer').sort(sortResult).skip(skip).limit(limit)
+      serviceTickets = await ServiceTicket
+        .find(filter)
+        .populate({
+          path: 'serviceEngineer',
+          match: serviceEngineerFilter
+        })
+        .sort(sortResult)
+        .skip(skip)
+        .limit(limit)
     }
     else if(includes === 'client') {
-      offices = await ServiceTicket.find(filter).populate('client').sort(sortResult).skip(skip).limit(limit)
+      serviceTickets = await ServiceTicket
+        .find(filter)
+        .populate({
+          path: 'client',
+          match: clientFilter
+        })
+        .sort(sortResult)
+        .skip(skip)
+        .limit(limit)
     }
     else {
-      offices = await ServiceTicket.find(filter).sort(sortResult).skip(skip).limit(limit)
+      serviceTickets = await ServiceTicket
+        .find(filter)
+        .sort(sortResult)
+        .skip(skip)
+        .limit(limit)
     }
- 
-    const total = await ServiceTicket.find(filter).countDocuments()
 
-    const results: IServiceTicketResults = { results: offices, page, totalPages: Math.ceil(total / limit), total }
+
+    filteredServiceTickets = serviceTickets.filter(serviceTicket => {
+      const hasMatchingOffice = client ? serviceTicket.client : true
+      const hasMatchingDesignation = serviceEngineer ? serviceTicket.serviceEngineer : true
+      return hasMatchingOffice && hasMatchingDesignation        
+    })
+
+    console.log(filteredServiceTickets)
+    console.log('----')
+    console.log(serviceTickets)
+ 
+    const total = await ServiceTicket
+      .find(filter)
+      .countDocuments()
+
+    const results: IServiceTicketResults = { results: filteredServiceTickets, page, totalPages: Math.ceil(total / limit), total }
     res.json(results)
   }
   catch(error) {
@@ -87,7 +141,7 @@ export async function getServiceTickets(req: Request<{}, {}, {}, IServiceTicketQ
 export async function getServiceTicket(req: Request, res: Response) {
   try {
     const serviceTicketId = req.params.serviceTicketId
-    const serviceTicket = await ServiceTicket.findById(serviceTicketId)
+    const serviceTicket = await ServiceTicket.findById(serviceTicketId).populate('client').populate('serviceEngineer')
     
     if(!serviceTicket) {
       res.status(404).json({ message: '`ServiceTicket` not found' })
