@@ -4,9 +4,9 @@ import { Document, Types } from 'mongoose'
 export interface IServiceTicketHistory extends Document {
   serviceTicket: Types.ObjectId
   serviceStatus: string
-  date: Date
+  date: string
   time?: string
-  action: string
+  action: string  
   duration?: string
   remarks?: string
   createdBy?: Types.ObjectId

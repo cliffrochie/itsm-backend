@@ -216,7 +216,7 @@ export async function updateServiceTicket(req: IUserIdRequest, res: Response) {
     serviceTicket.ticketNo = body.ticketNo
     serviceTicket.date = body.date
     serviceTicket.time = body.time
-    serviceTicket.taskType = body.taskType ? body.taskType : ''
+    serviceTicket.taskType = body.taskType
     serviceTicket.natureOfWork = body.natureOfWork
     serviceTicket.serialNo = body.serialNo
     serviceTicket.equipmentType = body.equipmentType

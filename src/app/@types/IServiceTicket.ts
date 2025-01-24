@@ -7,7 +7,7 @@ export interface IServiceTicket extends Document {
   ticketNo: string
   date: string
   time?: string
-  taskType?: "" | "incident" | "service request" | "problem" | "maintenance" | "training" | "consultation"
+  taskType: "incident" | "service request" | "asset request" | "maintenance"  | "consultation"
   natureOfWork: string
   serialNo?: string
   equipmentType: "computer" | "printer" | "mobile device" | "network related" | "software application" | "others"
@@ -71,7 +71,7 @@ export interface IServiceTicketBody {
   ticketNo: string
   date: string
   time?: string
-  taskType?: "" | "incident" | "service request" | "problem" | "maintenance" | "training" | "consultation"
+  taskType: "incident" | "service request" | "asset request" | "maintenance"  | "consultation"
   natureOfWork: string
   serialNo?: string
   equipmentType: "computer" | "printer" | "mobile device" | "network related" | "software application" | "others"
