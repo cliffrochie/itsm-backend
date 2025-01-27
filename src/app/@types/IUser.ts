@@ -12,7 +12,7 @@ export interface IUser extends Document {
   lastName: string
   extensionName?: string
   contactNo?: string
-  role: "user" | "staff" | "admin"
+  role: "user" | "staff" | "admin" | "superadmin"
   createdAt?: Date
   updatedAt?: Date
   comparePassword(password: string): boolean

@@ -4,7 +4,13 @@ import sorter from "../utils/sorter";
 import ServiceTicket from "../models/ServiceTicket";
 import { IUserIdRequest } from "../@types/IUser";
 import { Types } from "mongoose";
-import { generateTicketNo } from "../utils";
+import { capitalizeFirstLetter, generateTicketNo } from "../utils";
+import User from "../models/User";
+
+
+interface LogRequest extends IUserIdRequest {
+  logDetails?: string
+}
 
 
 export async function getServiceTickets(req: Request<{}, {}, {}, IServiceTicketQueryParams>, res: Response) {
@@ -202,7 +208,7 @@ export async function createServiceTicket(req: IUserIdRequest, res: Response) {
   }
 }
 
-export async function updateServiceTicket(req: IUserIdRequest, res: Response) {
+export async function updateServiceTicket(req: LogRequest, res: Response) {
   try {
     const body: IServiceTicketBody = req.body
 
@@ -211,6 +217,51 @@ export async function updateServiceTicket(req: IUserIdRequest, res: Response) {
     if(!serviceTicket) {
       res.status(404).json({ message: '`Service Ticket` not found' })
       return
+    }
+
+    
+    // Update Service Status
+    if(serviceTicket.serviceStatus !== body.serviceStatus) {
+      req.logDetails = `Service status is updated from ${serviceTicket.serviceStatus} to ${body.serviceStatus}`
+    }
+
+    // Escalate Problem
+    if((serviceTicket.serviceEngineer !== null || serviceTicket.serviceEngineer !== undefined) 
+        && 
+        serviceTicket.serviceEngineer !== body.serviceEngineer
+      ) {
+
+      const newServiceEngineer = await User.findById(req.body.serviceEngineer)
+      if(!newServiceEngineer) {
+        res.status(404).json({ message: '`Service Engineer` not found'})
+        return
+      }
+
+      const oldServiceEngineer = await User.findById(serviceTicket.serviceEngineer)
+      if(!oldServiceEngineer) {
+        res.status(404).json({ message: '`Service Engineer` not found'})
+        return
+      }
+      
+      const oldFullName = capitalizeFirstLetter(oldServiceEngineer.firstName) +' '+ capitalizeFirstLetter(oldServiceEngineer.lastName)
+      const newFullName = capitalizeFirstLetter(newServiceEngineer.firstName) +' '+ capitalizeFirstLetter(newServiceEngineer.lastName)
+
+      req.logDetails = `Service is escalted from ${oldFullName} to ${newFullName} with  ${capitalizeFirstLetter(body.priority)} priority level.`
+    }
+
+    // Assign Service Engineer
+    if((serviceTicket.serviceEngineer !== null || serviceTicket.serviceEngineer !== undefined) 
+      &&
+      (body.serviceEngineer !== null || body.serviceEngineer !== undefined || body.serviceEngineer !== '')
+    ) {
+      const newServiceEngineer = await User.findById(req.body.serviceEngineer)
+      if(!newServiceEngineer) {
+        res.status(404).json({ message: '`Service Engineer` not found'})
+        return
+      }
+      const newFullName = capitalizeFirstLetter(newServiceEngineer.firstName) +' '+ capitalizeFirstLetter(newServiceEngineer.lastName)
+
+      req.logDetails = `Service is assigned to ${newFullName} with ${capitalizeFirstLetter(body.priority)} priority level.`
     }
 
     serviceTicket.ticketNo = body.ticketNo
@@ -223,7 +274,7 @@ export async function updateServiceTicket(req: IUserIdRequest, res: Response) {
     serviceTicket.defectsFound = body.defectsFound
     serviceTicket.serviceRendered = body.serviceRendered
     serviceTicket.serviceStatus = body.serviceStatus
-    priority: body.priority,
+    serviceTicket.priority = body.priority
     serviceTicket.remarks = body.remarks
     serviceTicket.serviceEngineer = body.serviceEngineer ? new Types.ObjectId(body.serviceEngineer) : undefined
     serviceTicket.client = body.client ? new Types.ObjectId(body.client) : undefined
@@ -256,3 +307,57 @@ export async function removeServiceTicket(req: Request, res: Response) {
     res.status(400).json(error)
   }
 }
+
+
+// export async function assignServiceEngineer(req: Request, res: Response) {
+//   try {
+//     const serviceTicketId = req.params.serviceTicketId
+//     const serviceTicket = await ServiceTicket.findById(serviceTicketId)
+//     if(!serviceTicket) {
+//       res.status(404).json({ message: '`Service Ticket` not found' })
+//       return
+//     }
+
+
+//   }
+//   catch(error) {
+//     console.error(`Error [assignServiceEngineer]: ${error}`)
+//     res.status(400).json(error)
+//   }
+// }
+
+
+// export async function escalateServiceTicket(req: Request, res: Response) {
+//   try {
+//     const serviceTicketId = req.params.serviceTicketId
+//     const serviceTicket = await ServiceTicket.findById(serviceTicketId)
+//     if(!serviceTicket) {
+//       res.status(404).json({ message: '`Service Ticket` not found' })
+//       return
+//     }
+
+//     // req.logDetails = `Escalated the problem to ${req.body}`
+//   }
+//   catch(error) {
+//     console.error(`Error [escalateServiceTicket]: ${error}`)
+//     res.status(400).json(error)
+//   }
+// }
+
+
+// export async function updateServiceStatus(req: Request, res: Response) {
+//   try {
+//     const serviceTicketId = req.params.serviceTicketId
+//     const serviceTicket = await ServiceTicket.findById(serviceTicketId)
+//     if(!serviceTicket) {
+//       res.status(404).json({ message: '`Service Ticket` not found' })
+//       return
+//     }
+
+
+//   }
+//   catch(error) {
+//     console.error(`Error [escalateServiceTicket]: ${error}`)
+//     res.status(400).json(error)
+//   }
+// }

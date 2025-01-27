@@ -10,11 +10,9 @@ export async function getServiceTicketHistories(req: Request<{}, {}, {}, IServic
   try {
     const {
       serviceTicket,
-      serviceStatus,
       date,
       time,
-      action,
-      duration,
+      details,
       remarks,
       sort,
       noPage
@@ -24,11 +22,9 @@ export async function getServiceTicketHistories(req: Request<{}, {}, {}, IServic
     const sortResult = await sorter(sort)
 
     if(serviceTicket) filter.serviceTicket = { $regex: serviceTicket + '.*', $options: 'i' }
-    if(serviceStatus) filter.serviceStatus = { $regex: serviceStatus + '.*', $options: 'i' }
     if(date) filter.date = { $regex: date + '.*', $options: 'i' }
     if(time) filter.time = { $regex: time + '.*', $options: 'i' }
-    if(action) filter.action = { $regex: action + '.*', $options: 'i' }
-    if(duration) filter.duration = { $regex: duration + '.*', $options: 'i' }
+    if(details) filter.details = { $regex: details + '.*', $options: 'i' }
     if(remarks) filter.remarks = { $regex: remarks + '.*', $options: 'i' }
 
     const page: number = Number(req.query.page) || 1
@@ -82,11 +78,9 @@ export async function createServiceTicketHistory(req: IUserIdRequest, res: Respo
 
     const serviceTicketHistory = new ServiceTicketHistory({
       serviceTicket: body.serviceTicket,
-      serviceStatus: body.serviceStatus,
       date: body.date,
       time: body.time,
-      action: body.action,
-      duration: body.duration,
+      details: body.details,
       remarks: body.remarks,
       createdBy: new Types.ObjectId(req.userId),
     })
@@ -112,11 +106,9 @@ export async function updateServiceTicketHistory(req: IUserIdRequest, res: Respo
     }
 
     serviceTicketHistory.serviceTicket = body.serviceTicket
-    serviceTicketHistory.serviceStatus = body.serviceStatus
     serviceTicketHistory.date = body.date
     serviceTicketHistory.time = body.time
-    serviceTicketHistory.action = body.action
-    serviceTicketHistory.duration = body.duration
+    serviceTicketHistory.details = body.details
     serviceTicketHistory.remarks = body.remarks
     serviceTicketHistory.updatedBy = new Types.ObjectId(req.userId)
 

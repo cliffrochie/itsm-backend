@@ -14,10 +14,10 @@ export interface IServiceTicket extends Document {
   equipmentTypeOthers?: string
   defectsFound?: string
   serviceRendered?: string
-  serviceStatus?: "open" | "in progress" | "on hold" | "escalated" | "canceled" | "reopened" | "resolved" | "closed"
+  serviceStatus?: "" | "open" | "in progress" | "on hold" | "escalated" | "canceled" | "reopened" | "resolved" | "closed"
   isActive: boolean
   isFinished: boolean
-  priority: "low" | "medium" | "high"
+  priority: "" | "low" | "medium" | "high"
   remarks?: string
   serviceEngineer?: Types.ObjectId 
   client?: Types.ObjectId 
@@ -78,16 +78,32 @@ export interface IServiceTicketBody {
   equipmentTypeOthers?: string
   defectsFound?: string
   serviceRendered?: string
-  serviceStatus: "open" | "in progress" | "on hold" | "escalated" | "canceled" | "reopened" | "resolved" | "closed"
+  serviceStatus: "" | "open" | "in progress" | "on hold" | "escalated" | "canceled" | "reopened" | "resolved" | "closed"
   isActive: boolean
   isFinished: boolean
-  priority: "low" | "medium" | "high"
+  priority: "" | "low" | "medium" | "high"
   remarks?: string
   serviceEngineer?: string
   client?: string
   createdBy?: string
   updatedBy?: string
 }
+
+
+export interface IEscalatedTo {
+  serviceEngineer: string
+  serviceEngineerName: string
+  date?: string
+  time?: string
+}
+
+
+export interface IUpdateServiceStatus {
+  serviceStatus: string
+  date?: string
+  time?: string
+}
+
 
 export interface IServiceTicketResults {
   results: IServiceTicket[]

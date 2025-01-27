@@ -3,11 +3,9 @@ import { Document, Types } from 'mongoose'
 
 export interface IServiceTicketHistory extends Document {
   serviceTicket: Types.ObjectId
-  serviceStatus: string
   date: string
   time?: string
-  action: string  
-  duration?: string
+  details: string  
   remarks?: string
   createdBy?: Types.ObjectId
   updatedBy?: Types.ObjectId
@@ -17,11 +15,9 @@ export interface IServiceTicketHistory extends Document {
 
 export interface IServiceTicketHistoryQueryParams {
   serviceTicket?: string
-  serviceStatus?: string
   date?: string
   time?: string
-  action?: string
-  duration?: string
+  details?: string  
   remarks?: string
   sort?: string
   page?: number
@@ -31,21 +27,17 @@ export interface IServiceTicketHistoryQueryParams {
 
 export interface IServiceTicketHistoryFilter {
   serviceTicket?: object
-  serviceStatus?: object
   date?: object
   time?: object
-  action?: object
-  duration?: object
+  details?: object  
   remarks?: object
 }
 
 export interface IServiceTicketHistoryBody {
   serviceTicket: string
-  serviceStatus: string
   date: string
   time: string
-  action: string
-  duration?: string
+  details: string
   remarks?: string
   createdBy?: string
   updatedBy?: string
