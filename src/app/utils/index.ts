@@ -1,4 +1,8 @@
+import { Types } from "mongoose"
 import ServiceTicket from "../models/ServiceTicket"
+import ServiceTicketHistory from "../models/ServiceTicketHistory"
+import { Request } from "express"
+import { IUserIdRequest } from "../@types/IUser"
 
 
 export async function generateTicketNo(date: string) {
@@ -102,3 +106,5 @@ function generateShortUUID(length: number) {
     .join('')
     .substring(0, length);
 }
+
+

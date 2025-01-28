@@ -22,8 +22,8 @@ export default async function serviceTicketLogger(req: LogRequest, res: Response
         action: action,
         details: req.logDetails ? req.logDetails : 'No details provided.'      
       })
+      
       await log.save()
-  
     }
     catch(error) {
       console.error(`Error [serviceTicketLogger]: ${error}`)
