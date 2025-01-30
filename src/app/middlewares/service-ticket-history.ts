@@ -7,23 +7,27 @@ import { IUserIdRequest } from '../@types/IUser'
 
 
 interface LogRequest extends IUserIdRequest {
+  serviceTicketId?: string
   logDetails?: string
 }
 
 export default async function serviceTicketLogger(req: LogRequest, res: Response, next: NextFunction) {
   res.on('finish', async () => {
     try { 
-      const action = actionInterpretation(req.method)
-      const log = new ServiceTicketHistory({
-        createdBy: new Types.ObjectId(req.userId),
-        createdAt: new Date(),
-        date: changeDateFormatMMDDYYYY(new Date()),
-        time: new Date().toLocaleString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true}),
-        action: action,
-        details: req.logDetails ? req.logDetails : 'No details provided.'      
-      })
-      
-      await log.save()
+      if(req.logDetails && req.serviceTicketId) {
+        const action = actionInterpretation(req.method)
+        const log = new ServiceTicketHistory({
+          serviceTicket: new Types.ObjectId(req.serviceTicketId),
+          createdBy: new Types.ObjectId(req.userId),
+          createdAt: new Date(),
+          date: changeDateFormatMMDDYYYY(new Date()),
+          time: new Date().toLocaleString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true}),
+          action: action,
+          details: req.logDetails ? req.logDetails : 'No details provided.'      
+        })
+        
+        await log.save()
+      }
     }
     catch(error) {
       console.error(`Error [serviceTicketLogger]: ${error}`)

@@ -19,10 +19,10 @@ export interface IServiceTicket extends Document {
   isFinished: boolean
   priority: "" | "low" | "medium" | "high"
   remarks?: string
-  serviceEngineer?: Types.ObjectId 
-  client?: Types.ObjectId 
-  createdBy?: Types.ObjectId
-  updatedBy?: Types.ObjectId
+  serviceEngineer?: Types.ObjectId | null
+  client?: Types.ObjectId | null
+  createdBy?: Types.ObjectId | null
+  updatedBy?: Types.ObjectId | null
   createdAt?: Date
   updatedAt?: Date
 }
@@ -83,8 +83,8 @@ export interface IServiceTicketBody {
   isFinished: boolean
   priority: "" | "low" | "medium" | "high"
   remarks?: string
-  serviceEngineer?: string
-  client?: string
+  serviceEngineer?: string | null
+  client?: string | null
   createdBy?: string
   updatedBy?: string
 }

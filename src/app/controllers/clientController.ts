@@ -170,7 +170,7 @@ export async function createClient(req: IUserIdRequest, res: Response) {
       email: body.email,
       designation: body.designation ? new Types.ObjectId(body.designation) : undefined, 
       office: body.office ? new Types.ObjectId(body.office): undefined,
-      createdBy: new Types.ObjectId(req.userId)
+      createdBy: req.userId ? new Types.ObjectId(req.userId) : undefined
     })
 
     await client.save()
@@ -203,7 +203,7 @@ export async function updateClient(req: IUserIdRequest, res: Response) {
     client.email = body.email
     client.designation = body.designation ? new Types.ObjectId(body.designation): undefined
     client.office = body.office ? new Types.ObjectId(body.office) : undefined
-    client.updatedBy = new Types.ObjectId(req.userId)
+    client.updatedBy = req.userId ? new Types.ObjectId(req.userId) : undefined
     
     await client.save()
     res.json(client)

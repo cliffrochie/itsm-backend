@@ -21,28 +21,31 @@ export async function getServiceTicketHistories(req: Request<{}, {}, {}, IServic
     const filter: IServiceTicketHistoryFilter = {}
     const sortResult = await sorter(sort)
 
-    if(serviceTicket) filter.serviceTicket = { $regex: serviceTicket + '.*', $options: 'i' }
+    // if(serviceTicket) filter.serviceTicket = { $regex: serviceTicket + '.*', $options: 'i' }
+    if(serviceTicket) filter.serviceTicket =  new Types.ObjectId(serviceTicket)
     if(date) filter.date = { $regex: date + '.*', $options: 'i' }
     if(time) filter.time = { $regex: time + '.*', $options: 'i' }
     if(details) filter.details = { $regex: details + '.*', $options: 'i' }
     if(remarks) filter.remarks = { $regex: remarks + '.*', $options: 'i' }
 
+    console.log(filter)
+
     const page: number = Number(req.query.page) || 1
     const limit: number = req.query.limit || 10
     const skip: number = (page - 1) * limit
 
-    let offices = []
+    let serviceTicketHistories = []
 
     if(noPage) {
-      offices = await ServiceTicketHistory.find(filter).sort(sortResult)
-      res.json(offices)
+      serviceTicketHistories = await ServiceTicketHistory.find(filter).sort(sortResult)
+      res.json(serviceTicketHistories)
       return
     }
 
-    offices = await ServiceTicketHistory.find(filter).sort(sortResult).skip(skip).limit(limit)
+    serviceTicketHistories = await ServiceTicketHistory.find(filter).sort(sortResult).skip(skip).limit(limit)
     const total = await ServiceTicketHistory.find(filter).countDocuments()
 
-    const results: IServiceTicketHistoryResults = { results: offices, page, totalPages: Math.ceil(total / limit), total }
+    const results: IServiceTicketHistoryResults = { results: serviceTicketHistories, page, totalPages: Math.ceil(total / limit), total }
     res.json(results)
   }
   catch(error) {
@@ -82,7 +85,7 @@ export async function createServiceTicketHistory(req: IUserIdRequest, res: Respo
       time: body.time,
       details: body.details,
       remarks: body.remarks,
-      createdBy: new Types.ObjectId(req.userId),
+      createdBy: req.userId ? new Types.ObjectId(req.userId) : undefined,
     })
     await serviceTicketHistory.save()
     res.status(201).json(serviceTicketHistory)
@@ -110,7 +113,7 @@ export async function updateServiceTicketHistory(req: IUserIdRequest, res: Respo
     serviceTicketHistory.time = body.time
     serviceTicketHistory.details = body.details
     serviceTicketHistory.remarks = body.remarks
-    serviceTicketHistory.updatedBy = new Types.ObjectId(req.userId)
+    serviceTicketHistory.updatedBy = req.userId ? new Types.ObjectId(req.userId) : undefined
 
     await serviceTicketHistory.save()
     res.status(200).json(serviceTicketHistory)

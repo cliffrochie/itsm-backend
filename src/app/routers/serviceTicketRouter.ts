@@ -6,8 +6,9 @@ import {
   getGeneratedTicketNo, 
   getServiceTicket, 
   getServiceTickets, 
+  updateServiceTicket,
   removeServiceTicket, 
-  updateServiceTicket 
+  updateServiceStatus,  
 } from "../controllers/serviceTicketController";
 
 
@@ -16,8 +17,10 @@ const router = Router()
 router.get('/', getServiceTickets)
 router.get('/generate', getGeneratedTicketNo)
 router.get('/:serviceTicketId', getServiceTicket)
-router.post('/', createServiceTicket)
+router.post('/', serviceTicketLogger, createServiceTicket)
 router.put('/:serviceTicketId', serviceTicketLogger, updateServiceTicket)
+router.put('/:serviceTicketId/update-service-status', serviceTicketLogger, updateServiceStatus)
 router.delete('/:serviceTicketId', removeServiceTicket)
+
 
 export default router

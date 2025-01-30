@@ -63,7 +63,7 @@ export async function createDesignation(req: IUserIdRequest, res: Response) {
 
     const designation = new Designation({
       title: body.title,
-      createdBy: new Types.ObjectId(req.userId)
+      createdBy: req.userId ? new Types.ObjectId(req.userId) : undefined
     })
     
     await designation.save()
@@ -88,7 +88,7 @@ export async function updateDesignation(req: IUserIdRequest, res: Response) {
     }
 
     designation.title = body.title
-    designation.updatedBy = new Types.ObjectId(req.userId)
+    designation.updatedBy = req.userId ? new Types.ObjectId(req.userId) : undefined
 
     await designation.save()
     res.json(designation)

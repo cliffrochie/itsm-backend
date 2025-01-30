@@ -26,7 +26,7 @@ export interface IServiceTicketHistoryQueryParams {
 }
 
 export interface IServiceTicketHistoryFilter {
-  serviceTicket?: object
+  serviceTicket?: object | Types.ObjectId
   date?: object
   time?: object
   details?: object  
