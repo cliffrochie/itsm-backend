@@ -29,6 +29,7 @@ export interface IUserQueryParams {
   contactNo?: string
   role?: string
   personnel?: boolean
+  exclude?: string
   sort?: string
   page?: number
   limit?: number
@@ -46,6 +47,7 @@ export interface IUserFilter {
   role?: object
   $or?: any
   $in?: any
+  _id?: any
   personnel?: any
 }
 

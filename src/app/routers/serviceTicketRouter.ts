@@ -9,6 +9,8 @@ import {
   updateServiceTicket,
   removeServiceTicket, 
   updateServiceStatus,  
+  assignServiceEngineer,
+  escalateService
 } from "../controllers/serviceTicketController";
 
 
@@ -19,7 +21,9 @@ router.get('/generate', getGeneratedTicketNo)
 router.get('/:serviceTicketId', getServiceTicket)
 router.post('/', serviceTicketLogger, createServiceTicket)
 router.put('/:serviceTicketId', serviceTicketLogger, updateServiceTicket)
-router.put('/:serviceTicketId/update-service-status', serviceTicketLogger, updateServiceStatus)
+router.patch('/:serviceTicketId/update-service-status', serviceTicketLogger, updateServiceStatus)
+router.patch('/:serviceTicketId/assign-service-engineer', serviceTicketLogger, assignServiceEngineer)
+router.patch('/:serviceTicketId/escalate-service', serviceTicketLogger, escalateService)
 router.delete('/:serviceTicketId', removeServiceTicket)
 
 

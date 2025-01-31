@@ -78,6 +78,7 @@ export async function getUsers(req: Request<{}, {}, {}, IUserQueryParams>, res: 
       email, 
       role, 
       personnel, 
+      exclude,
       noPage 
     } = req.query
 
@@ -93,7 +94,8 @@ export async function getUsers(req: Request<{}, {}, {}, IUserQueryParams>, res: 
     if(role) filter.role = { $regex: role + '.*', $options: 'i' }
     if(personnel) filter.role = { $in: ['staff', 'admin'] }
     if(fullName) filter.$or = [{ firstName : { $regex: fullName, $options: 'i' } }, { lastName : { $regex: fullName, $options: 'i' } }]
-   
+    if(exclude) filter._id = { $ne: exclude }
+
     const page: number = Number(req.query.page) || 1
     const limit: number = req.query.limit || 10
     const skip: number = (page - 1) * limit

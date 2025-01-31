@@ -7,7 +7,7 @@ export interface IServiceTicket extends Document {
   ticketNo: string
   date: string
   time?: string
-  taskType: "incident" | "service request" | "asset request" | "maintenance"  | "consultation"
+  taskType: "incident" | "service request" | "asset request" | "maintenance"  | "consultation" | "accessibility"
   natureOfWork: string
   serialNo?: string
   equipmentType: "computer" | "printer" | "mobile device" | "network related" | "software application" | "others"
@@ -19,6 +19,7 @@ export interface IServiceTicket extends Document {
   isFinished: boolean
   priority: "" | "low" | "medium" | "high"
   remarks?: string
+  adminRemarks?: string
   serviceEngineer?: Types.ObjectId | null
   client?: Types.ObjectId | null
   createdBy?: Types.ObjectId | null
@@ -43,6 +44,7 @@ export interface IServiceTicketQueryParams {
   isFinished?: boolean
   priority?: string
   remarks?: string
+  adminRemarks?: string
   sort?: string
   includes?: string
   page?: number
@@ -65,13 +67,14 @@ export interface IServiceTicketFilter {
   serviceStatus?: object
   priority?: object
   remarks?: object
+  adminRemarks?: object
 }
 
 export interface IServiceTicketBody {
   ticketNo: string
   date: string
   time?: string
-  taskType: "incident" | "service request" | "asset request" | "maintenance"  | "consultation"
+  taskType: "incident" | "service request" | "asset request" | "maintenance"  | "consultation" | "accessibility"
   natureOfWork: string
   serialNo?: string
   equipmentType: "computer" | "printer" | "mobile device" | "network related" | "software application" | "others"
@@ -83,6 +86,7 @@ export interface IServiceTicketBody {
   isFinished: boolean
   priority: "" | "low" | "medium" | "high"
   remarks?: string
+  adminRemarks?: string
   serviceEngineer?: string | null
   client?: string | null
   createdBy?: string
@@ -93,6 +97,7 @@ export interface IServiceTicketBody {
 export interface IEscalatedTo {
   serviceEngineer: string
   serviceEngineerName: string
+  adminRemarks?: string
   date?: string
   time?: string
 }
