@@ -390,8 +390,9 @@ export async function assignServiceEngineer(req: LogRequest, res: Response) {
         return
       }
       const serviceEngineerFullName = capitalizeFirstLetter(serviceEngineer.firstName) +' '+ capitalizeFirstLetter(serviceEngineer.lastName)
+      
       req.serviceTicketId = serviceTicketId
-      req.logDetails = `Service is assigned to ${serviceEngineerFullName} with ${body.priority ? body.priority : 'no'} priority level."`
+      req.logDetails = `Service is assigned to ${serviceEngineerFullName} with ${body.priority ? body.priority : 'no'} priority level.`
 
       serviceTicket.serviceEngineer = new Types.ObjectId(body.serviceEngineer)
       serviceTicket.priority = body.priority
@@ -419,6 +420,7 @@ export async function escalateService(req: LogRequest, res: Response) {
       remarks: string
     } = req.body
 
+
     const serviceTicketId = req.params.serviceTicketId
     const serviceTicket = await ServiceTicket.findById(serviceTicketId)
     if(!serviceTicket) {
@@ -442,6 +444,7 @@ export async function escalateService(req: LogRequest, res: Response) {
       const oldFullName = capitalizeFirstLetter(oldServiceEngineer.firstName) +' '+ capitalizeFirstLetter(oldServiceEngineer.lastName)
       const newFullName = capitalizeFirstLetter(newServiceEngineer.firstName) +' '+ capitalizeFirstLetter(newServiceEngineer.lastName)
   
+      req.serviceTicketId = serviceTicketId
       req.logDetails = `Service is escalated from ${oldFullName} to ${newFullName} with ${body.priority} priority level.`
 
       serviceTicket.serviceEngineer = new Types.ObjectId(body.serviceEngineer)
