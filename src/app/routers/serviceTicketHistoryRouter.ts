@@ -11,10 +11,10 @@ import {
 
 const router = Router()
 
-router.get('/', getServiceTicketHistories)
-router.get('/:serviceTicketId', getServiceTicketHistory)
-router.post('/', createServiceTicketHistory)
-router.put('/:serviceTicketId', updateServiceTicketHistory)
-router.delete('/:serviceTicketId', removeServiceTicketHistory)
+router.get('/', auth, getServiceTicketHistories)
+router.get('/:serviceTicketId', auth, getServiceTicketHistory)
+router.post('/', auth, createServiceTicketHistory)
+router.put('/:serviceTicketId', auth, updateServiceTicketHistory)
+router.delete('/:serviceTicketId', auth, removeServiceTicketHistory)
 
 export default router

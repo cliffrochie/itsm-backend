@@ -16,15 +16,15 @@ import {
 
 const router = Router()
 
-router.get('/', getServiceTickets)
-router.get('/generate', getGeneratedTicketNo)
-router.get('/:serviceTicketId', getServiceTicket)
-router.post('/', serviceTicketLogger, createServiceTicket)
-router.put('/:serviceTicketId', serviceTicketLogger, updateServiceTicket)
-router.patch('/:serviceTicketId/update-service-status', serviceTicketLogger, updateServiceStatus)
-router.patch('/:serviceTicketId/assign-service-engineer', serviceTicketLogger, assignServiceEngineer)
-router.patch('/:serviceTicketId/escalate-service', serviceTicketLogger, escalateService)
-router.delete('/:serviceTicketId', removeServiceTicket)
+router.get('/', auth, getServiceTickets)
+router.get('/generate', auth, getGeneratedTicketNo)
+router.get('/:serviceTicketId', auth, getServiceTicket)
+router.post('/', auth, serviceTicketLogger, createServiceTicket)
+router.put('/:serviceTicketId', auth, serviceTicketLogger, updateServiceTicket)
+router.patch('/:serviceTicketId/update-service-status', auth, serviceTicketLogger, updateServiceStatus)
+router.patch('/:serviceTicketId/assign-service-engineer', auth, serviceTicketLogger, assignServiceEngineer)
+router.patch('/:serviceTicketId/escalate-service', auth, serviceTicketLogger, escalateService)
+router.delete('/:serviceTicketId', auth, removeServiceTicket)
 
 
 export default router

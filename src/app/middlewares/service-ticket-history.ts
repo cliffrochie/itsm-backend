@@ -3,10 +3,10 @@ import { actionInterpretation } from '../utils'
 import ServiceTicketHistory from '../models/ServiceTicketHistory'
 import { Types } from 'mongoose'
 import { changeDateFormatMMDDYYYY } from '../utils'
-import { IUserIdRequest } from '../@types/IUser'
+import { IUserRequest } from '../@types/IUser'
 
 
-interface LogRequest extends IUserIdRequest {
+interface LogRequest extends IUserRequest {
   serviceTicketId?: string
   logDetails?: string
 }

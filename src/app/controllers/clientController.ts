@@ -2,7 +2,7 @@ import { Request, Response } from "express-serve-static-core";
 import { IClientBody, IClientFilter, IClientQueryParams, IClientResults, IClient } from "../@types/IClient";
 import sorter from "../utils/sorter";
 import Client from "../models/Client";
-import { IUserIdRequest } from "../@types/IUser";
+import { IUserRequest } from "../@types/IUser";
 import User from "../models/User";
 import Designation from "../models/Designation";
 import Office from "../models/Office";
@@ -156,7 +156,7 @@ export async function getClient(req: Request, res: Response) {
 }
 
 
-export async function createClient(req: IUserIdRequest, res: Response) {
+export async function createClient(req: IUserRequest, res: Response) {
   try {
     const body: IClientBody = req.body
 
@@ -183,7 +183,7 @@ export async function createClient(req: IUserIdRequest, res: Response) {
 }
 
 
-export async function updateClient(req: IUserIdRequest, res: Response) {
+export async function updateClient(req: IUserRequest, res: Response) {
   try {
     const body: IClientBody = req.body
 

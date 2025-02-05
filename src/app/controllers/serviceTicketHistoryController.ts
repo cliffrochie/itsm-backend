@@ -2,7 +2,7 @@ import { Request, Response } from "express-serve-static-core";
 import { IServiceTicketHistoryBody, IServiceTicketHistoryFilter, IServiceTicketHistoryQueryParams, IServiceTicketHistoryResults } from "../@types/IServiceTicketHistory";
 import sorter from "../utils/sorter";
 import ServiceTicketHistory from "../models/ServiceTicketHistory";
-import { IUserIdRequest } from "../@types/IUser";
+import { IUserRequest } from "../@types/IUser";
 import { Types } from "mongoose";
 
 
@@ -75,7 +75,7 @@ export async function getServiceTicketHistory(req: Request, res: Response) {
 }
 
 
-export async function createServiceTicketHistory(req: IUserIdRequest, res: Response) {
+export async function createServiceTicketHistory(req: IUserRequest, res: Response) {
   try {
     const body: IServiceTicketHistoryBody = req.body
 
@@ -97,7 +97,7 @@ export async function createServiceTicketHistory(req: IUserIdRequest, res: Respo
 }
 
 
-export async function updateServiceTicketHistory(req: IUserIdRequest, res: Response) {
+export async function updateServiceTicketHistory(req: IUserRequest, res: Response) {
   try {
     const body = req.body
 

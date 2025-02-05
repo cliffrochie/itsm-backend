@@ -2,7 +2,7 @@ import { Types } from "mongoose"
 import ServiceTicket from "../models/ServiceTicket"
 import ServiceTicketHistory from "../models/ServiceTicketHistory"
 import { Request } from "express"
-import { IUserIdRequest } from "../@types/IUser"
+import { IUserRequest } from "../@types/IUser"
 
 
 export async function generateTicketNo(date: string) {

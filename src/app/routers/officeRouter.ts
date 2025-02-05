@@ -5,16 +5,16 @@ import { createOffice, getOffice, getOffices, removeOffice, updateOffice } from 
 
 const router = Router()
 
-// router.get('/', auth, getOffices)
-// router.get('/:officeId', auth, getOffice)
-// router.post('/', auth, createOffice)
-// router.put('/:officeId', auth, updateOffice)
-// router.delete('/:officeId', auth, removeOffice)
+router.get('/', auth, getOffices)
+router.get('/:officeId', auth, getOffice)
+router.post('/', auth, createOffice)
+router.put('/:officeId', auth, updateOffice)
+router.delete('/:officeId', auth, removeOffice)
 
-router.get('/', getOffices)
-router.get('/:officeId', getOffice)
-router.post('/', createOffice)
-router.put('/:officeId', updateOffice)
-router.delete('/:officeId', removeOffice)
+// router.get('/', getOffices)
+// router.get('/:officeId', getOffice)
+// router.post('/', createOffice)
+// router.put('/:officeId', updateOffice)
+// router.delete('/:officeId', removeOffice)
 
 export default router

@@ -2,24 +2,25 @@ import dotenv from 'dotenv'
 import jwt from 'jsonwebtoken'
 import { Request, Response, NextFunction } from 'express-serve-static-core'
 import { JwtPayload } from '../../types/query-params'
-import { IUserIdRequest } from '../@types/IUser'
+import { IUserRequest } from '../@types/IUser'
 
 dotenv.config()
 
 
-export default function(req: IUserIdRequest, res: Response, next: NextFunction) {
+export default function(req: IUserRequest, res: Response, next: NextFunction) {
   try {
-    // Authorization: 'Bearer token'
-    const authHeader = req.headers.authorization
+    // // Authorization: 'Bearer token'
+    // const authHeader = req.headers.authorization
+    // if(!authHeader || !authHeader.startsWith('Bearer ')) {
+    //   res.status(401).json({ message: 'User unauthorized' })
+    //   return
+    // }
+    // const token = authHeader.split(' ')[1]
 
-    if(!authHeader || !authHeader.startsWith('Bearer ')) {
-      res.status(401).json({ message: 'User unauthorized' })
-      return
-    }
+    const token = req.cookies.token
+    console.log(token)
 
-    const token = authHeader.split(' ')[1]
-    
-    if(!jwt.verify(token, process.env.SECRET_KEY || 'notsosecret')) {
+    if(!jwt.verify(token, String(process.env.SECRET_KEY) || 'notsosecret')) {
       res.status(403).json({ message: 'Invalid token' })  
       return
     }
@@ -36,6 +37,7 @@ export default function(req: IUserIdRequest, res: Response, next: NextFunction) 
   }
 
   catch(error) {
+    res.clearCookie('token')
     console.error(`Error [auth]: ${error}`)
     res.status(403).json({ message: 'Invalid token'})
     return

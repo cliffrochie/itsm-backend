@@ -5,17 +5,17 @@ import { createClient, getClient, getClients, removeClient, updateClient } from 
 
 const router = Router()
 
-// router.get('/', auth, getClients)
-// router.get('/:clientId', auth, getClient)
-// router.post('/', auth, createClient)
-// router.put('/:clientId', auth, updateClient)
-// router.delete('/:clientId', auth, removeClient)
+router.get('/', auth, getClients)
+router.get('/:clientId', auth, getClient)
+router.post('/', auth, createClient)
+router.put('/:clientId', auth, updateClient)
+router.delete('/:clientId', auth, removeClient)
 
-router.get('/', getClients)
-router.get('/:clientId', getClient)
-router.post('/', createClient)
-router.put('/:clientId', updateClient)
-router.delete('/:clientId', removeClient)
+// router.get('/', getClients)
+// router.get('/:clientId', getClient)
+// router.post('/', createClient)
+// router.put('/:clientId', updateClient)
+// router.delete('/:clientId', removeClient)
 
 
 export default router

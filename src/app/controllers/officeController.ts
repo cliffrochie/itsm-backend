@@ -2,7 +2,7 @@ import { Request, Response } from "express-serve-static-core";
 import { IOfficeBody, IOfficeFilter, IOfficeQueryParams, IOfficeResults } from "../@types/IOffice";
 import sorter from "../utils/sorter";
 import Office from "../models/Office";
-import { IUserIdRequest } from "../@types/IUser";
+import { IUserRequest } from "../@types/IUser";
 import User from "../models/User";
 import { Types } from "mongoose";
 
@@ -75,7 +75,7 @@ export async function getOffice(req: Request, res: Response) {
 }
 
 
-export async function createOffice(req: IUserIdRequest, res: Response) {
+export async function createOffice(req: IUserRequest, res: Response) {
   try {
     const body: IOfficeBody = req.body
     
@@ -97,7 +97,7 @@ export async function createOffice(req: IUserIdRequest, res: Response) {
 }
 
 
-export async function updateOffice(req: IUserIdRequest, res: Response) {
+export async function updateOffice(req: IUserRequest, res: Response) {
   try {
     const body: IOfficeBody = req.body
     const officeId = req.params.officeId

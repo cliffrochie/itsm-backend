@@ -13,6 +13,7 @@ export interface IUser extends Document {
   extensionName?: string
   contactNo?: string
   role: "user" | "staff" | "admin" | "superadmin"
+  isActive: boolean
   createdAt?: Date
   updatedAt?: Date
   comparePassword(password: string): boolean
@@ -28,6 +29,7 @@ export interface IUserQueryParams {
   email?: string
   contactNo?: string
   role?: string
+  isActive?: boolean
   personnel?: boolean
   exclude?: string
   sort?: string
@@ -45,6 +47,7 @@ export interface IUserFilter {
   email?: object
   contactNo?: object
   role?: object
+  isActive?: object
   $or?: any
   $in?: any
   _id?: any
@@ -68,6 +71,8 @@ export interface IUserSorter {
   email?: number
 }
 
-export interface IUserIdRequest extends Request {
+export interface IUserRequest extends Request {
   userId?: string
+  username?: string
+  role?: string
 }

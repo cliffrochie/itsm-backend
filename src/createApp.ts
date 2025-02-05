@@ -1,6 +1,7 @@
 import express from 'express'
 import dotenv from 'dotenv'
 import cors from 'cors'
+import cookieParser from 'cookie-parser'
 import { Express, Request, Response } from 'express-serve-static-core'
 
 import database from './config/database'
@@ -18,10 +19,15 @@ export function createApp() {
   database()
 
   const app: Express = express()
+  app.use(cors({ 
+    origin: 'http://localhost:3500',
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'],
+    allowedHeaders: ['Content-Type', 'Authorization'], 
+  }))
+  app.use(cookieParser())
   app.use(express.json())
-  app.use(cors({ origin: process.env.CORS_ORIGIN }))
   app.use(logMiddleware)
-  
   app.use('/api/users', userRouter)
   app.use('/api/designations', designationRouter)
   app.use('/api/offices', officeRouter)

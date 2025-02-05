@@ -2,13 +2,13 @@ import { Request, Response } from "express-serve-static-core";
 import { IServiceTicketBody, IServiceTicketFilter, IServiceTicketQueryParams, IServiceTicketResults } from "../@types/IServiceTicket";
 import sorter from "../utils/sorter";
 import ServiceTicket from "../models/ServiceTicket";
-import { IUserIdRequest } from "../@types/IUser";
+import { IUserRequest } from "../@types/IUser";
 import { Types } from "mongoose";
 import { capitalizeFirstLetter, generateTicketNo } from "../utils";
 import User from "../models/User";
 
 
-interface LogRequest extends IUserIdRequest {
+interface LogRequest extends IUserRequest {
   serviceTicketId?: string
   logDetails?: string
 }

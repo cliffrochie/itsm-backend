@@ -2,7 +2,7 @@ import { Request, Response } from "express-serve-static-core";
 import Designation from '../models/Designation';
 import sorter from '../utils/sorter';
 import { IDesignation, IDesignationBody, IDesignationFilter, IDesignationQueryParams, IDesignationResults } from '../@types/IDesignation';
-import { IUserIdRequest } from '../@types/IUser';
+import { IUserRequest } from '../@types/IUser';
 import User from "../models/User";
 import { Types } from "mongoose";
 
@@ -57,7 +57,7 @@ export async function getDesignation(req: Request, res: Response) {
 }
 
 
-export async function createDesignation(req: IUserIdRequest, res: Response) {
+export async function createDesignation(req: IUserRequest, res: Response) {
   try {
     const body: IDesignationBody = req.body
 
@@ -76,7 +76,7 @@ export async function createDesignation(req: IUserIdRequest, res: Response) {
 }
 
 
-export async function updateDesignation(req: IUserIdRequest, res: Response) {
+export async function updateDesignation(req: IUserRequest, res: Response) {
   try {
     const body: IDesignationBody = req.body
     const designationId = req.params.designationId

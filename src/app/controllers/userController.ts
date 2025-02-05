@@ -2,7 +2,7 @@ import jwt from 'jsonwebtoken'
 import { Request, Response } from "express-serve-static-core";
 import User from "../models/User";
 import sorter from '../utils/sorter';
-import { IUser, IUserFilter, IUserIdRequest, IUserQueryParams, IUserResults } from '../@types/IUser';
+import { IUser, IUserFilter, IUserRequest, IUserQueryParams, IUserResults } from '../@types/IUser';
 
 
 export async function userSignIn(req: Request, res: Response) {
@@ -13,19 +13,19 @@ export async function userSignIn(req: Request, res: Response) {
       res.status(404).json({ message: 'Invalid credentials!' })
       return
     }
-    if(!user.comparePassword(password)) { 
+    if(!user.comparePassword(password)) {
       res.status(404).json({ message: 'Invalid credentials!!' })
       return
     }
-    const token = jwt.sign({userId: user._id}, process.env.SECRET_KEY || 'notsosecret', {expiresIn: '1h'})
+    const token = jwt.sign({userId: user._id, username: user.username, role: user.role}, process.env.SECRET_KEY || 'notsosecret', {expiresIn: '1h'})
 
-    res.cookie('jwt', token, {
+    res.cookie('token', token, {
       httpOnly: true,             // Prevent JavaScript access
       secure: false,              // Use HTTPS in production
       sameSite: 'strict',         // Protect against CSRF
       maxAge: 24 * 60 * 60 * 1000 // 1 day expiration
     })
-    res.json({ message: 'Login successful' })
+    res.json({ message: 'Login successful', token: token })
   }
   catch(error) {
     console.error(`Error [userSignIn]: ${error}`)
@@ -49,7 +49,24 @@ export async function userSignUp(req: Request, res: Response) {
 }
 
 
-export async function getCurrentUser(req: IUserIdRequest, res: Response) {
+export async function userSignOut(req: Request, res: Response) {
+  try {
+    res.clearCookie('token', {
+      httpOnly: true,
+      secure: false,
+      sameSite: 'strict'
+    })
+
+    res.status(200).json({ message: 'Signed-out successfully.'})
+  }
+  catch(error) {
+    console.error(`Error [userSignOut]: ${error}`)
+    res.status(400).json(error)
+  }
+}
+
+
+export async function getCurrentUser(req: IUserRequest, res: Response) {
   try {
     const userId = req.userId
     const user = await User.findById(userId).select('-password')
@@ -160,6 +177,7 @@ export async function updateUser(req: Request, res: Response) {
     user.contactNo = req.body.contactNo
     user.email = req.body.email
     user.role = req.body.role
+    user.isActive = req.body.isActive
     user.save()
     
     res.json(user)
