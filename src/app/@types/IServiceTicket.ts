@@ -52,6 +52,15 @@ export interface IServiceTicketQueryParams {
   noPage?: boolean
   client?: string
   serviceEngineer?: string
+  totalTickets?: boolean
+  totalOpenedTickets?: boolean
+  totalInProgressTickets?: boolean
+  totalOnHoldTickets?: boolean
+  totalEscalatedTickets?: boolean
+  totalCanceledTickets?: boolean
+  totalReOpenedTickets?: boolean
+  totalResolvedTickets?: boolean
+  totalClosedTickets?: boolean
 }
 
 export interface IServiceTicketFilter {

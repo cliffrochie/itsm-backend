@@ -17,7 +17,7 @@ export async function userSignIn(req: Request, res: Response) {
       res.status(404).json({ message: 'Invalid credentials!!' })
       return
     }
-    const token = jwt.sign({userId: user._id, username: user.username, role: user.role}, process.env.SECRET_KEY || 'notsosecret', {expiresIn: '1h'})
+    const token = jwt.sign({userId: user._id, username: user.username, role: user.role}, process.env.SECRET_KEY || 'notsosecret', {expiresIn: '24h'})
 
     res.cookie('token', token, {
       httpOnly: true,             // Prevent JavaScript access

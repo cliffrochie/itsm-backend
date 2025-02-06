@@ -34,7 +34,14 @@ export async function getServiceTickets(req: Request<{}, {}, {}, IServiceTicketQ
       includes,
       noPage,
       client,
-      serviceEngineer
+      serviceEngineer,
+      totalTickets,
+      totalInProgressTickets,
+      totalEscalatedTickets,
+      totalCanceledTickets,
+      totalReOpenedTickets,
+      totalResolvedTickets,
+      totalClosedTickets,
     } = req.query
 
     // console.log(req.query)
@@ -465,3 +472,82 @@ export async function escalateService(req: LogRequest, res: Response) {
 }
 
 
+export async function getTotalTickets(req: Request<{}, {}, {}, IServiceTicketQueryParams>, res: Response) {
+  try {
+    const {
+      totalTickets,
+      totalOpenedTickets,
+      totalInProgressTickets,
+      totalOnHoldTickets,
+      totalEscalatedTickets,
+      totalCanceledTickets,
+      totalReOpenedTickets,
+      totalResolvedTickets,
+      totalClosedTickets,
+    } = req.query
+
+    let result = {}
+
+    if(totalTickets) {
+      const total = await ServiceTicket
+        .countDocuments()
+
+      console.log(total)
+      result = { ...result, totalTickets: total }
+    }
+    if(totalOpenedTickets) {
+      const total = await ServiceTicket
+        .find({ serviceStatus: 'open' })
+        .countDocuments()
+      result = { ...result, totalOpenedTickets: total }
+    }
+    if(totalInProgressTickets) {
+      const total = await ServiceTicket
+        .find({ serviceStatus: 'in progress' })
+        .countDocuments()
+      result = { ...result, totalInProgressTickets: total }
+    }
+    if(totalOnHoldTickets) {
+      const total = await ServiceTicket
+        .find({ serviceStatus: 'on hold' })
+        .countDocuments()
+      result = { ...result, totalOnHoldTickets: total }
+    }
+    if(totalEscalatedTickets) {
+      const total = await ServiceTicket
+        .find({ serviceStatus: 'escalated' })
+        .countDocuments()
+      result = { ...result, totalEscalatedTickets: total }
+    }
+    if(totalCanceledTickets) {
+      const total = await ServiceTicket
+        .find({ serviceStatus: 'canceled' })
+        .countDocuments()
+      result = { ...result, totalCanceledTickets: total }
+    }
+    if(totalReOpenedTickets) {
+      const total = await ServiceTicket
+        .find({ serviceStatus: 'reopened' })
+        .countDocuments()
+      result = { ...result, totalReOpenedTickets: total }
+    }
+    if(totalResolvedTickets) {
+      const total = await ServiceTicket
+        .find({ serviceStatus: 'resolved' })
+        .countDocuments()
+      result = { ...result, totalResolvedTickets: total }
+    }
+    if(totalClosedTickets) {
+      const total = await ServiceTicket
+        .find({ serviceStatus: 'closed' })
+        .countDocuments()
+      result = { ...result, totalClosedTickets: total }
+    }
+
+    res.json(result)
+  }
+  catch(error) {
+    console.error(`Error [getTotalTickets]: ${error}`)
+    res.status(400).json(error)
+  }
+}

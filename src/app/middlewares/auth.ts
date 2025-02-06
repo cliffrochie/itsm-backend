@@ -18,7 +18,7 @@ export default function(req: IUserRequest, res: Response, next: NextFunction) {
     // const token = authHeader.split(' ')[1]
 
     const token = req.cookies.token
-    console.log(token)
+    // console.log(token)
 
     if(!jwt.verify(token, String(process.env.SECRET_KEY) || 'notsosecret')) {
       res.status(403).json({ message: 'Invalid token' })  

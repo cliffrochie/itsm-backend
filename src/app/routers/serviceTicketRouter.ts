@@ -10,7 +10,8 @@ import {
   removeServiceTicket, 
   updateServiceStatus,  
   assignServiceEngineer,
-  escalateService
+  escalateService,
+  getTotalTickets,
 } from "../controllers/serviceTicketController";
 
 
@@ -18,6 +19,7 @@ const router = Router()
 
 router.get('/', auth, getServiceTickets)
 router.get('/generate', auth, getGeneratedTicketNo)
+router.get('/total', getTotalTickets)
 router.get('/:serviceTicketId', auth, getServiceTicket)
 router.post('/', auth, serviceTicketLogger, createServiceTicket)
 router.put('/:serviceTicketId', auth, serviceTicketLogger, updateServiceTicket)
