@@ -52,6 +52,21 @@ export interface IServiceTicketQueryParams {
   noPage?: boolean
   client?: string
   serviceEngineer?: string
+  // Task Type
+  totalIncident?: boolean
+  totalServiceRequest?: boolean
+  totalAssetRequest?: boolean
+  totalMaintenance?: boolean
+  totalConsultation?: boolean
+  totalAccessibility?: boolean
+  // Equipment Type
+  totalComputer?: boolean
+  totalPrinter?: boolean
+  totalMobileDevice?: boolean
+  totalNetworkRelated?: boolean
+  totalSoftwareApplication?: boolean
+  totalOthers?: boolean
+  // Service Status
   totalTickets?: boolean
   totalOpenedTickets?: boolean
   totalInProgressTickets?: boolean
@@ -61,6 +76,7 @@ export interface IServiceTicketQueryParams {
   totalReOpenedTickets?: boolean
   totalResolvedTickets?: boolean
   totalClosedTickets?: boolean
+  
 }
 
 export interface IServiceTicketFilter {

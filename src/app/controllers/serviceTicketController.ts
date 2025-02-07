@@ -35,13 +35,6 @@ export async function getServiceTickets(req: Request<{}, {}, {}, IServiceTicketQ
       noPage,
       client,
       serviceEngineer,
-      totalTickets,
-      totalInProgressTickets,
-      totalEscalatedTickets,
-      totalCanceledTickets,
-      totalReOpenedTickets,
-      totalResolvedTickets,
-      totalClosedTickets,
     } = req.query
 
     // console.log(req.query)
@@ -472,7 +465,7 @@ export async function escalateService(req: LogRequest, res: Response) {
 }
 
 
-export async function getTotalTickets(req: Request<{}, {}, {}, IServiceTicketQueryParams>, res: Response) {
+export async function getTotalServiceStatuses(req: Request<{}, {}, {}, IServiceTicketQueryParams>, res: Response) {
   try {
     const {
       totalTickets,
@@ -491,8 +484,6 @@ export async function getTotalTickets(req: Request<{}, {}, {}, IServiceTicketQue
     if(totalTickets) {
       const total = await ServiceTicket
         .countDocuments()
-
-      console.log(total)
       result = { ...result, totalTickets: total }
     }
     if(totalOpenedTickets) {
@@ -547,7 +538,136 @@ export async function getTotalTickets(req: Request<{}, {}, {}, IServiceTicketQue
     res.json(result)
   }
   catch(error) {
-    console.error(`Error [getTotalTickets]: ${error}`)
+    console.error(`Error [getTotalServiceStatuses]: ${error}`)
+    res.status(400).json(error)
+  }
+}
+
+export async function getTotalTaskTypes(req: Request<{}, {}, {}, IServiceTicketQueryParams>, res: Response) {
+  try {
+    const {
+      totalTickets,
+      totalIncident,
+      totalServiceRequest,
+      totalAssetRequest,
+      totalMaintenance,
+      totalConsultation,
+      totalAccessibility,
+    } = req.query
+
+    let result = {}
+
+    if(totalTickets) {
+      const total = await ServiceTicket
+        .countDocuments()
+      result = { ...result, totalTickets: total }
+    }
+    if(totalIncident) {
+      const total = await ServiceTicket
+        .find({ taskType: 'incident' })
+        .countDocuments()
+      result = { ...result, totalIncident: total }
+    }
+    if(totalServiceRequest) {
+      const total = await ServiceTicket
+        .find({ taskType: 'service request' })
+        .countDocuments()
+      result = { ...result, totalServiceRequest: total }
+    }
+    if(totalAssetRequest) {
+      const total = await ServiceTicket
+        .find({ taskType: 'asset request' })
+        .countDocuments()
+      result = { ...result, totalAssetRequest: total }
+    }
+    if(totalMaintenance) {
+      const total = await ServiceTicket
+        .find({ taskType: 'maintenace' })
+        .countDocuments()
+      result = { ...result, totalMaintenance: total }
+    }
+    if(totalConsultation) {
+      const total = await ServiceTicket
+        .find({ taskType: 'consultation' })
+        .countDocuments()
+      result = { ...result, totalConsultation: total }
+    }
+    if(totalAccessibility) {
+      const total = await ServiceTicket
+        .find({ taskType: 'accessibility' })
+        .countDocuments()
+      result = { ...result, totalAccessibility: total }
+    }
+
+    res.json(result)
+  }
+  catch(error) {
+    console.error(`Error [getTotalTaskTypes]: ${error}`)
+    res.status(400).json(error)
+  }
+}
+
+
+export async function getTotalEquipmentTypes(req: Request<{}, {}, {}, IServiceTicketQueryParams>, res: Response) {
+  try {
+    const {
+      totalTickets,
+      totalComputer,
+      totalPrinter,
+      totalMobileDevice,
+      totalNetworkRelated,
+      totalSoftwareApplication,
+      totalOthers,
+    } = req.query
+  
+    let result = {}
+
+    if(totalTickets) {
+      const total = await ServiceTicket
+        .countDocuments()
+      result = { ...result, totalTickets: total }
+    }
+    if(totalComputer) {
+      const total = await ServiceTicket
+        .find({ equipmentType: 'computer' })
+        .countDocuments()
+      result = { ...result, totalComputer: total }
+    }
+    if(totalPrinter) {
+      const total = await ServiceTicket
+        .find({ equipmentType: 'printer' })
+        .countDocuments()
+      result = { ...result, totalPrinter: total }
+    }
+    if(totalMobileDevice) {
+      const total = await ServiceTicket
+        .find({ equipmentType: 'mobile device' })
+        .countDocuments()
+      result = { ...result, totalMobileDevice: total }
+    }
+    if(totalNetworkRelated) {
+      const total = await ServiceTicket
+        .find({ equipmentType: 'network related' })
+        .countDocuments()
+      result = { ...result, totalNetworkRelated: total }
+    }
+    if(totalSoftwareApplication) {
+      const total = await ServiceTicket
+        .find({ equipmentType: 'software application' })
+        .countDocuments()
+      result = { ...result, totalSoftwareApplication: total }
+    }
+    if(totalOthers) {
+      const total = await ServiceTicket
+        .find({ equipmentType: 'others' })
+        .countDocuments()
+      result = { ...result, totalOthers: total }
+    }
+
+    res.json(result)
+  }
+  catch(error) {
+    console.error(`Error [getTotalEquipmentTypes]: ${error}`)
     res.status(400).json(error)
   }
 }

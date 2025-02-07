@@ -187,3 +187,47 @@ export async function updateUser(req: Request, res: Response) {
     res.status(400).json(error)
   }
 }
+
+
+export async function getTotalUserRoles(req: Request<{}, {}, {}, IUserQueryParams>, res: Response) {
+  try {
+    const {
+      total,
+      totalAdmin,
+      totalStaff,
+      totalUser,
+    } = req.query
+
+    let result = {}
+
+    if(total) {
+      const total = await User
+        .countDocuments()
+      result = { ...result, total: total }
+    }
+    if(totalAdmin) {
+      const total = await User
+        .find({ role: 'admin' })
+        .countDocuments()
+      result = { ...result, totalAdmin: total }
+    }
+    if(totalStaff) {
+      const total = await User
+        .find({ role: 'staff' })
+        .countDocuments()
+      result = { ...result, totalStaff: total }
+    }
+    if(totalUser) {
+      const total = await User
+        .find({ role: 'user' })
+        .countDocuments()
+      result = { ...result, totalUser: total }
+    }
+
+    res.json(result)
+  }
+  catch(error) {
+    console.error(`Error [getTotalUserRoles]: ${error}`)
+    res.status(400).json(error)
+  }
+}

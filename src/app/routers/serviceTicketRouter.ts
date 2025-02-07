@@ -11,7 +11,9 @@ import {
   updateServiceStatus,  
   assignServiceEngineer,
   escalateService,
-  getTotalTickets,
+  getTotalServiceStatuses,
+  getTotalTaskTypes,
+  getTotalEquipmentTypes,
 } from "../controllers/serviceTicketController";
 
 
@@ -19,7 +21,9 @@ const router = Router()
 
 router.get('/', auth, getServiceTickets)
 router.get('/generate', auth, getGeneratedTicketNo)
-router.get('/total', getTotalTickets)
+router.get('/total-service-status', auth, getTotalServiceStatuses)
+router.get('/total-task-type', auth, getTotalTaskTypes)
+router.get('/total-equipment-type', getTotalEquipmentTypes)
 router.get('/:serviceTicketId', auth, getServiceTicket)
 router.post('/', auth, serviceTicketLogger, createServiceTicket)
 router.put('/:serviceTicketId', auth, serviceTicketLogger, updateServiceTicket)
