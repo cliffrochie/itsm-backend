@@ -193,6 +193,7 @@ export async function getTotalUserRoles(req: Request<{}, {}, {}, IUserQueryParam
   try {
     const {
       total,
+      totalSuperAdmin,
       totalAdmin,
       totalStaff,
       totalUser,
@@ -204,6 +205,12 @@ export async function getTotalUserRoles(req: Request<{}, {}, {}, IUserQueryParam
       const total = await User
         .countDocuments()
       result = { ...result, total: total }
+    }
+    if(totalSuperAdmin) {
+      const total = await User
+        .find({ role: 'superadmin' })
+        .countDocuments()
+      result = { ...result, totalSuperAdmin: total }
     }
     if(totalAdmin) {
       const total = await User

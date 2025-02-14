@@ -37,6 +37,7 @@ export interface IUserQueryParams {
   limit?: number
   noPage?: boolean
   total?: boolean
+  totalSuperAdmin?: boolean
   totalAdmin?: boolean
   totalStaff?: boolean
   totalUser?: boolean
