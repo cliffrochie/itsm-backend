@@ -465,6 +465,27 @@ export async function escalateService(req: LogRequest, res: Response) {
 }
 
 
+export async function getAssignedServiceTickets(req: IUserRequest, res: Response) {
+  try {
+
+    const currentUser = await User.findById(req.userId).sort()
+    if(currentUser && currentUser.role === 'user') {
+      res.status(403).json({ message: 'Unauthorized access' })
+      return
+    }
+
+   
+
+    const serviceTickets = await ServiceTicket.find({ serviceEngineer: req.userId }).sort({ createdAt: -1 })
+    res.status(200).json(serviceTickets)
+  }
+  catch(error) {
+    console.error(`Error [getAssignedServiceTickets]: ${error}`)
+    res.status(400).json(error)
+  }
+}
+
+
 export async function getTotalServiceStatuses(req: Request<{}, {}, {}, IServiceTicketQueryParams>, res: Response) {
   try {
     const {
