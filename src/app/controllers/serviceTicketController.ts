@@ -18,9 +18,8 @@ export async function getServiceTickets(req: Request<{}, {}, {}, IServiceTicketQ
   try {
     const {
       ticketNo, 
-      date,
-      time,
       taskType,
+      title,
       natureOfWork,
       serialNo,
       equipmentType,
@@ -43,9 +42,8 @@ export async function getServiceTickets(req: Request<{}, {}, {}, IServiceTicketQ
     const sortResult = await sorter(sort)
 
     if(ticketNo) filter.ticketNo = { $regex: ticketNo + '.*', $options: 'i' }
-    if(date) filter.date = { $regex: date + '.*', $options: 'i' }
-    if(time) filter.time = { $regex: time + '.*', $options: 'i' }
     if(taskType) filter.taskType = { $regex: taskType + '.*', $options: 'i' }
+    if(title) filter.title = { $regex: title + '.*', $options: 'i' }
     if(natureOfWork) filter.natureOfWork = { $regex: natureOfWork + '.*', $options: 'i' }
     if(serialNo) filter.serialNo = { $regex: serialNo + '.*', $options: 'i' }
     if(equipmentType) filter.equipmentType = { $regex: equipmentType + '.*', $options: 'i' }
@@ -169,7 +167,7 @@ export async function getServiceTicket(req: Request, res: Response) {
 export async function getGeneratedTicketNo(req: Request, res: Response) {
   try {
     // console.log('----')
-    const ticket = await generateTicketNo('01/21/2025')
+    const ticket = await generateTicketNo()
     // console.log(ticket)
     res.json({ ticket: ticket })
   }
@@ -183,13 +181,12 @@ export async function getGeneratedTicketNo(req: Request, res: Response) {
 export async function createServiceTicket(req: LogRequest, res: Response) {
   try {
     const body: IServiceTicketBody = req.body
-    const ticket = await generateTicketNo(body.date)
+    const ticket = await generateTicketNo()
 
     const serviceTicket = new ServiceTicket({
       ticketNo: ticket,
-      date: body.date,
-      time: body.time,
       taskType: body.taskType,
+      title: body.title,
       natureOfWork: body.natureOfWork,
       serialNo: body.serialNo,
       equipmentType: body.equipmentType,
@@ -240,6 +237,7 @@ export async function updateServiceTicket(req: LogRequest, res: Response) {
       req.logDetails = `Priority level is updated from "${serviceTicket.priority ? serviceTicket.priority : 'none' }" to "${body.priority}."`
     }
 
+    let statusAssigned = ''
     // Assign Service Engineer
     if(serviceTicket.serviceEngineer === null && String(serviceTicket.serviceEngineer) !== String(req.body.serviceEngineer)) {
       const newServiceEngineer = await User.findById(req.body.serviceEngineer)
@@ -248,7 +246,7 @@ export async function updateServiceTicket(req: LogRequest, res: Response) {
         return
       }
       const newFullName = capitalizeFirstLetter(newServiceEngineer.firstName) +' '+ capitalizeFirstLetter(newServiceEngineer.lastName)
-
+      statusAssigned = 'assigned'
       req.logDetails = `Service is assigned to ${newFullName} with ${body.priority ? body.priority : 'no' } priority level.`
     }
 
@@ -291,15 +289,14 @@ export async function updateServiceTicket(req: LogRequest, res: Response) {
     }
 
     serviceTicket.ticketNo = body.ticketNo
-    serviceTicket.date = body.date
-    serviceTicket.time = body.time
     serviceTicket.taskType = body.taskType
+    serviceTicket.title = body.title
     serviceTicket.natureOfWork = body.natureOfWork
     serviceTicket.serialNo = body.serialNo
     serviceTicket.equipmentType = body.equipmentType
     serviceTicket.defectsFound = body.defectsFound
     serviceTicket.serviceRendered = body.serviceRendered
-    serviceTicket.serviceStatus = body.serviceStatus
+    serviceTicket.serviceStatus = statusAssigned === 'assigned' ? statusAssigned : body.serviceStatus
     serviceTicket.priority = body.priority
     serviceTicket.remarks = body.remarks
     serviceTicket.adminRemarks = body.adminRemarks
@@ -395,6 +392,7 @@ export async function assignServiceEngineer(req: LogRequest, res: Response) {
       req.logDetails = `Service is assigned to ${serviceEngineerFullName} with ${body.priority ? body.priority : 'no'} priority level.`
 
       serviceTicket.serviceEngineer = new Types.ObjectId(body.serviceEngineer)
+      serviceTicket.serviceStatus = 'assigned'
       serviceTicket.priority = body.priority
       serviceTicket.adminRemarks = body.adminRemarks
       serviceTicket.save()
@@ -448,6 +446,7 @@ export async function escalateService(req: LogRequest, res: Response) {
       req.logDetails = `Service is escalated from ${oldFullName} to ${newFullName} with ${body.priority} priority level.`
 
       serviceTicket.serviceEngineer = new Types.ObjectId(body.serviceEngineer)
+      serviceTicket.serviceStatus = 'escalated'
       serviceTicket.priority = body.priority
       serviceTicket.remarks = body.remarks
       serviceTicket.save()
@@ -460,6 +459,31 @@ export async function escalateService(req: LogRequest, res: Response) {
   }
   catch(error) {
     console.error(`Error [escalateService]: ${error}`)
+    res.status(400).json(error)
+  }
+}
+
+
+export async function inputFindings(req: IUserRequest, res: Response) {
+  try {
+    const body: {
+      findings: string
+    } = req.body
+
+    const serviceTicketId = req.params.serviceTicketId
+    const serviceTicket = await ServiceTicket.findById(serviceTicketId)
+    if(!serviceTicket) {
+      res.status(404).json({ message: '`Service Ticket` not found' })
+      return
+    }
+
+    serviceTicket.defectsFound = body.findings
+    serviceTicket.save()
+    res.status(200).json(serviceTicket)
+    return
+  }
+  catch(error) {
+    console.error(`Error [inputFindings]: ${error}`)
     res.status(400).json(error)
   }
 }
@@ -491,6 +515,7 @@ export async function getTotalServiceStatuses(req: Request<{}, {}, {}, IServiceT
     const {
       totalTickets,
       totalOpenedTickets,
+      totalAssignedTickets,
       totalInProgressTickets,
       totalOnHoldTickets,
       totalEscalatedTickets,
@@ -512,6 +537,12 @@ export async function getTotalServiceStatuses(req: Request<{}, {}, {}, IServiceT
         .find({ serviceStatus: 'open' })
         .countDocuments()
       result = { ...result, totalOpenedTickets: total }
+    }
+    if(totalAssignedTickets) {
+      const total = await ServiceTicket
+        .find({ serviceStatus: 'assigned' })
+        .countDocuments()
+      result = { ...result, totalAssignedTickets: total }
     }
     if(totalInProgressTickets) {
       const total = await ServiceTicket

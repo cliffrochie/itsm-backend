@@ -3,28 +3,42 @@ import ServiceTicket from "../models/ServiceTicket"
 import ServiceTicketHistory from "../models/ServiceTicketHistory"
 import { Request } from "express"
 import { IUserRequest } from "../@types/IUser"
+import { IServiceTicket } from "../@types/IServiceTicket"
 
 
-export async function generateTicketNo(date: string) {
-  const [month, day, year] = date.split('/')
+export async function generateTicketNo() {
+  const now = new Date()
+  const startOfDay = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate(), 0, 0, 0, 0));
+  const endOfDay = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate(), 23, 59, 59, 999));
+  
+  
+  console.log('start: ', startOfDay)
+  console.log('end: ', endOfDay)
 
-  let result = ''
-  const total = await ServiceTicket.find({ date: { $regex: date + '.*', $options: 'i' } }).countDocuments()
+  let counter = ''
+  const total = await ServiceTicket.find({ createdAt: { $gte: startOfDay, $lte: endOfDay } }).countDocuments()
+
+  console.log('total', total)
 
   if(total < 9) {
-    result = `000${total+1}`
+    counter = `00${total+1}`
   }
   else if(total < 99) {
-    result = `00${total+1}`
+    counter = `0${total+1}`
   }
   else if(total < 999) {
-    result = `0${total+1}`
+    counter = `${total+1}`
   }
   else {
-    result = (total+1).toString()
+    counter = (total+1).toString()
   }
   
-  return 'ITSM'+ year.substring(2) + month + day + result
+  const formattedDate = endOfDay.toISOString().slice(2, 10)
+  console.log('formatted date: ', formattedDate)
+  let result = 'ITSM-'+ formattedDate.replace(/-/g, '') +'-'+ counter
+
+
+  return result
 }
 
 

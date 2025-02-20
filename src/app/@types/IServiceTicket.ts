@@ -5,16 +5,15 @@ import { IClient } from './IClient'
 
 export interface IServiceTicket extends Document {
   ticketNo: string
-  date: string
-  time?: string
   taskType: "incident" | "service request" | "asset request" | "maintenance"  | "consultation" | "accessibility"
+  title: string
   natureOfWork: string
   serialNo?: string
   equipmentType: "computer" | "printer" | "mobile device" | "network related" | "software application" | "others"
   equipmentTypeOthers?: string
   defectsFound?: string
   serviceRendered?: string
-  serviceStatus?: "" | "open" | "in progress" | "on hold" | "escalated" | "canceled" | "reopened" | "resolved" | "closed"
+  serviceStatus?: "" | "open" | "assigned" | "in progress" | "on hold" | "escalated" | "canceled" | "reopened" | "resolved" | "closed"
   isActive: boolean
   isFinished: boolean
   priority: "" | "low" | "medium" | "high"
@@ -30,9 +29,8 @@ export interface IServiceTicket extends Document {
 
 export interface IServiceTicketQueryParams {
   ticketNo?: string
-  date?: string
-  time?: string
   taskType?: string
+  title?: string
   natureOfWork?: string
   serialNo?: string
   equipmentType?: string
@@ -69,6 +67,7 @@ export interface IServiceTicketQueryParams {
   // Service Status
   totalTickets?: boolean
   totalOpenedTickets?: boolean
+  totalAssignedTickets?: boolean
   totalInProgressTickets?: boolean
   totalOnHoldTickets?: boolean
   totalEscalatedTickets?: boolean
@@ -81,9 +80,8 @@ export interface IServiceTicketQueryParams {
 
 export interface IServiceTicketFilter {
   ticketNo?: object
-  date?: object
-  time?: object
   taskType?: object
+  title?: object
   natureOfWork?: object
   serialNo?: object
   equipmentType?: object
@@ -97,16 +95,15 @@ export interface IServiceTicketFilter {
 
 export interface IServiceTicketBody {
   ticketNo: string
-  date: string
-  time?: string
   taskType: "incident" | "service request" | "asset request" | "maintenance"  | "consultation" | "accessibility"
+  title: string
   natureOfWork: string
   serialNo?: string
   equipmentType: "computer" | "printer" | "mobile device" | "network related" | "software application" | "others"
   equipmentTypeOthers?: string
   defectsFound?: string
   serviceRendered?: string
-  serviceStatus: "" | "open" | "in progress" | "on hold" | "escalated" | "canceled" | "reopened" | "resolved" | "closed"
+  serviceStatus: "" | "open" | "assigned" | "in progress" | "on hold" | "escalated" | "canceled" | "reopened" | "resolved" | "closed"
   isActive: boolean
   isFinished: boolean
   priority: "" | "low" | "medium" | "high"

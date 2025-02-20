@@ -11,6 +11,7 @@ import {
   updateServiceStatus,  
   assignServiceEngineer,
   escalateService,
+  inputFindings,
   getAssignedServiceTickets,
   getTotalServiceStatuses,
   getTotalTaskTypes,
@@ -29,6 +30,7 @@ router.get('/total-equipment-type', getTotalEquipmentTypes)
 router.get('/:serviceTicketId', auth, getServiceTicket)
 router.post('/', auth, serviceTicketLogger, createServiceTicket)
 router.put('/:serviceTicketId', auth, serviceTicketLogger, updateServiceTicket)
+router.patch('/:serviceTicketId/input-findings', auth, serviceTicketLogger, inputFindings)
 router.patch('/:serviceTicketId/update-service-status', auth, serviceTicketLogger, updateServiceStatus)
 router.patch('/:serviceTicketId/assign-service-engineer', auth, serviceTicketLogger, assignServiceEngineer)
 router.patch('/:serviceTicketId/escalate-service', auth, serviceTicketLogger, escalateService)
