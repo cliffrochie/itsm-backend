@@ -416,6 +416,7 @@ export async function escalateService(req: LogRequest, res: Response) {
       serviceEngineer: string
       priority: "" | "low" | "medium" | "high"
       remarks: string
+      adminRemarks: string
     } = req.body
 
 
@@ -449,6 +450,7 @@ export async function escalateService(req: LogRequest, res: Response) {
       serviceTicket.serviceStatus = 'escalated'
       serviceTicket.priority = body.priority
       serviceTicket.remarks = body.remarks
+      serviceTicket.adminRemarks = body.adminRemarks
       serviceTicket.save()
       res.status(200).json(serviceTicket)
       return
@@ -464,7 +466,7 @@ export async function escalateService(req: LogRequest, res: Response) {
 }
 
 
-export async function inputFindings(req: IUserRequest, res: Response) {
+export async function inputFindings(req: LogRequest, res: Response) {
   try {
     const body: {
       findings: string
@@ -477,13 +479,56 @@ export async function inputFindings(req: IUserRequest, res: Response) {
       return
     }
 
+    const assignedServiceEngineer = await User.findById(serviceTicket.serviceEngineer)
+    if(!assignedServiceEngineer) {
+      res.status(404).json({ message: '`Assigned Service Engineer` not found' })
+      return
+    }
+    const serviceEngineerName = capitalizeFirstLetter(assignedServiceEngineer.firstName) +' '+ capitalizeFirstLetter(assignedServiceEngineer.lastName)
+
     serviceTicket.defectsFound = body.findings
     serviceTicket.save()
+    req.serviceTicketId = serviceTicket._id as string
+    req.logDetails = `Diagnosis / findings is set to "${serviceTicket.defectsFound}" by ${serviceEngineerName}`
     res.status(200).json(serviceTicket)
     return
   }
   catch(error) {
     console.error(`Error [inputFindings]: ${error}`)
+    res.status(400).json(error)
+  }
+}
+
+
+export async function inputServiceRendered(req: LogRequest, res: Response) {
+  try {
+    const body: {
+      serviceRendered: string
+    } = req.body
+
+    const serviceTicketId = req.params.serviceTicketId
+    const serviceTicket = await ServiceTicket.findById(serviceTicketId)
+    if(!serviceTicket) {
+      res.status(404).json({ message: '`Service Ticket` not found' })
+      return
+    }
+
+    const assignedServiceEngineer = await User.findById(serviceTicket.serviceEngineer)
+    if(!assignedServiceEngineer) {
+      res.status(404).json({ message: '`Assigned Service Engineer` not found' })
+      return
+    }
+    const serviceEngineerName = capitalizeFirstLetter(assignedServiceEngineer.firstName) +' '+ capitalizeFirstLetter(assignedServiceEngineer.lastName)
+
+    serviceTicket.serviceRendered = body.serviceRendered
+    serviceTicket.save()
+    req.serviceTicketId = serviceTicket._id as string
+    req.logDetails = `Service rendered / action taken is set to "${serviceTicket.serviceRendered}" by ${serviceEngineerName}`
+    res.status(200).json(serviceTicket)
+    return
+  }
+  catch(error) {
+    console.error(`Error [inputServiceRendered]: ${error}`)
     res.status(400).json(error)
   }
 }
@@ -497,8 +542,6 @@ export async function getAssignedServiceTickets(req: IUserRequest, res: Response
       res.status(403).json({ message: 'Unauthorized access' })
       return
     }
-
-   
 
     const serviceTickets = await ServiceTicket.find({ serviceEngineer: req.userId }).sort({ createdAt: -1 })
     res.status(200).json(serviceTickets)
