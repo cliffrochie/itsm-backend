@@ -14,6 +14,7 @@ import {
   inputFindings,
   inputServiceRendered,
   getAssignedServiceTickets,
+  getAssignedClosedServiceTickets,
   getTotalServiceStatuses,
   getTotalTaskTypes,
   getTotalEquipmentTypes,
@@ -25,6 +26,7 @@ const router = Router()
 router.get('/', auth, getServiceTickets)
 router.get('/generate', auth, getGeneratedTicketNo)
 router.get('/assigned', auth, getAssignedServiceTickets)
+router.get('/assigned-closed', auth, getAssignedClosedServiceTickets)
 router.get('/total-service-status', auth, getTotalServiceStatuses)
 router.get('/total-task-type', auth, getTotalTaskTypes)
 router.get('/total-equipment-type', getTotalEquipmentTypes)
