@@ -3,6 +3,7 @@ import { Request, Response } from "express-serve-static-core";
 import User from "../models/User";
 import sorter from '../utils/sorter';
 import { IUser, IUserFilter, IUserRequest, IUserQueryParams, IUserResults } from '../@types/IUser';
+import Client from '../models/Client';
 
 
 export async function userSignIn(req: Request, res: Response) {
@@ -38,7 +39,17 @@ export async function userSignUp(req: Request, res: Response) {
   try {
     const body = req.body
     const user = new User(body)
-    await user.save()
+    const result = await user.save()
+    if(result) {
+      const client = new Client({
+        firstName: result.firstName,
+        middleName: result.middleName,
+        lastName: result.lastName,
+        contactNo: result.contactNo,
+        email: result.email
+      })
+      client.save()
+    }
     const token = jwt.sign({userId: user._id}, process.env.SECRET_KEY || 'notsosecret', {expiresIn: '1h'})
     res.status(201).json({ token })
   }
