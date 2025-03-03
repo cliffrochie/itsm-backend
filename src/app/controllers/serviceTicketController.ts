@@ -2,7 +2,7 @@ import { Request, Response } from "express-serve-static-core";
 import { IServiceTicketBody, IServiceTicketFilter, IServiceTicketQueryParams, IServiceTicketResults } from "../@types/IServiceTicket";
 import sorter from "../utils/sorter";
 import ServiceTicket from "../models/ServiceTicket";
-import { IUserRequest } from "../@types/IUser";
+import { IUser, IUserRequest } from "../@types/IUser";
 import { Types } from "mongoose";
 import { capitalizeFirstLetter, generateTicketNo } from "../utils";
 import User from "../models/User";
@@ -571,9 +571,28 @@ export async function inputServiceRendered(req: LogRequest, res: Response) {
 }
 
 
+
+export async function getRequestedServiceTickets(req: IUserRequest, res: Response) {
+  try {
+    const currentUser = await User.findById(req.userId)
+    if(currentUser && currentUser.role !== 'user') {
+      res.status(403).json({ message: 'Unauthorized access' })
+      return
+    }
+
+    const serviceTickets = await ServiceTicket.find({ createdBy: req.userId, serviceStatus: {$ne: 'closed'} })
+      .populate('client').populate({path: 'serviceEngineer', select: '-password'}).sort({ createdAt: -1 })
+    res.status(200).json(serviceTickets)
+  }
+  catch(error) {
+    console.error(`Error [getRequestedServiceTickets]: ${error}`)
+    res.status(400).json(error)
+  }
+}
+
+
 export async function getAssignedServiceTickets(req: IUserRequest, res: Response) {
   try {
-
     const currentUser = await User.findById(req.userId).sort()
     if(currentUser && currentUser.role === 'user') {
       res.status(403).json({ message: 'Unauthorized access' })

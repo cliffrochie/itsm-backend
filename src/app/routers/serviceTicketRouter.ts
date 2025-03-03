@@ -13,6 +13,7 @@ import {
   escalateService,
   inputFindings,
   inputServiceRendered,
+  getRequestedServiceTickets,
   getAssignedServiceTickets,
   getAssignedClosedServiceTickets,
   getTotalServiceStatuses,
@@ -25,6 +26,7 @@ const router = Router()
 
 router.get('/', auth, getServiceTickets)
 router.get('/generate', auth, getGeneratedTicketNo)
+router.get('/requested', auth, getRequestedServiceTickets)
 router.get('/assigned', auth, getAssignedServiceTickets)
 router.get('/assigned-closed', auth, getAssignedClosedServiceTickets)
 router.get('/total-service-status', auth, getTotalServiceStatuses)
