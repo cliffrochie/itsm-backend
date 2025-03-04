@@ -4,7 +4,7 @@ import sorter from "../utils/sorter";
 import ServiceTicket from "../models/ServiceTicket";
 import { IUser, IUserRequest } from "../@types/IUser";
 import { Types } from "mongoose";
-import { capitalizeFirstLetter, generateTicketNo } from "../utils";
+import { capitalizeFirstLetter, generateTicketNo, generateTicket } from "../utils";
 import User from "../models/User";
 
 
@@ -167,7 +167,7 @@ export async function getServiceTicket(req: Request, res: Response) {
 export async function getGeneratedTicketNo(req: Request, res: Response) {
   try {
     // console.log('----')
-    const ticket = await generateTicketNo()
+    const ticket = await generateTicket('Printer', 'Consultation')
     // console.log(ticket)
     res.json({ ticket: ticket })
   }
@@ -181,7 +181,9 @@ export async function getGeneratedTicketNo(req: Request, res: Response) {
 export async function createServiceTicket(req: LogRequest, res: Response) {
   try {
     const body: IServiceTicketBody = req.body
-    const ticket = await generateTicketNo()
+    const ticket = await generateTicket(body.equipmentType, body.taskType)
+
+    console.log(ticket)
 
     const serviceTicket = new ServiceTicket({
       ticketNo: ticket,
@@ -838,6 +840,36 @@ export async function getTotalEquipmentTypes(req: Request<{}, {}, {}, IServiceTi
   }
   catch(error) {
     console.error(`Error [getTotalEquipmentTypes]: ${error}`)
+    res.status(400).json(error)
+  }
+}
+
+
+export async function getSearchedTicketNo(req: IUserRequest, res: Response) {
+  try {
+    const { v } = req.query
+    const filter: IServiceTicketFilter = {}
+
+    if(v) filter.ticketNo = { $regex: `^${v}`, $options: 'i' }
+
+    const serviceTicket = await ServiceTicket.find(filter)
+      .populate({
+        path: 'client',
+        populate: [
+          {path: 'office'},
+          {path: 'designation'},
+        ]
+      }).populate('serviceEngineer').sort({ createdAt: -1 })
+    
+    if(!serviceTicket) {
+      res.status(404).json({ message: '`Service Ticket` not found' })
+      return
+    }
+
+    res.json(serviceTicket)
+  }
+  catch(error) {
+    console.error(`Error [getSearchedTicketNo]: ${error}`)
     res.status(400).json(error)
   }
 }

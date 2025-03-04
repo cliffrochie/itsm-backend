@@ -5,7 +5,7 @@ import { IClient } from './IClient'
 
 export interface IServiceTicket extends Document {
   ticketNo: string
-  taskType: "incident" | "service request" | "asset request" | "maintenance"  | "consultation" | "accessibility"
+  taskType: "incident" | "service request" | "maintenance"  | "consultation" | "accessibility"
   title: string
   natureOfWork: string
   serialNo?: string
@@ -95,7 +95,7 @@ export interface IServiceTicketFilter {
 
 export interface IServiceTicketBody {
   ticketNo: string
-  taskType: "incident" | "service request" | "asset request" | "maintenance"  | "consultation" | "accessibility"
+  taskType: "incident" | "service request" | "maintenance"  | "consultation" | "accessibility"
   title: string
   natureOfWork: string
   serialNo?: string

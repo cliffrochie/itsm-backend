@@ -19,6 +19,7 @@ import {
   getTotalServiceStatuses,
   getTotalTaskTypes,
   getTotalEquipmentTypes,
+  getSearchedTicketNo
 } from "../controllers/serviceTicketController";
 
 
@@ -29,9 +30,10 @@ router.get('/generate', auth, getGeneratedTicketNo)
 router.get('/requested', auth, getRequestedServiceTickets)
 router.get('/assigned', auth, getAssignedServiceTickets)
 router.get('/assigned-closed', auth, getAssignedClosedServiceTickets)
+router.get('/search-ticket-no', auth, getSearchedTicketNo)
 router.get('/total-service-status', auth, getTotalServiceStatuses)
 router.get('/total-task-type', auth, getTotalTaskTypes)
-router.get('/total-equipment-type', getTotalEquipmentTypes)
+router.get('/total-equipment-type', auth, getTotalEquipmentTypes)
 router.get('/:serviceTicketId', auth, getServiceTicket)
 router.post('/', auth, serviceTicketLogger, createServiceTicket)
 router.put('/:serviceTicketId', auth, serviceTicketLogger, updateServiceTicket)

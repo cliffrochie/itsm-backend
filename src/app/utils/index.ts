@@ -1,5 +1,6 @@
 import { Types } from "mongoose"
 import ServiceTicket from "../models/ServiceTicket"
+import TicketCounter from "../models/TicketCounter"
 import ServiceTicketHistory from "../models/ServiceTicketHistory"
 import { Request } from "express"
 import { IUserRequest } from "../@types/IUser"
@@ -10,10 +11,6 @@ export async function generateTicketNo() {
   const now = new Date()
   const startOfDay = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate(), 0, 0, 0, 0));
   const endOfDay = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate(), 23, 59, 59, 999));
-  
-  
-  console.log('start: ', startOfDay)
-  console.log('end: ', endOfDay)
 
   let counter = ''
   const total = await ServiceTicket.find({ createdAt: { $gte: startOfDay, $lte: endOfDay } }).countDocuments()
@@ -37,6 +34,65 @@ export async function generateTicketNo() {
   console.log('formatted date: ', formattedDate)
   let result = 'ITSM-'+ formattedDate.replace(/-/g, '') +'-'+ counter
 
+
+  return result
+}
+
+
+
+export async function generateTicket(equipmentType: string, taskType: string) {
+  try {
+    const E = equipmentType.charAt(0).toUpperCase()
+    const T = taskType.charAt(0).toUpperCase()
+
+    const now = new Date()
+    const year = now.getFullYear()
+    const endOfDay = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate(), 23, 59, 59, 999));
+    const formattedDate = endOfDay.toISOString().slice(2, 10)
+
+    const ticketCounter = await TicketCounter.findOne({ year: year })
+
+    if(!ticketCounter) {
+      const newTicketCounter = new TicketCounter({ year: year, counter: 1 })
+      await newTicketCounter.save()
+      return `${E}${T}-${formattedDate.replace(/-/g, '')}-${formatCounter(newTicketCounter.counter ? newTicketCounter.counter : 0)}`
+    }
+
+    ticketCounter.counter += 1
+    const done = await ticketCounter.save()
+
+    if(done) {
+      const result = `${E}${T}-${formattedDate.replace(/-/g, '')}-${formatCounter(ticketCounter.counter)}`
+      return result
+    }
+    else {
+      return 0
+    }
+  }
+  catch(error) {
+    console.error(error)
+  }
+}
+
+
+function formatCounter(counter: number) {
+  let result = ''
+
+  if(counter < 9) {
+    result = `000${counter}`
+  }
+  else if(counter < 99) {
+    result = `00${counter}`
+  }
+  else if(counter < 999) {
+    result = `0${counter}`
+  }
+  else if(counter < 9999) {
+    result = `${counter}`
+  }
+  else {
+    result = (counter).toString()
+  }
 
   return result
 }
@@ -101,16 +157,6 @@ export function changeDateFormatMMDDYYYY(date: Date) {
   const month = date.getMonth() < 10 ? `0${date.getMonth() + 1}` : (date.getMonth() + 1).toString()
   const day = date.getDate() < 10 ? `0${date.getDate()}` : date.getDate().toString()
   return month +'/'+ day +'/'+ year
-}
-
-
-export function generateTicket() {
-  const currentDate = new Date()
-  const year = currentDate.getFullYear().toString().substring(2)
-  const month = (currentDate.getMonth() + 1) < 10 ? `0${(currentDate.getMonth() + 1)}` : (currentDate.getMonth() + 1).toString()
-  const date =  currentDate.getDate() < 10 ? `0${currentDate.getDate()}` : currentDate.getDate().toString()
-  const ticket = year + month + date + generateShortUUID(4).toUpperCase()
-  return ticket
 }
 
 
