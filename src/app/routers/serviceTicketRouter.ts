@@ -19,7 +19,8 @@ import {
   getTotalServiceStatuses,
   getTotalTaskTypes,
   getTotalEquipmentTypes,
-  getSearchedTicketNo
+  getSearchedTicketNo,
+  setServiceRating
 } from "../controllers/serviceTicketController";
 
 
@@ -36,6 +37,7 @@ router.get('/total-task-type', auth, getTotalTaskTypes)
 router.get('/total-equipment-type', auth, getTotalEquipmentTypes)
 router.get('/:serviceTicketId', auth, getServiceTicket)
 router.post('/', auth, serviceTicketLogger, createServiceTicket)
+router.post('/set-rating', auth, serviceTicketLogger, setServiceRating)
 router.put('/:serviceTicketId', auth, serviceTicketLogger, updateServiceTicket)
 router.patch('/:serviceTicketId/input-findings', auth, serviceTicketLogger, inputFindings)
 router.patch('/:serviceTicketId/service-rendered', auth, serviceTicketLogger, inputServiceRendered)

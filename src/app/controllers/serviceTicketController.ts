@@ -1,5 +1,5 @@
 import { Request, Response } from "express-serve-static-core";
-import { IServiceTicketBody, IServiceTicketFilter, IServiceTicketQueryParams, IServiceTicketResults } from "../@types/IServiceTicket";
+import { IServiceRating, IServiceTicketBody, IServiceTicketFilter, IServiceTicketQueryParams, IServiceTicketResults } from "../@types/IServiceTicket";
 import sorter from "../utils/sorter";
 import ServiceTicket from "../models/ServiceTicket";
 import { IUser, IUserRequest } from "../@types/IUser";
@@ -29,6 +29,8 @@ export async function getServiceTickets(req: Request<{}, {}, {}, IServiceTicketQ
       priority,
       remarks,
       adminRemarks,
+      rating,
+      ratingComment,
       sort,
       includes,
       noPage,
@@ -53,6 +55,8 @@ export async function getServiceTickets(req: Request<{}, {}, {}, IServiceTicketQ
     if(priority) filter.priority = { $regex: priority + '.*', $options: 'i' }
     if(remarks) filter.remarks = { $regex: remarks + '.*', $options: 'i' }
     if(adminRemarks) filter.adminRemarks = { $regex: adminRemarks + '.*', $options: 'i' }
+    if(rating) filter.rating = { $regex: rating + '.*', $options: 'i' }
+    if(ratingComment) filter.ratingComment = { $regex: ratingComment + '.*', $options: 'i' }
 
     const clientFilter = client
       ? { $or: [{firstName: {$regex: client, $options: 'i'}}, {lastName: {$regex: client, $options: 'i'}}] }
@@ -87,6 +91,7 @@ export async function getServiceTickets(req: Request<{}, {}, {}, IServiceTicketQ
           path: 'client',
           match: clientFilter
         })
+        .populate('createdBy')
         .sort(sortResult)
         .skip(skip)
         .limit(limit)
@@ -148,7 +153,7 @@ export async function getServiceTickets(req: Request<{}, {}, {}, IServiceTicketQ
 export async function getServiceTicket(req: Request, res: Response) {
   try {
     const serviceTicketId = req.params.serviceTicketId
-    const serviceTicket = await ServiceTicket.findById(serviceTicketId).populate('client').populate('serviceEngineer')
+    const serviceTicket = await ServiceTicket.findById(serviceTicketId).populate('client').populate('serviceEngineer').populate('createdBy')
     
     if(!serviceTicket) {
       res.status(404).json({ message: '`ServiceTicket` not found' })
@@ -870,6 +875,33 @@ export async function getSearchedTicketNo(req: IUserRequest, res: Response) {
   }
   catch(error) {
     console.error(`Error [getSearchedTicketNo]: ${error}`)
+    res.status(400).json(error)
+  }
+}
+
+
+export async function setServiceRating(req: LogRequest, res: Response) {
+  try {
+    const { serviceTicketId, rating, ratingComment }: IServiceRating = req.body
+    const serviceTicket = await ServiceTicket.findById(serviceTicketId)
+    if(!serviceTicket) {
+      res.status(404).json({ message: '`Service Ticket` not found' })
+      return
+    }
+
+    serviceTicket.rating = rating
+    serviceTicket.ratingComment = ratingComment
+    const done = await serviceTicket.save()
+    if(done) {
+      req.logDetails = `Ticket owner provided a feedback to the service(s) with a rating of ${rating} stars and a feedback/comment: "${ratingComment}."`
+      res.status(200).json(serviceTicket)
+    }
+    else {
+      res.status(400).json({ message: 'Something went wrong.' })
+    }
+  }
+  catch(error) {
+    console.error(`Error [setServiceRating]: ${error}`)
     res.status(400).json(error)
   }
 }

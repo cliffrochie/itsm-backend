@@ -19,6 +19,8 @@ export interface IServiceTicket extends Document {
   priority: "" | "low" | "medium" | "high"
   remarks?: string
   adminRemarks?: string
+  rating?: number
+  ratingComment?: string
   serviceEngineer?: Types.ObjectId | null
   client?: Types.ObjectId | null
   createdBy?: Types.ObjectId | null
@@ -43,6 +45,8 @@ export interface IServiceTicketQueryParams {
   priority?: string
   remarks?: string
   adminRemarks?: string
+  rating?: number
+  ratingComment?: string
   sort?: string
   includes?: string
   page?: number
@@ -91,6 +95,8 @@ export interface IServiceTicketFilter {
   priority?: object
   remarks?: object
   adminRemarks?: object
+  rating?: object
+  ratingComment?: object
 }
 
 export interface IServiceTicketBody {
@@ -109,6 +115,8 @@ export interface IServiceTicketBody {
   priority: "" | "low" | "medium" | "high"
   remarks?: string
   adminRemarks?: string
+  rating?: number
+  ratingComment?: string
   serviceEngineer?: string | null
   client?: string | null
   createdBy?: string
@@ -129,6 +137,12 @@ export interface IUpdateServiceStatus {
   serviceStatus: string
   date?: string
   time?: string
+}
+
+export interface IServiceRating {
+  serviceTicketId: Types.ObjectId
+  rating: number
+  ratingComment: string
 }
 
 
