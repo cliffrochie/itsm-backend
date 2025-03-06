@@ -1,12 +1,12 @@
 import { Request, Response } from "express-serve-static-core";
 import { IServiceRating, IServiceTicketBody, IServiceTicketFilter, IServiceTicketQueryParams, IServiceTicketResults } from "../@types/IServiceTicket";
 import sorter from "../utils/sorter";
-import ServiceTicket from "../models/ServiceTicket";
 import { IUser, IUserRequest } from "../@types/IUser";
 import { Types } from "mongoose";
 import { capitalizeFirstLetter, generateTicketNo, generateTicket } from "../utils";
 import User from "../models/User";
-
+import ServiceTicket from "../models/ServiceTicket";
+import { createNotification } from "../utils/notification";
 
 interface LogRequest extends IUserRequest {
   serviceTicketId?: string
@@ -188,7 +188,7 @@ export async function createServiceTicket(req: LogRequest, res: Response) {
     const body: IServiceTicketBody = req.body
     const ticket = await generateTicket(body.equipmentType, body.taskType)
 
-    console.log(ticket)
+    const adminUsers = await User.find({ role: 'admin' })
 
     const serviceTicket = new ServiceTicket({
       ticketNo: ticket,
@@ -207,11 +207,26 @@ export async function createServiceTicket(req: LogRequest, res: Response) {
       client: body.client ? new Types.ObjectId(body.client) : undefined,
       createdBy: req.userId ? new Types.ObjectId(req.userId) : undefined,
     })
-    await serviceTicket.save()
+
+    const authenticatedUser = await User.findById(req.userId)
+    if(!authenticatedUser) {
+      res.status(404).json({ message: '`User` not found'})
+      return
+    }
+
+    const result = await serviceTicket.save()
+    if(!result) {
+      res.status(400).json({ message: 'Error [createServiceTicket]: Something went wrong'})
+      return
+    }
+
+    adminUsers.forEach((admin) => {
+      const message = `A new service request with a ticket number ${serviceTicket.ticketNo} is being created.`
+      createNotification(admin._id, serviceTicket.ticketNo, message)
+    })
 
     req.serviceTicketId = String(serviceTicket._id)
-    req.logDetails = `${serviceTicket.ticketNo} is created with ${serviceTicket.priority ? serviceTicket.priority : 'no' } priority level.`
-
+    req.logDetails = `${serviceTicket.ticketNo} is created by ${capitalizeFirstLetter(authenticatedUser.firstName)} ${capitalizeFirstLetter(authenticatedUser.lastName)}.`
     res.status(201).json(serviceTicket)
   }
   catch(error) {
@@ -374,7 +389,18 @@ export async function updateServiceStatus(req: LogRequest, res: Response) {
       req.logDetails = `Service status is updated from "${serviceTicket.serviceStatus}" to "${body.serviceStatus}." by ${userFullName}`
       serviceTicket.serviceStatus = body.serviceStatus
       serviceTicket.updatedBy = req.userId ? new Types.ObjectId(req.userId) : undefined
-      serviceTicket.save()
+      const done = await serviceTicket.save()
+
+      if(!done) {
+        res.status(400).json({ message: 'Error [updateServiceStatus]: Something went wrong.'})
+        return
+      }
+
+      let requestor = ''
+      if(serviceTicket.createdBy) requestor = serviceTicket.createdBy.toString()
+      const message = `Service status of ${serviceTicket.ticketNo} is updated to ${serviceTicket.serviceStatus}.`
+      await createNotification(requestor, serviceTicket.ticketNo, message)
+
       res.status(200).json(serviceTicket)
       return
     }
@@ -429,7 +455,21 @@ export async function assignServiceEngineer(req: LogRequest, res: Response) {
       serviceTicket.priority = body.priority
       serviceTicket.adminRemarks = body.adminRemarks
       serviceTicket.updatedBy = req.userId ? new Types.ObjectId(req.userId) : undefined
-      serviceTicket.save()
+      const done = await serviceTicket.save()
+
+      if(!done) {
+        res.status(400).json({ message: 'Error [assignServiceEngineer]: Something went wrong.'})
+        return
+      }
+
+      let requestor = ''
+      if(serviceTicket.createdBy) requestor = serviceTicket.createdBy.toString()
+      const message = `A service engineer is assigned to ${serviceTicket.ticketNo}.`
+      await createNotification(requestor, serviceTicket.ticketNo, message)
+
+      const message2 = `You are assigned as service engineer for ${serviceTicket.ticketNo}.`
+      await createNotification(serviceTicket.serviceEngineer.toString(), serviceTicket.ticketNo, message2)
+
       res.status(200).json(serviceTicket)
       return
     }
@@ -493,7 +533,24 @@ export async function escalateService(req: LogRequest, res: Response) {
       serviceTicket.remarks = body.remarks
       serviceTicket.adminRemarks = body.adminRemarks
       serviceTicket.updatedBy = req.userId ? new Types.ObjectId(req.userId) : undefined
-      serviceTicket.save()
+      const done = await serviceTicket.save()
+
+      if(!done) {
+        res.status(400).json({ message: 'Error [escalateService]: Something went wrong.'})
+        return
+      }
+
+      let requestor = ''
+      if(serviceTicket.createdBy) requestor = serviceTicket.createdBy.toString()
+      const message = `${serviceTicket.ticketNo} has been escalated to other service engineer.`
+      await createNotification(requestor, serviceTicket.ticketNo, message)
+
+      const message1 = `${serviceTicket.ticketNo} has been escalated to you.`
+      await createNotification(newServiceEngineer._id.toString(), serviceTicket.ticketNo, message1)
+
+      const message2 = `You have been removed as service engineer for ${serviceTicket.ticketNo} and escalated to another service engineer.`
+      await createNotification(oldServiceEngineer._id.toString(), serviceTicket.ticketNo, message2)
+
       res.status(200).json(serviceTicket)
       return
     }
@@ -530,7 +587,18 @@ export async function inputFindings(req: LogRequest, res: Response) {
 
     serviceTicket.defectsFound = body.findings
     serviceTicket.updatedBy = req.userId ? new Types.ObjectId(req.userId) : undefined
-    serviceTicket.save()
+    const done = await serviceTicket.save()
+
+    if(!done) {
+      res.status(400).json({ message: 'Error [inputFindings]: Something went wrong.'})
+      return
+    }
+
+    let requestor = ''
+    if(serviceTicket.createdBy) requestor = serviceTicket.createdBy.toString()
+    const message = `Service engineer for ${serviceTicket.ticketNo} had set its findings.`
+    await createNotification(requestor, serviceTicket.ticketNo, message)
+
     req.serviceTicketId = serviceTicket._id as string
     req.logDetails = `Diagnosis / findings is set to "${serviceTicket.defectsFound}" by ${serviceEngineerName}`
     res.status(200).json(serviceTicket)
@@ -565,7 +633,18 @@ export async function inputServiceRendered(req: LogRequest, res: Response) {
 
     serviceTicket.serviceRendered = body.serviceRendered
     serviceTicket.updatedBy = req.userId ? new Types.ObjectId(req.userId) : undefined
-    serviceTicket.save()
+    const done = await serviceTicket.save()
+
+    if(!done) {
+      res.status(400).json({ message: 'Error [inputFindings]: Something went wrong.'})
+      return
+    }
+
+    let requestor = ''
+    if(serviceTicket.createdBy) requestor = serviceTicket.createdBy.toString()
+    const message = `Service engineer for ${serviceTicket.ticketNo} has rendered its service/action taken.`
+    await createNotification(requestor, serviceTicket.ticketNo, message)
+
     req.serviceTicketId = serviceTicket._id as string
     req.logDetails = `Service rendered / action taken is set to "${serviceTicket.serviceRendered}" by ${serviceEngineerName}.`
     res.status(200).json(serviceTicket)

@@ -1,6 +1,6 @@
 import { Router } from "express";
-import auth from "../middlewares/auth";
-import serviceTicketLogger from "../middlewares/service-ticket-history";
+import authMiddleware from "../middlewares/auth";
+import serviceTicketLoggerMiddleware from "../middlewares/service-ticket-history";
 import { 
   createServiceTicket, 
   getGeneratedTicketNo, 
@@ -26,25 +26,25 @@ import {
 
 const router = Router()
 
-router.get('/', auth, getServiceTickets)
-router.get('/generate', auth, getGeneratedTicketNo)
-router.get('/requested', auth, getRequestedServiceTickets)
-router.get('/assigned', auth, getAssignedServiceTickets)
-router.get('/assigned-closed', auth, getAssignedClosedServiceTickets)
-router.get('/search-ticket-no', auth, getSearchedTicketNo)
-router.get('/total-service-status', auth, getTotalServiceStatuses)
-router.get('/total-task-type', auth, getTotalTaskTypes)
-router.get('/total-equipment-type', auth, getTotalEquipmentTypes)
-router.get('/:serviceTicketId', auth, getServiceTicket)
-router.post('/', auth, serviceTicketLogger, createServiceTicket)
-router.post('/set-rating', auth, serviceTicketLogger, setServiceRating)
-router.put('/:serviceTicketId', auth, serviceTicketLogger, updateServiceTicket)
-router.patch('/:serviceTicketId/input-findings', auth, serviceTicketLogger, inputFindings)
-router.patch('/:serviceTicketId/service-rendered', auth, serviceTicketLogger, inputServiceRendered)
-router.patch('/:serviceTicketId/update-service-status', auth, serviceTicketLogger, updateServiceStatus)
-router.patch('/:serviceTicketId/assign-service-engineer', auth, serviceTicketLogger, assignServiceEngineer)
-router.patch('/:serviceTicketId/escalate-service', auth, serviceTicketLogger, escalateService)
-router.delete('/:serviceTicketId', auth, removeServiceTicket)
+router.get('/', authMiddleware, getServiceTickets)
+router.get('/generate', authMiddleware, getGeneratedTicketNo)
+router.get('/requested', authMiddleware, getRequestedServiceTickets)
+router.get('/assigned', authMiddleware, getAssignedServiceTickets)
+router.get('/assigned-closed', authMiddleware, getAssignedClosedServiceTickets)
+router.get('/search-ticket-no', authMiddleware, getSearchedTicketNo)
+router.get('/total-service-status', authMiddleware, getTotalServiceStatuses)
+router.get('/total-task-type', authMiddleware, getTotalTaskTypes)
+router.get('/total-equipment-type', authMiddleware, getTotalEquipmentTypes)
+router.get('/:serviceTicketId', authMiddleware, getServiceTicket)
+router.post('/', authMiddleware, serviceTicketLoggerMiddleware, createServiceTicket)
+router.post('/set-rating', authMiddleware, serviceTicketLoggerMiddleware, setServiceRating)
+router.put('/:serviceTicketId', authMiddleware, serviceTicketLoggerMiddleware, updateServiceTicket)
+router.patch('/:serviceTicketId/input-findings', authMiddleware, serviceTicketLoggerMiddleware, inputFindings)
+router.patch('/:serviceTicketId/service-rendered', authMiddleware, serviceTicketLoggerMiddleware, inputServiceRendered)
+router.patch('/:serviceTicketId/update-service-status', authMiddleware, serviceTicketLoggerMiddleware, updateServiceStatus)
+router.patch('/:serviceTicketId/assign-service-engineer', authMiddleware, serviceTicketLoggerMiddleware, assignServiceEngineer)
+router.patch('/:serviceTicketId/escalate-service', authMiddleware, serviceTicketLoggerMiddleware, escalateService)
+router.delete('/:serviceTicketId', authMiddleware, removeServiceTicket)
 
 
 export default router

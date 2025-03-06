@@ -11,7 +11,7 @@ interface LogRequest extends IUserRequest {
   logDetails?: string
 }
 
-export default async function serviceTicketLogger(req: LogRequest, res: Response, next: NextFunction) {
+export default async function serviceTicketLoggerMiddleware(req: LogRequest, res: Response, next: NextFunction) {
   res.on('finish', async () => {
     try { 
       if(req.logDetails && req.serviceTicketId) {
@@ -31,7 +31,7 @@ export default async function serviceTicketLogger(req: LogRequest, res: Response
       }
     }
     catch(error) {
-      console.error(`Error [serviceTicketLogger]: ${error}`)
+      console.error(`Error [serviceTicketLoggerMiddleware]: ${error}`)
       res.status(403).json({ message: `Something went wrong: ${error}`})
       return
     }

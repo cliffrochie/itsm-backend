@@ -12,6 +12,7 @@ import clientRouter from './app/routers/clientRouter'
 import serviceTicketRouter from './app/routers/serviceTicketRouter'
 import serviceTicketHistoryRouter from './app/routers/serviceTicketHistoryRouter'
 import ticketCounterRouter from './app/routers/ticketCounterRouter'
+import notificationRouter from './app/routers/notificationRouter'
 import logMiddleware from './app/middlewares/action-log'
 
 
@@ -21,7 +22,7 @@ export function createApp() {
 
   const app: Express = express()
   app.use(cors({ 
-    origin: 'http://localhost:3500',
+    origin: 'http://192.168.2.254:3500',
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'],
     allowedHeaders: ['Content-Type', 'Authorization'], 
@@ -36,6 +37,7 @@ export function createApp() {
   app.use('/api/service-tickets', serviceTicketRouter)
   app.use('/api/service-ticket-histories', serviceTicketHistoryRouter)
   app.use('/api/ticket-counters', ticketCounterRouter)
+  app.use('/api/notifications', notificationRouter)
 
   app.get('/', async (req: Request, res: Response) => {
     res.json({ message: 'hello it service ticket' })

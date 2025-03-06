@@ -19,7 +19,7 @@ export interface IServiceTicket extends Document {
   priority: "" | "low" | "medium" | "high"
   remarks?: string
   adminRemarks?: string
-  rating?: number
+  rating?:  "" | "n" | "s" | "vs" | "d" | "vd"
   ratingComment?: string
   serviceEngineer?: Types.ObjectId | null
   client?: Types.ObjectId | null
@@ -45,7 +45,7 @@ export interface IServiceTicketQueryParams {
   priority?: string
   remarks?: string
   adminRemarks?: string
-  rating?: number
+  rating?: "" | "n" | "s" | "vs" | "d" | "vd"
   ratingComment?: string
   sort?: string
   includes?: string
@@ -115,7 +115,7 @@ export interface IServiceTicketBody {
   priority: "" | "low" | "medium" | "high"
   remarks?: string
   adminRemarks?: string
-  rating?: number
+  rating?: "" | "n" | "s" | "vs" | "d" | "vd"
   ratingComment?: string
   serviceEngineer?: string | null
   client?: string | null
@@ -141,7 +141,7 @@ export interface IUpdateServiceStatus {
 
 export interface IServiceRating {
   serviceTicketId: Types.ObjectId
-  rating: number
+  rating: "" | "n" | "s" | "vs" | "d" | "vd"
   ratingComment: string
 }
 
