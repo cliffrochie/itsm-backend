@@ -222,7 +222,8 @@ export async function createServiceTicket(req: LogRequest, res: Response) {
 
     adminUsers.forEach((admin) => {
       const message = `A new service request with a ticket number ${serviceTicket.ticketNo} is being created.`
-      createNotification(admin._id, serviceTicket.ticketNo, message)
+      const serviceTicketId = serviceTicket ? serviceTicket._id : ''
+      createNotification(admin._id, serviceTicketId.toString(), serviceTicket.ticketNo, message)
     })
 
     req.serviceTicketId = String(serviceTicket._id)
@@ -386,7 +387,7 @@ export async function updateServiceStatus(req: LogRequest, res: Response) {
 
     if(serviceTicket.serviceStatus !== body.serviceStatus) {
       req.serviceTicketId = serviceTicketId
-      req.logDetails = `Service status is updated from "${serviceTicket.serviceStatus}" to "${body.serviceStatus}." by ${userFullName}`
+      req.logDetails = `Service status is updated from "${serviceTicket.serviceStatus}" to "${body.serviceStatus}" by ${userFullName}.`
       serviceTicket.serviceStatus = body.serviceStatus
       serviceTicket.updatedBy = req.userId ? new Types.ObjectId(req.userId) : undefined
       const done = await serviceTicket.save()
@@ -398,8 +399,36 @@ export async function updateServiceStatus(req: LogRequest, res: Response) {
 
       let requestor = ''
       if(serviceTicket.createdBy) requestor = serviceTicket.createdBy.toString()
-      const message = `Service status of ${serviceTicket.ticketNo} is updated to ${serviceTicket.serviceStatus}.`
-      await createNotification(requestor, serviceTicket.ticketNo, message)
+      let message = `Service status for ${serviceTicket.ticketNo} is updated to "${serviceTicket.serviceStatus}".`
+      
+      switch(serviceTicket.serviceStatus) {
+        case 'open':
+          message = `${serviceTicket.ticketNo} is now open.`
+          break
+        case 'in progress':
+          message = `Service engineer is now working for ${serviceTicket.ticketNo}.`
+          break
+        case 'on hold':
+          message = `${serviceTicket.ticketNo} has been put on hold.`
+          break
+        case 'escalated':
+          message = `${serviceTicket.ticketNo} has been escalated to another service engineer.`
+          break
+        case 'canceled':
+          message = `${serviceTicket.ticketNo} has been canceled by the administrator.`
+          break
+        case 'reopened':
+          message = `${serviceTicket.ticketNo} has been re-opened by the administrator.`
+          break
+        case 'resolved':
+          message = `The service engineer has completed its task for ${serviceTicket.ticketNo}, please provide a feedback to his/her performance.`
+          break
+        case 'resolved':
+          message = `Ticket ${serviceTicket.ticketNo} is now closed by ${userFullName}.`
+          break
+      }
+
+      await createNotification(requestor, serviceTicketId, serviceTicket.ticketNo, message)
 
       res.status(200).json(serviceTicket)
       return
@@ -465,10 +494,10 @@ export async function assignServiceEngineer(req: LogRequest, res: Response) {
       let requestor = ''
       if(serviceTicket.createdBy) requestor = serviceTicket.createdBy.toString()
       const message = `A service engineer is assigned to ${serviceTicket.ticketNo}.`
-      await createNotification(requestor, serviceTicket.ticketNo, message)
+      await createNotification(requestor, serviceTicketId, serviceTicket.ticketNo, message)
 
       const message2 = `You are assigned as service engineer for ${serviceTicket.ticketNo}.`
-      await createNotification(serviceTicket.serviceEngineer.toString(), serviceTicket.ticketNo, message2)
+      await createNotification(serviceTicket.serviceEngineer.toString(), serviceTicketId, serviceTicket.ticketNo, message2)
 
       res.status(200).json(serviceTicket)
       return
@@ -543,13 +572,13 @@ export async function escalateService(req: LogRequest, res: Response) {
       let requestor = ''
       if(serviceTicket.createdBy) requestor = serviceTicket.createdBy.toString()
       const message = `${serviceTicket.ticketNo} has been escalated to other service engineer.`
-      await createNotification(requestor, serviceTicket.ticketNo, message)
+      await createNotification(requestor, serviceTicketId, serviceTicket.ticketNo, message)
 
       const message1 = `${serviceTicket.ticketNo} has been escalated to you.`
-      await createNotification(newServiceEngineer._id.toString(), serviceTicket.ticketNo, message1)
+      await createNotification(newServiceEngineer._id.toString(), serviceTicketId, serviceTicket.ticketNo, message1)
 
       const message2 = `You have been removed as service engineer for ${serviceTicket.ticketNo} and escalated to another service engineer.`
-      await createNotification(oldServiceEngineer._id.toString(), serviceTicket.ticketNo, message2)
+      await createNotification(oldServiceEngineer._id.toString(), serviceTicketId, serviceTicket.ticketNo, message2)
 
       res.status(200).json(serviceTicket)
       return
@@ -597,9 +626,9 @@ export async function inputFindings(req: LogRequest, res: Response) {
     let requestor = ''
     if(serviceTicket.createdBy) requestor = serviceTicket.createdBy.toString()
     const message = `Service engineer for ${serviceTicket.ticketNo} had set its findings.`
-    await createNotification(requestor, serviceTicket.ticketNo, message)
+    await createNotification(requestor, serviceTicketId, serviceTicket.ticketNo, message)
 
-    req.serviceTicketId = serviceTicket._id as string
+    req.serviceTicketId = serviceTicketId
     req.logDetails = `Diagnosis / findings is set to "${serviceTicket.defectsFound}" by ${serviceEngineerName}`
     res.status(200).json(serviceTicket)
     return
@@ -643,9 +672,9 @@ export async function inputServiceRendered(req: LogRequest, res: Response) {
     let requestor = ''
     if(serviceTicket.createdBy) requestor = serviceTicket.createdBy.toString()
     const message = `Service engineer for ${serviceTicket.ticketNo} has rendered its service/action taken.`
-    await createNotification(requestor, serviceTicket.ticketNo, message)
+    await createNotification(requestor, serviceTicketId, serviceTicket.ticketNo, message)
 
-    req.serviceTicketId = serviceTicket._id as string
+    req.serviceTicketId = serviceTicketId
     req.logDetails = `Service rendered / action taken is set to "${serviceTicket.serviceRendered}" by ${serviceEngineerName}.`
     res.status(200).json(serviceTicket)
     return
@@ -961,8 +990,8 @@ export async function getSearchedTicketNo(req: IUserRequest, res: Response) {
 
 export async function setServiceRating(req: LogRequest, res: Response) {
   try {
-    const { serviceTicketId, rating, ratingComment }: IServiceRating = req.body
-    const serviceTicket = await ServiceTicket.findById(serviceTicketId)
+    const { rating, ratingComment }: IServiceRating = req.body
+    const serviceTicket = await ServiceTicket.findById(req.params.serviceTicketId)
     if(!serviceTicket) {
       res.status(404).json({ message: '`Service Ticket` not found' })
       return
@@ -972,6 +1001,13 @@ export async function setServiceRating(req: LogRequest, res: Response) {
     serviceTicket.ratingComment = ratingComment
     const done = await serviceTicket.save()
     if(done) {
+      const message = `Ticket owner provided a rating/feedback to your service performance.`
+      await createNotification(
+        serviceTicket.serviceEngineer ? serviceTicket.serviceEngineer.toString() : '', 
+        serviceTicket._id ? serviceTicket._id.toString() : '', 
+        serviceTicket.ticketNo, 
+        message
+      )
       req.logDetails = `Ticket owner provided a feedback to the service(s) with a rating of ${rating} stars and a feedback/comment: "${ratingComment}."`
       res.status(200).json(serviceTicket)
     }

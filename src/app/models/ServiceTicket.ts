@@ -17,7 +17,7 @@ const ServiceTicketSchema = new Schema<IServiceTicket>({
   remarks: { type: String, default: null },
   adminRemarks: { type: String, default: null },
   rating: { type: String, default: "" },
-  ratingComment: { type: String, default: null },
+  ratingComment: { type: String, default: "" },
   serviceEngineer: { type: mongoose.Schema.Types.ObjectId, ref: 'User', default: null },
   client: { type: mongoose.Schema.Types.ObjectId, ref: 'Client', default: null },
   createdBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User', default: null },

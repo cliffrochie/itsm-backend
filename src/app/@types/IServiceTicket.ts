@@ -4,6 +4,7 @@ import { IClient } from './IClient'
 
 
 export interface IServiceTicket extends Document {
+  _id: Types.ObjectId
   ticketNo: string
   taskType: "incident" | "service request" | "maintenance"  | "consultation" | "accessibility"
   title: string

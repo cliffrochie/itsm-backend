@@ -1,10 +1,11 @@
 import Notification from "../models/Notification"
 
 
-export async function createNotification(userId: string, ticketNo: string, message: string) {
+export async function createNotification(userId: string, serviceTicketId: string, ticketNo: string, message: string) {
   try {
     const data = new Notification({
       user: userId,
+      serviceTicket: serviceTicketId,
       message: message,
       ticketNo: ticketNo,
       isRead: false

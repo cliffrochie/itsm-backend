@@ -12,14 +12,14 @@ import Notification from "../models/Notification";
 
 export async function getNotifications(req: Request<{}, {}, {}, INotificationQueryParams>, res: Response) {
   try {
-    const { userId, isRead, noPage } = req.query
+    const { userId, serviceTicketId, isRead, noPage } = req.query
     const filter: INotificationFilter = {}
     const sortResult = await sorter(req.query.sort)
     
-    const user = new Types.ObjectId(userId)
-    console.log(`${userId} : ${user}`)
+    const serviceTicket = new Types.ObjectId(serviceTicketId)
 
-    filter.user = user
+    if(userId) filter.user = new Types.ObjectId(userId)
+    if(serviceTicketId) filter.serviceTicket = new Types.ObjectId(serviceTicketId)
     if(isRead) filter.isRead = isRead
 
     const page: number = Number(req.query.page)  || 1

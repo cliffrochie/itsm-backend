@@ -4,6 +4,7 @@ import { Request } from 'express'
 
 export interface INotification extends Document {
   user: Types.ObjectId
+  serviceTicket: Types.ObjectId
   ticketNo: string
   message: string
   isRead: boolean
@@ -16,6 +17,7 @@ export interface INotification extends Document {
 
 export interface INotificationQueryParams {
   userId?: string
+  serviceTicketId?: string
   ticketNo?: string
   message?: string
   isRead?: boolean
@@ -28,6 +30,7 @@ export interface INotificationQueryParams {
 
 export interface INotificationFilter {
   user?: Types.ObjectId
+  serviceTicket?: Types.ObjectId
   ticketNo?: object
   isRead?: boolean
 }

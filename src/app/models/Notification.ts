@@ -4,6 +4,7 @@ import { INotification } from '../@types/INotification'
 
 const NotificationSchema = new Schema<INotification>({
   user: { type: mongoose.Schema.Types.ObjectId, ref: 'User', default: null },
+  serviceTicket: { type: mongoose.Schema.Types.ObjectId, ref: 'ServiceTicket', default: null },
   ticketNo: { type: String, required: true },
   message: { type: String, required: true },
   isRead: { type: Boolean, default: false },
