@@ -10,6 +10,9 @@ export async function userSignIn(req: Request, res: Response) {
   try {
     const { username, password } = req.body
     const user = await User.findOne({ username })
+
+    console.log(`User: ${user}`)
+
     if(!user) {
       res.status(404).json({ message: 'Invalid credentials!' })
       return
@@ -18,7 +21,12 @@ export async function userSignIn(req: Request, res: Response) {
       res.status(404).json({ message: 'Invalid credentials!!' })
       return
     }
-    const token = jwt.sign({userId: user._id, username: user.username, role: user.role}, process.env.SECRET_KEY || 'notsosecret', {expiresIn: '24h'})
+    const token = jwt.sign({
+      userId: user._id, 
+      username: user.username, 
+      role: user.role, 
+      isActive: user.isActive
+    }, process.env.SECRET_KEY || 'notsosecret', {expiresIn: '24h'})
 
     res.cookie('token', token, {
       httpOnly: true,             // Prevent JavaScript access
