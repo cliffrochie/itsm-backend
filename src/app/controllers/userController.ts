@@ -4,6 +4,7 @@ import User from "../models/User";
 import sorter from '../utils/sorter';
 import { IUser, IUserFilter, IUserRequest, IUserQueryParams, IUserResults } from '../@types/IUser';
 import Client from '../models/Client';
+import { Types } from 'mongoose';
 
 
 export async function userSignIn(req: Request, res: Response) {
@@ -54,7 +55,8 @@ export async function userSignUp(req: Request, res: Response) {
         middleName: result.middleName,
         lastName: result.lastName,
         contactNo: result.contactNo,
-        email: result.email
+        email: result.email,
+        user: user._id
       })
       client.save()
     }
@@ -179,6 +181,25 @@ export async function getUser(req: Request, res: Response) {
     res.status(400).json(error)
   }
 }
+
+
+
+export async function getClientDetails(req: IUserRequest, res: Response) {
+  try {
+    const clientDetails = await Client.find({ user: new Types.ObjectId(req.userId) })
+    if(!clientDetails) {
+      res.status(404).json({message: '`Client Details` not found.'})
+      return
+    }
+
+    res.json(clientDetails[0])
+  }
+  catch(error) {
+    console.error(`Error [getClientDetails]: ${error}`)
+    res.status(400).json(error)
+  }
+}
+
 
 export async function updateUser(req: Request, res: Response) {
   try {

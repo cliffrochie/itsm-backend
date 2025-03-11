@@ -1,12 +1,22 @@
 import { Router } from "express";
 import auth from "../middlewares/auth";
-import { getCurrentUser, getUser, getUsers, updateUser, userSignIn, userSignUp, userSignOut, getTotalUserRoles } from "../controllers/userController";
+import { 
+  getCurrentUser, 
+  getUser, 
+  getUsers, 
+  updateUser, 
+  userSignIn, 
+  userSignUp, 
+  userSignOut, 
+  getTotalUserRoles, 
+  getClientDetails } from "../controllers/userController";
 
 
 const router = Router()
 
 router.get('/', auth, getUsers)
 router.get('/current-user', auth, getCurrentUser)
+router.get('/client-details', auth, getClientDetails)
 router.get('/total-user-role', auth, getTotalUserRoles)
 router.get('/:id', auth, getUser)
 router.put('/:id', auth, updateUser)
