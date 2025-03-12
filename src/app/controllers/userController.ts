@@ -172,7 +172,6 @@ export async function getUsers(req: Request<{}, {}, {}, IUserQueryParams>, res: 
 export async function getUser(req: Request, res: Response) {
   try {
     const user: IUser = await User.findById(req.params.id).select('-password')
-
     if(!user) { res.status(404).json({messsage: 'User not found'}); return }
     res.json(user)
   }
@@ -223,7 +222,28 @@ export async function updateUser(req: Request, res: Response) {
     res.json(user)
   }
   catch(error) {
-    console.error(`Error [getUserById]: ${error}`)
+    console.error(`Error [updateUser]: ${error}`)
+    res.status(400).json(error)
+  }
+}
+
+
+export async function changePassword(req: Request, res: Response) {
+  try {
+    const user: IUser = await User.findById(req.params.id).select('-username')
+    if(!user) { res.status(404).json({messsage: 'User not found'}); return }
+
+    user.password = req.body.password
+    const done = user.save()
+    if(!done) {
+      res.status(400).json({message: 'Something went wrong.'})
+      return
+    }
+    
+    res.status(200).json({message: 'Successfully changed the password.'})
+  }
+  catch(error) {
+    console.error(`Error [changePassword]: ${error}`)
     res.status(400).json(error)
   }
 }
