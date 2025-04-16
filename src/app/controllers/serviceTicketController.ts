@@ -1020,3 +1020,34 @@ export async function setServiceRating(req: LogRequest, res: Response) {
     res.status(400).json(error)
   }
 }
+
+export async function closeTicket(req: LogRequest, res: Response) {
+  try {
+    const serviceTicket = await ServiceTicket.findById(req.params.serviceTicketId)
+    if(!serviceTicket) {
+      res.status(404).json({ message: '`Service Ticket` not found' })
+      return
+    }
+
+    const authenticatedUser = await User.findById(req.userId)
+    if(!authenticatedUser) {
+      res.status(404).json({ message: '`User` not found'})
+      return
+    }
+
+    serviceTicket.serviceStatus = 'closed'
+    const done = await serviceTicket.save()
+    if(done) {
+      req.serviceTicketId = req.params.serviceTicketId
+      req.logDetails = `Ticket has been closed by ${capitalizeFirstLetter(authenticatedUser.firstName)} ${capitalizeFirstLetter(authenticatedUser.lastName)}.`
+      res.status(200).json(serviceTicket)
+    }
+    else {
+      res.status(400).json({ message: 'Something went wrong.' })
+    }
+  }
+  catch(error) {
+    console.error(`Error [closeTicket]: ${error}`)
+    res.status(400).json(error)
+  }
+}

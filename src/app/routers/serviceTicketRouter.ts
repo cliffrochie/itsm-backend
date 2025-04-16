@@ -20,7 +20,8 @@ import {
   getTotalTaskTypes,
   getTotalEquipmentTypes,
   getSearchedTicketNo,
-  setServiceRating
+  setServiceRating,
+  closeTicket
 } from "../controllers/serviceTicketController";
 
 
@@ -44,6 +45,7 @@ router.patch('/:serviceTicketId/update-service-status', authMiddleware, serviceT
 router.patch('/:serviceTicketId/assign-service-engineer', authMiddleware, serviceTicketLoggerMiddleware, assignServiceEngineer)
 router.patch('/:serviceTicketId/escalate-service', authMiddleware, serviceTicketLoggerMiddleware, escalateService)
 router.patch('/:serviceTicketId/set-rating', authMiddleware, serviceTicketLoggerMiddleware, setServiceRating)
+router.patch('/:serviceTicketId/close-ticket', authMiddleware, serviceTicketLoggerMiddleware, closeTicket)
 router.delete('/:serviceTicketId', authMiddleware, removeServiceTicket)
 
 

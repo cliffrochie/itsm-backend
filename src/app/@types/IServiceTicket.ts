@@ -10,7 +10,7 @@ export interface IServiceTicket extends Document {
   title: string
   natureOfWork: string
   serialNo?: string
-  equipmentType: "computer" | "printer" | "mobile device" | "network related" | "software application" | "others"
+  equipmentType: "computer" | "printer" | "scanner" | "mobile device" | "network related" | "software application" | "others"
   equipmentTypeOthers?: string
   defectsFound?: string
   serviceRendered?: string
@@ -106,7 +106,7 @@ export interface IServiceTicketBody {
   title: string
   natureOfWork: string
   serialNo?: string
-  equipmentType: "computer" | "printer" | "mobile device" | "network related" | "software application" | "others"
+  equipmentType: "computer" | "printer" | "scanner" | "mobile device" | "network related" | "software application" | "others"
   equipmentTypeOthers?: string
   defectsFound?: string
   serviceRendered?: string
