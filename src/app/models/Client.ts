@@ -1,12 +1,14 @@
 import mongoose, { Schema, Model } from 'mongoose'
 import { IClient } from '../@types/IClient'
+import { toUpper } from '../utils'
+
 
 
 const ClientSchema = new Schema<IClient>({
-  firstName: { type: String, required: true },
-  middleName: { type: String, default: null },
-  lastName: { type: String, required: true },
-  extensionName: { type: String, default: null },
+  firstName: { type: String, required: true, set: toUpper },
+  middleName: { type: String, default: null, set: toUpper },
+  lastName: { type: String, required: true, set: toUpper },
+  extensionName: { type: String, default: null, set: toUpper },
   contactNo: { type: String, default: null },
   email: { type: String, default: null },
   designation: { type: mongoose.Schema.ObjectId, ref: 'Designation', default: null }, 

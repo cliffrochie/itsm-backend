@@ -168,3 +168,7 @@ function generateShortUUID(length: number) {
 }
 
 
+
+export function toUpper(v: string) {
+  return  v?.toUpperCase?.() || ''
+}

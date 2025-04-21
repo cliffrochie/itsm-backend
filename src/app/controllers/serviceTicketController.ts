@@ -153,7 +153,11 @@ export async function getServiceTickets(req: Request<{}, {}, {}, IServiceTicketQ
 export async function getServiceTicket(req: Request, res: Response) {
   try {
     const serviceTicketId = req.params.serviceTicketId
-    const serviceTicket = await ServiceTicket.findById(serviceTicketId).populate('client').populate('serviceEngineer').populate('createdBy')
+    const serviceTicket = await ServiceTicket.findById(serviceTicketId)
+      .populate({
+        path: 'client',
+        populate: [{ path: 'designation'}, {path: 'office'}],
+      }).populate('serviceEngineer').populate('createdBy')
     
     if(!serviceTicket) {
       res.status(404).json({ message: '`ServiceTicket` not found' })
@@ -695,7 +699,8 @@ export async function getRequestedServiceTickets(req: IUserRequest, res: Respons
       return
     }
 
-    const serviceTickets = await ServiceTicket.find({ createdBy: req.userId, serviceStatus: {$ne: 'closed'} })
+    // const serviceTickets = await ServiceTicket.find({ createdBy: req.userId, serviceStatus: {$ne: 'closed'} })
+    const serviceTickets = await ServiceTicket.find({ createdBy: req.userId, rating : {$eq: ""}  })
       .populate('client').populate({path: 'serviceEngineer', select: '-password'}).sort({ createdAt: -1 })
     res.status(200).json(serviceTickets)
   }

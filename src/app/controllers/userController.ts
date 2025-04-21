@@ -48,18 +48,31 @@ export async function userSignUp(req: Request, res: Response) {
   try {
     const body = req.body
     const user = new User(body)
-    const result = await user.save()
-    if(result) {
+    const userResult = await user.save()
+
+    const clientCheck = await Client.findOne({
+      firstName: userResult.firstName, 
+      middleName: userResult.middleName,
+      lastName: userResult.lastName,
+      extensionName: userResult.extensionName
+    })
+
+    if(clientCheck && userResult) {
+      clientCheck.user = new Types.ObjectId(user._id)
+      clientCheck.save()
+    }
+    else if(userResult) {
       const client = new Client({
-        firstName: result.firstName,
-        middleName: result.middleName,
-        lastName: result.lastName,
-        contactNo: result.contactNo,
-        email: result.email,
+        firstName: userResult.firstName,
+        middleName: userResult.middleName,
+        lastName: userResult.lastName,
+        contactNo: userResult.contactNo,
+        email: userResult.email,
         user: user._id
       })
       client.save()
     }
+
     const token = jwt.sign({userId: user._id}, process.env.SECRET_KEY || 'notsosecret', {expiresIn: '1h'})
     res.status(201).json({ token })
   }
@@ -130,7 +143,7 @@ export async function getUsers(req: Request<{}, {}, {}, IUserQueryParams>, res: 
     if(email) filter.email = { $regex: email + '.*', $options: 'i' }
     if(extensionName) filter.extensionName = { $regex: extensionName + '.*', $options: 'i' }
     if(role) filter.role = { $regex: role + '.*', $options: 'i' }
-    if(personnel) filter.role = { $in: ['staff', 'admin'] }
+    if(personnel) filter.role = { $in: ['staff'] }
     if(fullName) filter.$or = [{ firstName : { $regex: fullName, $options: 'i' } }, { lastName : { $regex: fullName, $options: 'i' } }]
     if(exclude) filter._id = { $ne: exclude }
 

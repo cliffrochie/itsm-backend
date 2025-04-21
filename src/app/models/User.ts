@@ -1,6 +1,8 @@
 import mongoose, { Schema, Model } from 'mongoose'
 import bcrypt from 'bcrypt'
 import { IUser } from '../@types/IUser'
+import { toUpper } from '../utils'
+
 
 
 const UserSchema: Schema = new Schema<IUser>({
@@ -8,16 +10,23 @@ const UserSchema: Schema = new Schema<IUser>({
   username: { type: String, required: true, unique: true },
   email: { type: String, required: true, unique: true, min: 6 },
   password: { type: String, required: true },
-  firstName: { type: String, required: true },
-  middleName: { type: String, default: null },
-  lastName: { type: String, required: true },
-  extensionName: { type: String, default: null },
+  firstName: { type: String, required: true, set: toUpper },
+  middleName: { type: String, default: null, set: toUpper },
+  lastName: { type: String, required: true, set: toUpper },
+  extensionName: { type: String, default: null, set: toUpper },
   contactNo: { type: String, default: null },
   role: { type: String, default: 'user'},
   isActive: {type: Boolean, default: false },
   createdAt: { type: Date, immutable: true, default: () => Date.now() },
   updatedAt: { type: Date, default: null },
 })
+
+UserSchema.index({
+  firstName: 1,
+  middleName: 1,
+  lastName: 1,
+  extensionName: 1,
+}, { unique: true })
 
 UserSchema.pre<IUser>('save', async function(next: (error?: Error) => void) {
   try {
