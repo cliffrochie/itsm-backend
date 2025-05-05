@@ -68,7 +68,7 @@ export async function userSignUp(req: Request, res: Response) {
         lastName: userResult.lastName,
         contactNo: userResult.contactNo,
         email: userResult.email,
-        user: user._id
+        user: new Types.ObjectId(user._id)
       })
       client.save()
     }

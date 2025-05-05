@@ -65,6 +65,7 @@ export interface IServiceTicketQueryParams {
   // Equipment Type
   totalComputer?: boolean
   totalPrinter?: boolean
+  totalScanner?: boolean
   totalMobileDevice?: boolean
   totalNetworkRelated?: boolean
   totalSoftwareApplication?: boolean

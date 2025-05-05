@@ -904,6 +904,7 @@ export async function getTotalEquipmentTypes(req: Request<{}, {}, {}, IServiceTi
       totalTickets,
       totalComputer,
       totalPrinter,
+      totalScanner,
       totalMobileDevice,
       totalNetworkRelated,
       totalSoftwareApplication,
@@ -928,6 +929,12 @@ export async function getTotalEquipmentTypes(req: Request<{}, {}, {}, IServiceTi
         .find({ equipmentType: 'printer' })
         .countDocuments()
       result = { ...result, totalPrinter: total }
+    }
+    if(totalScanner) {
+      const total = await ServiceTicket
+        .find({ equipmentType: 'scanner' })
+        .countDocuments()
+      result = { ...result, totalScanner: total }
     }
     if(totalMobileDevice) {
       const total = await ServiceTicket
