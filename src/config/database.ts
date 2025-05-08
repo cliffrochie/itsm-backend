@@ -3,7 +3,9 @@ dotenv.config()
 
 export default async function () {
   try {
-    await require('mongoose').connect(process.env.MONGODB_URL)
+    const connection = process.env.MONGODB_URL
+    console.log('DB Link: ', connection)
+    await require('mongoose').connect(connection)
     console.log('Server connected to the database successfully!')
   }
   catch(error) {
