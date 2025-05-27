@@ -21,7 +21,7 @@ export default async function serviceTicketLoggerMiddleware(req: LogRequest, res
           createdBy: new Types.ObjectId(req.userId),
           createdAt: new Date(),
           date: changeDateFormatMMDDYYYY(new Date()),
-          time: new Date().toLocaleString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true}),
+          time: new Date().toLocaleString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true, timeZone: 'Asia/Manila'}),
           action: action,
           details: req.logDetails ? req.logDetails : 'No details provided.'      
         })

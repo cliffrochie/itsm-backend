@@ -13,7 +13,7 @@ export default function(req: IUserRequest, res: Response, next: NextFunction) {
     // console.log(token)
 
     if(!jwt.verify(token, String(process.env.SECRET_KEY) || 'notsosecret')) {
-      res.status(403).json({ message: 'Invalid token 1' })  
+      res.status(403).json({ message: 'Invalid token!' })  
       return
     }
 
@@ -22,7 +22,7 @@ export default function(req: IUserRequest, res: Response, next: NextFunction) {
     // console.log(payload)
 
     if(!payload) {
-      res.status(403).json({ message: 'Invalid token 2' })
+      res.status(403).json({ message: 'Invalid token!!' })
       return
     }
 
@@ -33,7 +33,7 @@ export default function(req: IUserRequest, res: Response, next: NextFunction) {
   catch(error) {
     res.clearCookie('token')
     console.error(`Error [auth]: ${error}`)
-    res.status(403).json({ message: 'Invalid token 3'})
+    res.status(403).json({ message: 'Invalid token!!!'})
     return
   }
 }
