@@ -34,6 +34,7 @@ export interface IClientQueryParams {
   fullName?: string
   office?: string
   designation?: string
+  userId?: string
 }
 
 export interface IClientFilter {
@@ -41,6 +42,7 @@ export interface IClientFilter {
   middleName?: object
   lastName?: object
   extensionName?: object
+  user?: string
   $or?: any
   $in?: any
   'office.alias'?: object

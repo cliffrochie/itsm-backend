@@ -22,7 +22,7 @@ async function getOffice(filter: any) {
 
 export async function getClients(req: Request<{}, {}, {}, IClientQueryParams>, res: Response) {
   try {
-    const { firstName, lastName, includes, sort, noPage, fullName, office, designation } = req.query
+    const { firstName, lastName, includes, sort, noPage, fullName, office, designation, userId } = req.query
 
     const filter: IClientFilter = {}
     const sortResult = await sorter(sort)
@@ -30,6 +30,7 @@ export async function getClients(req: Request<{}, {}, {}, IClientQueryParams>, r
     if(firstName) filter.firstName = { $regex: firstName + '.*', $options: 'i' }
     if(lastName) filter.lastName = { $regex: lastName + '.*', $options: 'i' }
     if(fullName) filter.$or = [{ firstName : { $regex: fullName, $options: 'i' } }, { lastName : { $regex: fullName, $options: 'i' } }]
+    if(userId) filter.user = userId
 
     const officeFilter = office
       ? { alias: { $regex: office, $options: 'i' } }

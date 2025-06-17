@@ -85,7 +85,24 @@ export async function notificationIsBeingRead(req: Request, res: Response) {
     res.json({})
   }
   catch(error) {
-    console.error(`Error [updateNotification]: ${error}`)
+    console.error(`Error [notificationIsBeingRead]: ${error}`)
+    res.status(400).json(error)
+  }
+}
+
+
+export async function clearAllAuthenticatedUserNotifications(req: Request, res: Response) {
+  try {
+    const userId = req.params.userId
+    await Notification.updateMany(
+      {user: userId, isRead: false},
+      {$set: {isRead: true}}
+    )
+   
+    res.json({})
+  }
+  catch(error) {
+    console.error(`Error [clearAllAuthenticatedUserNotifications]: ${error}`)
     res.status(400).json(error)
   }
 }

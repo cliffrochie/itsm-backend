@@ -22,7 +22,7 @@ export function createApp() {
 
   const app: Express = express()
   app.use(cors({ 
-    origin: process.env.CORS_ORIGIN || 'http://192.168.2.254:3500',
+    origin: process.env.CORS_ORIGIN || 'http://localhost:3500',
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'],
     allowedHeaders: ['Content-Type', 'Authorization'], 

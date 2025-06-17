@@ -54,7 +54,9 @@ export interface IServiceTicketQueryParams {
   limit?: number
   noPage?: boolean
   client?: string
+  clientId?: string
   serviceEngineer?: string
+  serviceEngineerId?: string
   // Task Type
   totalIncident?: boolean
   totalServiceRequest?: boolean
@@ -99,6 +101,10 @@ export interface IServiceTicketFilter {
   adminRemarks?: object
   rating?: object
   ratingComment?: object
+  client?: string
+  clientId?: string
+  serviceEngineer?: string
+  serviceEngineerId?: string
 }
 
 export interface IServiceTicketBody {

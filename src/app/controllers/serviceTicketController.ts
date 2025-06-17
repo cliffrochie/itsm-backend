@@ -35,10 +35,12 @@ export async function getServiceTickets(req: Request<{}, {}, {}, IServiceTicketQ
       includes,
       noPage,
       client,
+      clientId,
       serviceEngineer,
+      serviceEngineerId
     } = req.query
 
-    // console.log(req.query)
+    console.log(clientId)
 
     const filter: IServiceTicketFilter = {}
     const sortResult = await sorter(sort)
@@ -57,6 +59,8 @@ export async function getServiceTickets(req: Request<{}, {}, {}, IServiceTicketQ
     if(adminRemarks) filter.adminRemarks = { $regex: adminRemarks + '.*', $options: 'i' }
     if(rating) filter.rating = { $regex: rating + '.*', $options: 'i' }
     if(ratingComment) filter.ratingComment = { $regex: ratingComment + '.*', $options: 'i' }
+    if(clientId) filter.client = clientId
+    if(serviceEngineerId) filter.serviceEngineer = serviceEngineerId
 
     const clientFilter = client
       ? { $or: [{firstName: {$regex: client, $options: 'i'}}, {lastName: {$regex: client, $options: 'i'}}] }
