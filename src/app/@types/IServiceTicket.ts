@@ -83,7 +83,11 @@ export interface IServiceTicketQueryParams {
   totalReOpenedTickets?: boolean
   totalResolvedTickets?: boolean
   totalClosedTickets?: boolean
-  
+  // Others
+  createdBy?: string
+  updatedBy?: string
+  createdAt?: string
+  updatedAt?: string
 }
 
 export interface IServiceTicketFilter {
@@ -105,6 +109,10 @@ export interface IServiceTicketFilter {
   clientId?: string
   serviceEngineer?: string
   serviceEngineerId?: string
+  createdBy?: string
+  updatedBy?: string
+  createdAt?: string
+  updatedAt?: string
 }
 
 export interface IServiceTicketBody {

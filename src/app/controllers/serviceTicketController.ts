@@ -37,7 +37,8 @@ export async function getServiceTickets(req: Request<{}, {}, {}, IServiceTicketQ
       client,
       clientId,
       serviceEngineer,
-      serviceEngineerId
+      serviceEngineerId,
+      createdBy
     } = req.query
 
     console.log(clientId)
@@ -61,6 +62,7 @@ export async function getServiceTickets(req: Request<{}, {}, {}, IServiceTicketQ
     if(ratingComment) filter.ratingComment = { $regex: ratingComment + '.*', $options: 'i' }
     if(clientId) filter.client = clientId
     if(serviceEngineerId) filter.serviceEngineer = serviceEngineerId
+    if(createdBy) filter.createdBy = createdBy
 
     const clientFilter = client
       ? { $or: [{firstName: {$regex: client, $options: 'i'}}, {lastName: {$regex: client, $options: 'i'}}] }
