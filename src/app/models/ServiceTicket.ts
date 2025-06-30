@@ -1,6 +1,5 @@
-import mongoose, { Schema, Model } from 'mongoose'
-import { IServiceTicket } from '../@types/IServiceTicket'
-
+import mongoose, { Schema, Model } from "mongoose";
+import { IServiceTicket } from "../@types/IServiceTicket";
 
 const ServiceTicketSchema = new Schema<IServiceTicket>({
   ticketNo: { type: String, required: true, unique: true },
@@ -18,19 +17,38 @@ const ServiceTicketSchema = new Schema<IServiceTicket>({
   adminRemarks: { type: String, default: null },
   rating: { type: String, default: "" },
   ratingComment: { type: String, default: "" },
-  serviceEngineer: { type: mongoose.Schema.Types.ObjectId, ref: 'User', default: null },
-  client: { type: mongoose.Schema.Types.ObjectId, ref: 'Client', default: null },
-  createdBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User', default: null },
-  updatedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User', default: null },
+  serviceEngineer: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "User",
+    default: null,
+  },
+  client: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Client",
+    default: null,
+  },
+  createdBy: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "User",
+    default: null,
+  },
+  updatedBy: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "User",
+    default: null,
+  },
   createdAt: { type: Date, immutable: true, default: () => Date.now() },
   updatedAt: { type: Date, default: null },
-})
+});
 
-ServiceTicketSchema.pre('save', async function(next) {
-  this.updatedAt = new Date(Date.now())
-  next()
-})
+ServiceTicketSchema.pre("save", async function (next) {
+  this.updatedAt = new Date(Date.now());
+  next();
+});
 
-const ServiceTicket: Model<IServiceTicket> = mongoose.model<IServiceTicket>('ServiceTicket', ServiceTicketSchema)
+const ServiceTicket: Model<IServiceTicket> = mongoose.model<IServiceTicket>(
+  "ServiceTicket",
+  ServiceTicketSchema
+);
 
-export default ServiceTicket
+export default ServiceTicket;

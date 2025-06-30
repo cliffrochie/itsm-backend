@@ -1,6 +1,6 @@
 export interface JwtPayload {
-  userId?: string
-  username?: string
-  role?: "user" | "staff" | "admin" | "superadmin"
-  isActive?: boolean
+  userId?: string;
+  username?: string;
+  role?: "user" | "staff" | "admin" | "superadmin";
+  isActive?: boolean;
 }

@@ -1,83 +1,93 @@
 import { Request, Response } from "express-serve-static-core";
-import { IServiceTicketHistoryBody, IServiceTicketHistoryFilter, IServiceTicketHistoryQueryParams, IServiceTicketHistoryResults } from "../@types/IServiceTicketHistory";
+import {
+  IServiceTicketHistoryBody,
+  IServiceTicketHistoryFilter,
+  IServiceTicketHistoryQueryParams,
+  IServiceTicketHistoryResults,
+} from "../@types/IServiceTicketHistory";
 import sorter from "../utils/sorter";
 import ServiceTicketHistory from "../models/ServiceTicketHistory";
 import { IUserRequest } from "../@types/IUser";
 import { Types } from "mongoose";
 
-
-export async function getServiceTicketHistories(req: Request<{}, {}, {}, IServiceTicketHistoryQueryParams>, res: Response) {
+export async function getServiceTicketHistories(
+  req: Request<{}, {}, {}, IServiceTicketHistoryQueryParams>,
+  res: Response
+) {
   try {
-    const {
-      serviceTicket,
-      date,
-      time,
-      details,
-      remarks,
-      sort,
-      noPage
-    } = req.query
+    const { serviceTicket, date, time, details, remarks, sort, noPage } =
+      req.query;
 
-    const filter: IServiceTicketHistoryFilter = {}
-    const sortResult = await sorter(sort)
+    const filter: IServiceTicketHistoryFilter = {};
+    const sortResult = await sorter(sort);
 
     // if(serviceTicket) filter.serviceTicket = { $regex: serviceTicket + '.*', $options: 'i' }
-    if(serviceTicket) filter.serviceTicket =  new Types.ObjectId(serviceTicket)
-    if(date) filter.date = { $regex: date + '.*', $options: 'i' }
-    if(time) filter.time = { $regex: time + '.*', $options: 'i' }
-    if(details) filter.details = { $regex: details + '.*', $options: 'i' }
-    if(remarks) filter.remarks = { $regex: remarks + '.*', $options: 'i' }
+    if (serviceTicket) filter.serviceTicket = new Types.ObjectId(serviceTicket);
+    if (date) filter.date = { $regex: date + ".*", $options: "i" };
+    if (time) filter.time = { $regex: time + ".*", $options: "i" };
+    if (details) filter.details = { $regex: details + ".*", $options: "i" };
+    if (remarks) filter.remarks = { $regex: remarks + ".*", $options: "i" };
 
-    console.log(filter)
+    console.log(filter);
 
-    const page: number = Number(req.query.page) || 1
-    const limit: number = req.query.limit || 10
-    const skip: number = (page - 1) * limit
+    const page: number = Number(req.query.page) || 1;
+    const limit: number = req.query.limit || 10;
+    const skip: number = (page - 1) * limit;
 
-    let serviceTicketHistories = []
+    let serviceTicketHistories = [];
 
-    if(noPage) {
-      serviceTicketHistories = await ServiceTicketHistory.find(filter).sort(sortResult)
-      res.json(serviceTicketHistories)
-      return
+    if (noPage) {
+      serviceTicketHistories = await ServiceTicketHistory.find(filter).sort(
+        sortResult
+      );
+      res.json(serviceTicketHistories);
+      return;
     }
 
-    serviceTicketHistories = await ServiceTicketHistory.find(filter).sort(sortResult).skip(skip).limit(limit)
-    const total = await ServiceTicketHistory.find(filter).countDocuments()
+    serviceTicketHistories = await ServiceTicketHistory.find(filter)
+      .sort(sortResult)
+      .skip(skip)
+      .limit(limit);
+    const total = await ServiceTicketHistory.find(filter).countDocuments();
 
-    const results: IServiceTicketHistoryResults = { results: serviceTicketHistories, page, totalPages: Math.ceil(total / limit), total }
-    res.json(results)
-  }
-  catch(error) {
-    console.error(`Error [getServiceTicketHistories]: ${error}`)
-    res.status(400).json(error)
+    const results: IServiceTicketHistoryResults = {
+      results: serviceTicketHistories,
+      page,
+      totalPages: Math.ceil(total / limit),
+      total,
+    };
+    res.json(results);
+  } catch (error) {
+    console.error(`Error [getServiceTicketHistories]: ${error}`);
+    res.status(400).json(error);
   }
 }
-
 
 export async function getServiceTicketHistory(req: Request, res: Response) {
   try {
-    const serviceTicketHistoryId = req.params.serviceTicketHistoryId
-    const serviceTicketHistory = await ServiceTicketHistory.findById(serviceTicketHistoryId)
-    
-    if(!serviceTicketHistory) {
-      res.status(404).json({ message: '`ServiceTicketHistory` not found' })
-      return
+    const serviceTicketHistoryId = req.params.serviceTicketHistoryId;
+    const serviceTicketHistory = await ServiceTicketHistory.findById(
+      serviceTicketHistoryId
+    );
+
+    if (!serviceTicketHistory) {
+      res.status(404).json({ message: "`ServiceTicketHistory` not found" });
+      return;
+    } else {
+      res.json(serviceTicketHistory);
     }
-    else {
-      res.json(serviceTicketHistory)
-    }
-  }
-  catch(error) {
-    console.error(`Error [getServiceTicketHistory]: ${error}`)
-    res.status(400).json(error)
+  } catch (error) {
+    console.error(`Error [getServiceTicketHistory]: ${error}`);
+    res.status(400).json(error);
   }
 }
 
-
-export async function createServiceTicketHistory(req: IUserRequest, res: Response) {
+export async function createServiceTicketHistory(
+  req: IUserRequest,
+  res: Response
+) {
   try {
-    const body: IServiceTicketHistoryBody = req.body
+    const body: IServiceTicketHistoryBody = req.body;
 
     const serviceTicketHistory = new ServiceTicketHistory({
       serviceTicket: body.serviceTicket,
@@ -86,59 +96,66 @@ export async function createServiceTicketHistory(req: IUserRequest, res: Respons
       details: body.details,
       remarks: body.remarks,
       createdBy: req.userId ? new Types.ObjectId(req.userId) : undefined,
-    })
-    await serviceTicketHistory.save()
-    res.status(201).json(serviceTicketHistory)
-  }
-  catch(error) {
-    console.error(`Error [createServiceTicket]: ${error}`)
-    res.status(400).json(error)
+    });
+    await serviceTicketHistory.save();
+    res.status(201).json(serviceTicketHistory);
+  } catch (error) {
+    console.error(`Error [createServiceTicket]: ${error}`);
+    res.status(400).json(error);
   }
 }
 
-
-export async function updateServiceTicketHistory(req: IUserRequest, res: Response) {
+export async function updateServiceTicketHistory(
+  req: IUserRequest,
+  res: Response
+) {
   try {
-    const body = req.body
+    const body = req.body;
 
-    const serviceTicketHistoryId = req.params.serviceTicketHistoryId
-    const serviceTicketHistory = await ServiceTicketHistory.findById(serviceTicketHistoryId)
-    if(!serviceTicketHistory) {
-      res.status(404).json({ message: '`Service Ticket` not found' })
-      return
+    const serviceTicketHistoryId = req.params.serviceTicketHistoryId;
+    const serviceTicketHistory = await ServiceTicketHistory.findById(
+      serviceTicketHistoryId
+    );
+    if (!serviceTicketHistory) {
+      res.status(404).json({ message: "`Service Ticket` not found" });
+      return;
     }
 
-    serviceTicketHistory.serviceTicket = body.serviceTicket
-    serviceTicketHistory.date = body.date
-    serviceTicketHistory.time = body.time
-    serviceTicketHistory.details = body.details
-    serviceTicketHistory.remarks = body.remarks
-    serviceTicketHistory.updatedBy = req.userId ? new Types.ObjectId(req.userId) : undefined
+    serviceTicketHistory.serviceTicket = body.serviceTicket;
+    serviceTicketHistory.date = body.date;
+    serviceTicketHistory.time = body.time;
+    serviceTicketHistory.details = body.details;
+    serviceTicketHistory.remarks = body.remarks;
+    serviceTicketHistory.updatedBy = req.userId
+      ? new Types.ObjectId(req.userId)
+      : undefined;
 
-    await serviceTicketHistory.save()
-    res.status(200).json(serviceTicketHistory)
-  }
-  catch(error) {
-    console.error(`Error [updateserviceTicketHistory]: ${error}`)
-    res.status(400).json(error)
+    await serviceTicketHistory.save();
+    res.status(200).json(serviceTicketHistory);
+  } catch (error) {
+    console.error(`Error [updateserviceTicketHistory]: ${error}`);
+    res.status(400).json(error);
   }
 }
-
 
 export async function removeServiceTicketHistory(req: Request, res: Response) {
   try {
-    const serviceTicketId = req.params.serviceTicketId
-    const deleted = await ServiceTicketHistory.findByIdAndDelete(serviceTicketId)
-    
-    if(deleted) {
-      res.status(204).json({})
+    const serviceTicketId = req.params.serviceTicketId;
+    const deleted = await ServiceTicketHistory.findByIdAndDelete(
+      serviceTicketId
+    );
+
+    if (deleted) {
+      res.status(204).json({});
+    } else {
+      res
+        .status(500)
+        .json({
+          message: "Error [removeServiceTicketHistory]: Something went wrong.",
+        });
     }
-    else {
-      res.status(500).json({message: 'Error [removeServiceTicketHistory]: Something went wrong.'})
-    }
-  }
-  catch(error) {
-    console.error(`Error [removeServiceTicketHistory]: ${error}`)
-    res.status(400).json(error)
+  } catch (error) {
+    console.error(`Error [removeServiceTicketHistory]: ${error}`);
+    res.status(400).json(error);
   }
 }
