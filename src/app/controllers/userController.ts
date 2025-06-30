@@ -266,6 +266,23 @@ export async function updateUser(req: Request, res: Response) {
   }
 }
 
+export async function deleteUser(req: Request, res: Response) {
+  try {
+    const deletedUser = await User.findByIdAndDelete(req.params.id);
+
+    if (deletedUser) {
+      res.status(204).json({});
+    } else {
+      res.status(500).json({
+        message: "Error [deleteUser]: Something went wrong.",
+      });
+    }
+  } catch (error) {
+    console.error(`Error [deleteUser]: ${error}`);
+    res.status(400).json(error);
+  }
+}
+
 export async function changePassword(req: Request, res: Response) {
   try {
     const user: IUser = await User.findById(req.params.id).select("-username");

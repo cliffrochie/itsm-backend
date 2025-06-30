@@ -4,6 +4,7 @@ import {
   getCurrentUser,
   getUser,
   getUsers,
+  deleteUser,
   updateUser,
   userSignIn,
   userSignUp,
@@ -25,6 +26,7 @@ router.post("/signup", userSignUp);
 router.post("/signin", userSignIn);
 router.put("/:id", auth, updateUser);
 router.patch("/:id/change-password", auth, changePassword);
+router.delete("/:id", auth, deleteUser);
 
 // router.get('/', getUsers)
 // router.get('/current-user', getCurrentUser)
