@@ -177,11 +177,11 @@ export function getDateFormatYYYYMMDD() {
 export function changeDateFormatMMDDYYYY(date: Date) {
   const year = date.getFullYear().toString();
   const month =
-    date.getMonth() < 10
+    date.getMonth() < 9
       ? `0${date.getMonth() + 1}`
       : (date.getMonth() + 1).toString();
   const day =
-    date.getDate() < 10 ? `0${date.getDate()}` : date.getDate().toString();
+    date.getDate() < 9 ? `0${date.getDate()}` : date.getDate().toString();
   return month + "/" + day + "/" + year;
 }
 
