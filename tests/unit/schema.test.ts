@@ -25,4 +25,8 @@ describe("Database Schema Definitions (Drizzle MySQL)", () => {
     expect(schema.notifications[Symbol.for("drizzle:Name")]).toBe("notifications");
     expect(schema.actionLogs[Symbol.for("drizzle:Name")]).toBe("action_logs");
   });
+
+  it("clients table includes optional unique email column", () => {
+    expect((schema.clients as any).email).toBeDefined();
+  });
 });
