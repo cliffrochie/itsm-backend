@@ -1,8 +1,7 @@
 | Task | Status | Notes |
 | --- | --- | --- |
-| 1. Explore project context | Completed | Checked repo structure, mongoose setup, blueprints in spec-vault |
-| 2. Ask clarifying questions | Completed | Confirmed same repo (worktree), MySQL + Drizzle, fresh start with seeders, strict blueprint `/api/v1/` first. |
-| 3. Propose 2-3 approaches | Completed | User approved Approach 1 (Clean-slate rebuild via isolated worktree). |
-| 4. Present design | Completed | All 4 design sections presented and approved by user. |
-| 5. Write design doc | Completed | Written to `docs/plans/2026-09-04-itsm-backend-overhaul-design.md`. |
-| 6. Transition to implementation | Completed | Implementation plan written to `docs/plans/2026-09-04-itsm-backend-overhaul.md` and registered in `implementation_plan.md`. |
+| Task 1: Schema Update & Migration | completed | Add email column to clients table, update tests, generate migration |
+| Task 2: Client Validator Update | completed | Add email validation to client schemas and query |
+| Task 3: Client Service Auto-linking and Email Handling | completed | Implement email normalization, search, and user auto-link on client create |
+| Task 4: User Service Auto-linking to Existing Client | completed | Implement auto-linking unlinked client profile on user create |
+| Task 5: Seeders & Full Regression Suite | completed | Update seed data and run full test suite |

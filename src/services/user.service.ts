@@ -1,7 +1,8 @@
 import bcrypt from "bcrypt";
-import { eq, sql, and, or, like } from "drizzle-orm";
+import { eq, sql, and, or, like, isNull } from "drizzle-orm";
 import { db } from "../db/client";
 import { users, type User } from "../db/schema/users";
+import { clients } from "../db/schema/clients";
 import { NotFoundError, ValidationError } from "../types/errors";
 import type {
   CreateUserInput,
@@ -114,6 +115,21 @@ export class UserService {
         isActive: input.isActive,
       })
       .$returningId();
+
+    // Auto-link any existing unlinked client profile with matching email
+    const userEmail = input.email.trim().toLowerCase();
+    const [matchingClient] = await db
+      .select()
+      .from(clients)
+      .where(and(eq(clients.email, userEmail), isNull(clients.userId)))
+      .limit(1);
+
+    if (matchingClient) {
+      await db
+        .update(clients)
+        .set({ userId: inserted.id })
+        .where(eq(clients.id, matchingClient.id));
+    }
 
     return this.getUserById(inserted.id);
   }

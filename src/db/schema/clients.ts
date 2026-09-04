@@ -9,6 +9,7 @@ export const clients = mysqlTable("clients", {
   middleName: varchar("middle_name", { length: 100 }),
   lastName: varchar("last_name", { length: 100 }).notNull(),
   extensionName: varchar("extension_name", { length: 50 }),
+  email: varchar("email", { length: 191 }).unique(),
   contactNo: varchar("contact_no", { length: 50 }),
   officeId: bigint("office_id", { mode: "number", unsigned: true }).references(() => offices.id, { onDelete: "set null" }),
   designationId: bigint("designation_id", { mode: "number", unsigned: true }).references(() => designations.id, { onDelete: "set null" }),

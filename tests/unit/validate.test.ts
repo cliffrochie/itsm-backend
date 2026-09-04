@@ -55,3 +55,48 @@ describe("Validation Middleware (Zod)", () => {
     });
   });
 });
+
+describe("Client Validators", () => {
+  it("createClientSchema validates email correctly", async () => {
+    const { createClientSchema } = await import("../../src/validators/client.validator");
+
+    // Invalid email
+    const invalidRes = createClientSchema.safeParse({
+      firstName: "John",
+      lastName: "Doe",
+      email: "not-an-email",
+    });
+    expect(invalidRes.success).toBe(false);
+
+    // Valid email
+    const validRes = createClientSchema.safeParse({
+      firstName: "John",
+      lastName: "Doe",
+      email: "john.doe@example.com",
+    });
+    expect(validRes.success).toBe(true);
+
+    // Nullable / optional email
+    const nullRes = createClientSchema.safeParse({
+      firstName: "John",
+      lastName: "Doe",
+      email: null,
+    });
+    expect(nullRes.success).toBe(true);
+
+    const omittedRes = createClientSchema.safeParse({
+      firstName: "John",
+      lastName: "Doe",
+    });
+    expect(omittedRes.success).toBe(true);
+  });
+
+  it("clientQuerySchema accepts optional email query parameter", async () => {
+    const { clientQuerySchema } = await import("../../src/validators/client.validator");
+    const parsed = clientQuerySchema.safeParse({ email: "john@example.com" });
+    expect(parsed.success).toBe(true);
+    if (parsed.success) {
+      expect((parsed.data as any).email).toBe("john@example.com");
+    }
+  });
+});
