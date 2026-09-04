@@ -12,6 +12,7 @@ import usersRouter from "./routes/v1/users.routes";
 import officesRouter from "./routes/v1/offices.routes";
 import designationsRouter from "./routes/v1/designations.routes";
 import clientsRouter from "./routes/v1/clients.routes";
+import ticketsRouter from "./routes/v1/tickets.routes";
 
 export function createApp(): Express {
   const app: Express = express();
@@ -48,6 +49,7 @@ export function createApp(): Express {
   app.use("/api/v1/offices", officesRouter);
   app.use("/api/v1/designations", designationsRouter);
   app.use("/api/v1/clients", clientsRouter);
+  app.use("/api/v1/service-tickets", ticketsRouter);
 
   // 404 catch-all
   app.use((_req: Request, _res: Response) => {
