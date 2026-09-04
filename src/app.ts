@@ -13,6 +13,8 @@ import officesRouter from "./routes/v1/offices.routes";
 import designationsRouter from "./routes/v1/designations.routes";
 import clientsRouter from "./routes/v1/clients.routes";
 import ticketsRouter from "./routes/v1/tickets.routes";
+import notificationsRouter from "./routes/v1/notifications.routes";
+import actionLogsRouter from "./routes/v1/actionLogs.routes";
 
 export function createApp(): Express {
   const app: Express = express();
@@ -50,6 +52,8 @@ export function createApp(): Express {
   app.use("/api/v1/designations", designationsRouter);
   app.use("/api/v1/clients", clientsRouter);
   app.use("/api/v1/service-tickets", ticketsRouter);
+  app.use("/api/v1/notifications", notificationsRouter);
+  app.use("/api/v1/action-logs", actionLogsRouter);
 
   // 404 catch-all
   app.use((_req: Request, _res: Response) => {

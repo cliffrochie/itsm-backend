@@ -3,6 +3,8 @@ import { Server as SocketIOServer } from "socket.io";
 import { createApp } from "./app";
 import { env } from "./config/env";
 
+import { setSocketServer } from "./realtime/socket";
+
 const app = createApp();
 const server = http.createServer(app);
 
@@ -12,6 +14,8 @@ export const io = new SocketIOServer(server, {
     methods: ["GET", "POST"],
   },
 });
+
+setSocketServer(io);
 
 io.on("connection", (socket) => {
   socket.on("join:user", (userId: number) => {
