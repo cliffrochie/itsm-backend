@@ -5,7 +5,6 @@ import { designations } from "./designations";
 import { clients } from "./clients";
 import { serviceTickets } from "./serviceTickets";
 import { serviceTicketHistories } from "./serviceTicketHistories";
-import { ticketCounters } from "./ticketCounters";
 import { notifications } from "./notifications";
 import { actionLogs } from "./actionLogs";
 

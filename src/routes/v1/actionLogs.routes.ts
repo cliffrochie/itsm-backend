@@ -4,11 +4,13 @@ import { authenticate } from "../../middlewares/authenticate";
 import { formatPaginated } from "../../responses/envelope";
 import { ForbiddenError } from "../../types/errors";
 
+import type { AuthRequest } from "../../types/auth";
+
 const router = Router();
 
 router.use(authenticate);
 
-router.get("/", async (req, res, next) => {
+router.get("/", async (req: AuthRequest, res, next) => {
   try {
     if (req.user?.role !== "admin") {
       throw new ForbiddenError("Admin access required.");

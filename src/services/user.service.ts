@@ -58,7 +58,10 @@ export class UserService {
       .limit(limit)
       .offset(offset);
 
-    const sanitizedUsers = userRows.map(({ password: _, ...user }) => user);
+    const sanitizedUsers = userRows.map((u: User) => {
+      const { password: _, ...user } = u;
+      return user;
+    });
 
     return {
       users: sanitizedUsers,
