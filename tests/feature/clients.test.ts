@@ -94,4 +94,52 @@ describe("Clients Endpoints (/api/v1/clients)", () => {
     expect(res.body.data.userId).toBe(5);
     expect(res.body.message).toContain("Client created successfully");
   });
+
+  it("POST /api/v1/clients rejects invalid email format with 422", async () => {
+    const app = createApp();
+    const res = await request(app)
+      .post("/api/v1/clients")
+      .set("Authorization", `Bearer ${adminToken}`)
+      .send({
+        firstName: "John",
+        lastName: "Doe",
+        email: "not-a-valid-email",
+      });
+
+    expect(res.status).toBe(422);
+    expect(res.body.errors.email).toBeDefined();
+  });
+
+  it("POST /api/v1/clients accepts valid email and returns it", async () => {
+    const app = createApp();
+    const mockCreated = {
+      id: 3,
+      firstName: "CHARLIE",
+      middleName: null,
+      lastName: "BROWN",
+      extensionName: null,
+      email: "charlie.brown@example.com",
+      contactNo: null,
+      officeId: null,
+      designationId: null,
+      userId: 10,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    };
+
+    vi.spyOn(clientService, "createClient").mockResolvedValue(mockCreated as any);
+
+    const res = await request(app)
+      .post("/api/v1/clients")
+      .set("Authorization", `Bearer ${adminToken}`)
+      .send({
+        firstName: "Charlie",
+        lastName: "Brown",
+        email: "charlie.brown@example.com",
+      });
+
+    expect(res.status).toBe(201);
+    expect(res.body.data.email).toBe("charlie.brown@example.com");
+    expect(res.body.data.userId).toBe(10);
+  });
 });

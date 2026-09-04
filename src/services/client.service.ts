@@ -1,6 +1,7 @@
 import { eq, sql, and, or, like } from "drizzle-orm";
 import { db } from "../db/client";
 import { clients, type Client } from "../db/schema/clients";
+import { users } from "../db/schema/users";
 import { NotFoundError } from "../types/errors";
 import type { CreateClientInput, UpdateClientInput, ClientQueryInput } from "../validators/client.validator";
 
@@ -27,13 +28,17 @@ export class ClientService {
     if (query.userId) {
       conditions.push(eq(clients.userId, query.userId));
     }
+    if (query.email) {
+      conditions.push(eq(clients.email, query.email.trim().toLowerCase()));
+    }
     if (query.search) {
       const searchPattern = `%${query.search}%`;
       conditions.push(
         or(
           like(clients.firstName, searchPattern),
           like(clients.lastName, searchPattern),
-          like(clients.contactNo, searchPattern)
+          like(clients.contactNo, searchPattern),
+          like(clients.email, searchPattern)
         )
       );
     }
@@ -73,6 +78,20 @@ export class ClientService {
   }
 
   async createClient(input: CreateClientInput): Promise<Client> {
+    const email = input.email ? input.email.trim().toLowerCase() : null;
+
+    let userId = input.userId || null;
+    if (!userId && email) {
+      const [matchedUser] = await db
+        .select()
+        .from(users)
+        .where(eq(users.email, email))
+        .limit(1);
+      if (matchedUser) {
+        userId = matchedUser.id;
+      }
+    }
+
     const [inserted] = await db
       .insert(clients)
       .values({
@@ -80,10 +99,11 @@ export class ClientService {
         middleName: input.middleName ? input.middleName.toUpperCase() : null,
         lastName: input.lastName.toUpperCase(),
         extensionName: input.extensionName ? input.extensionName.toUpperCase() : null,
+        email,
         contactNo: input.contactNo || null,
         officeId: input.officeId || null,
         designationId: input.designationId || null,
-        userId: input.userId || null,
+        userId,
       })
       .$returningId();
 
@@ -98,6 +118,7 @@ export class ClientService {
     if (input.middleName !== undefined) updateValues.middleName = input.middleName ? input.middleName.toUpperCase() : null;
     if (input.lastName !== undefined) updateValues.lastName = input.lastName.toUpperCase();
     if (input.extensionName !== undefined) updateValues.extensionName = input.extensionName ? input.extensionName.toUpperCase() : null;
+    if (input.email !== undefined) updateValues.email = input.email ? input.email.trim().toLowerCase() : null;
     if (input.contactNo !== undefined) updateValues.contactNo = input.contactNo;
     if (input.officeId !== undefined) updateValues.officeId = input.officeId;
     if (input.designationId !== undefined) updateValues.designationId = input.designationId;
