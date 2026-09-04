@@ -9,6 +9,8 @@ import { env } from "./config/env";
 
 import authRouter from "./routes/v1/auth.routes";
 import usersRouter from "./routes/v1/users.routes";
+import officesRouter from "./routes/v1/offices.routes";
+import designationsRouter from "./routes/v1/designations.routes";
 
 export function createApp(): Express {
   const app: Express = express();
@@ -42,6 +44,8 @@ export function createApp(): Express {
   // API v1 routes
   app.use("/api/v1/auth", authRouter);
   app.use("/api/v1/users", usersRouter);
+  app.use("/api/v1/offices", officesRouter);
+  app.use("/api/v1/designations", designationsRouter);
 
   // 404 catch-all
   app.use((_req: Request, _res: Response) => {
