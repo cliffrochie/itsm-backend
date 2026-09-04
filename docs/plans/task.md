@@ -1,8 +1,7 @@
 | Task | Status | Notes |
 | --- | --- | --- |
-| 1. Explore project context | Completed | Reviewed clients and users schema, services, validators, tests, seeds |
-| 2. Ask clarifying questions | Completed | Confirmed email is optional (nullable) on clients |
-| 3. Propose 2-3 approaches | Completed | User approved Approach 1 (Bi-directional auto-linking with unique nullable email) |
-| 4. Present design | Completed | Design sections presented and approved |
-| 5. Write design doc | Completed | Saved to docs/plans/2026-09-04-client-email-and-user-linking-design.md |
-| 6. Transition to implementation | Completed | Implementation plan written to docs/plans/2026-09-04-client-email-and-user-linking.md and registered in implementation_plan.md |
+| Task 1: Schema Update & Migration | completed | Add email column to clients table, update tests, generate migration |
+| Task 2: Client Validator Update | completed | Add email validation to client schemas and query |
+| Task 3: Client Service Auto-linking and Email Handling | completed | Implement email normalization, search, and user auto-link on client create |
+| Task 4: User Service Auto-linking to Existing Client | completed | Implement auto-linking unlinked client profile on user create |
+| Task 5: Seeders & Full Regression Suite | completed | Update seed data and run full test suite |
