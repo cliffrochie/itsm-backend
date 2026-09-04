@@ -18,7 +18,15 @@ export function validate(schema: ZodSchema, source: "body" | "query" | "params" 
       return;
     }
     // Update target with coerced/cleaned data
-    req[source] = result.data;
+    if (source === "body") {
+      req.body = result.data;
+    } else {
+      const target = req[source] as Record<string, unknown>;
+      for (const key of Object.keys(target)) {
+        delete target[key];
+      }
+      Object.assign(target, result.data);
+    }
     next();
   };
 }

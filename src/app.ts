@@ -8,6 +8,7 @@ import { NotFoundError } from "./types/errors";
 import { env } from "./config/env";
 
 import authRouter from "./routes/v1/auth.routes";
+import usersRouter from "./routes/v1/users.routes";
 
 export function createApp(): Express {
   const app: Express = express();
@@ -40,6 +41,7 @@ export function createApp(): Express {
 
   // API v1 routes
   app.use("/api/v1/auth", authRouter);
+  app.use("/api/v1/users", usersRouter);
 
   // 404 catch-all
   app.use((_req: Request, _res: Response) => {
