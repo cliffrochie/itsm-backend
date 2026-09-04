@@ -1,3 +1,4 @@
+import "./config/nodePolyfills";
 import express, { type Express, type Request, type Response } from "express";
 import cors from "cors";
 import helmet from "helmet";
@@ -5,6 +6,8 @@ import { errorHandler } from "./middlewares/errorHandler";
 import { formatSuccess } from "./responses/envelope";
 import { NotFoundError } from "./types/errors";
 import { env } from "./config/env";
+
+import authRouter from "./routes/v1/auth.routes";
 
 export function createApp(): Express {
   const app: Express = express();
@@ -34,6 +37,9 @@ export function createApp(): Express {
       )
     );
   });
+
+  // API v1 routes
+  app.use("/api/v1/auth", authRouter);
 
   // 404 catch-all
   app.use((_req: Request, _res: Response) => {
