@@ -1,6 +1,15 @@
 import type { Response, NextFunction } from "express";
 import { userService } from "../services/user.service";
 import { formatSuccess, formatPaginated } from "../responses/envelope";
+import { ForbiddenError } from "../types/errors";
+import {
+  requireUser,
+  canCreateUser,
+  canUpdateUser,
+  canManageUserRole,
+  canToggleUserStatus,
+  canDeleteUser,
+} from "../authorization/user.authorization";
 import type { AuthRequest } from "../types/auth";
 import type { CreateUserInput, UpdateUserInput, UserQueryInput } from "../validators/user.validator";
 
@@ -38,6 +47,11 @@ export class UserController {
 
   async store(req: AuthRequest, res: Response, next: NextFunction): Promise<void> {
     try {
+      const actor = requireUser(req.user);
+      if (!canCreateUser(actor)) {
+        throw new ForbiddenError("Only administrators can create user accounts.");
+      }
+
       const input = req.body as CreateUserInput;
       const created = await userService.createUser(input);
       res.status(201).json(formatSuccess(created, "User created successfully."));
@@ -48,8 +62,18 @@ export class UserController {
 
   async update(req: AuthRequest, res: Response, next: NextFunction): Promise<void> {
     try {
+      const actor = requireUser(req.user);
       const id = Number(req.params.id);
+      if (!canUpdateUser(actor, id)) {
+        throw new ForbiddenError("You may only update your own account.");
+      }
+
       const input = req.body as UpdateUserInput;
+      const changesPrivilege = input.role !== undefined || input.isActive !== undefined;
+      if (changesPrivilege && !canManageUserRole(actor)) {
+        throw new ForbiddenError("You are not allowed to change a role or account status.");
+      }
+
       const updated = await userService.updateUser(id, input);
       res.status(200).json(formatSuccess(updated, "User updated successfully."));
     } catch (error) {
@@ -59,6 +83,11 @@ export class UserController {
 
   async toggleStatus(req: AuthRequest, res: Response, next: NextFunction): Promise<void> {
     try {
+      const actor = requireUser(req.user);
+      if (!canToggleUserStatus(actor)) {
+        throw new ForbiddenError("Only administrators can change account status.");
+      }
+
       const id = Number(req.params.id);
       const { isActive } = req.body;
       const updated = await userService.toggleStatus(id, isActive);
@@ -70,6 +99,11 @@ export class UserController {
 
   async destroy(req: AuthRequest, res: Response, next: NextFunction): Promise<void> {
     try {
+      const actor = requireUser(req.user);
+      if (!canDeleteUser(actor)) {
+        throw new ForbiddenError("Only administrators can delete user accounts.");
+      }
+
       const id = Number(req.params.id);
       await userService.deleteUser(id);
       res.status(200).json(formatSuccess(null, "User deleted successfully."));
