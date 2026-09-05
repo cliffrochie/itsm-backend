@@ -128,4 +128,94 @@ describe("Users Endpoints (/api/v1/users)", () => {
     expect(res.status).toBe(200);
     expect(res.body.data.isActive).toBe(false);
   });
+
+  it("POST /api/v1/users forbids a non-admin from creating an account", async () => {
+    const app = createApp();
+    const createUser = vi.spyOn(userService, "createUser");
+
+    const res = await request(app)
+      .post("/api/v1/users")
+      .set("Authorization", `Bearer ${regularToken}`)
+      .send({
+        username: "escalated",
+        email: "escalated@itsm.local",
+        password: "Password123!",
+        firstName: "Esc",
+        lastName: "Alated",
+        role: "admin",
+        isActive: true,
+      });
+
+    expect(res.status).toBe(403);
+    expect(res.body.data).toBeNull();
+    expect(createUser).not.toHaveBeenCalled();
+  });
+
+  it("PUT /api/v1/users/:id forbids a non-admin from updating another account", async () => {
+    const app = createApp();
+    const updateUser = vi.spyOn(userService, "updateUser");
+
+    const res = await request(app)
+      .put("/api/v1/users/99")
+      .set("Authorization", `Bearer ${regularToken}`)
+      .send({ firstName: "Taken" });
+
+    expect(res.status).toBe(403);
+    expect(updateUser).not.toHaveBeenCalled();
+  });
+
+  it("PUT /api/v1/users/:id forbids a non-admin from promoting themselves", async () => {
+    const app = createApp();
+    const updateUser = vi.spyOn(userService, "updateUser");
+
+    const res = await request(app)
+      .put("/api/v1/users/2")
+      .set("Authorization", `Bearer ${regularToken}`)
+      .send({ role: "admin" });
+
+    expect(res.status).toBe(403);
+    expect(updateUser).not.toHaveBeenCalled();
+  });
+
+  it("PUT /api/v1/users/:id still lets a user edit their own profile fields", async () => {
+    const app = createApp();
+    vi.spyOn(userService, "updateUser").mockResolvedValue({
+      id: 2,
+      username: "regular",
+      firstName: "RENAMED",
+    } as any);
+
+    const res = await request(app)
+      .put("/api/v1/users/2")
+      .set("Authorization", `Bearer ${regularToken}`)
+      .send({ firstName: "Renamed" });
+
+    expect(res.status).toBe(200);
+    expect(res.body.data.firstName).toBe("RENAMED");
+  });
+
+  it("PATCH /api/v1/users/:id/status forbids a non-admin from activating an account", async () => {
+    const app = createApp();
+    const toggleStatus = vi.spyOn(userService, "toggleStatus");
+
+    const res = await request(app)
+      .patch("/api/v1/users/99/status")
+      .set("Authorization", `Bearer ${regularToken}`)
+      .send({ isActive: true });
+
+    expect(res.status).toBe(403);
+    expect(toggleStatus).not.toHaveBeenCalled();
+  });
+
+  it("DELETE /api/v1/users/:id forbids a non-admin from deleting an account", async () => {
+    const app = createApp();
+    const deleteUser = vi.spyOn(userService, "deleteUser");
+
+    const res = await request(app)
+      .delete("/api/v1/users/99")
+      .set("Authorization", `Bearer ${regularToken}`);
+
+    expect(res.status).toBe(403);
+    expect(deleteUser).not.toHaveBeenCalled();
+  });
 });
