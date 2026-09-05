@@ -7,6 +7,7 @@ import { serviceTickets } from "./serviceTickets";
 import { serviceTicketHistories } from "./serviceTicketHistories";
 import { notifications } from "./notifications";
 import { actionLogs } from "./actionLogs";
+import { personalAccessTokens } from "./personalAccessTokens";
 
 export * from "./users";
 export * from "./offices";
@@ -17,12 +18,14 @@ export * from "./serviceTicketHistories";
 export * from "./ticketCounters";
 export * from "./notifications";
 export * from "./actionLogs";
+export * from "./personalAccessTokens";
 
 export const usersRelations = relations(users, ({ many, one }) => ({
   ticketsAssigned: many(serviceTickets, { relationName: "engineerTickets" }),
   ticketsCreated: many(serviceTickets, { relationName: "creatorTickets" }),
   notifications: many(notifications),
   actionLogs: many(actionLogs),
+  accessTokens: many(personalAccessTokens),
   clientProfile: one(clients, {
     fields: [users.id],
     references: [clients.userId],
@@ -101,6 +104,13 @@ export const notificationsRelations = relations(notifications, ({ one }) => ({
 export const actionLogsRelations = relations(actionLogs, ({ one }) => ({
   user: one(users, {
     fields: [actionLogs.userId],
+    references: [users.id],
+  }),
+}));
+
+export const personalAccessTokensRelations = relations(personalAccessTokens, ({ one }) => ({
+  user: one(users, {
+    fields: [personalAccessTokens.userId],
     references: [users.id],
   }),
 }));

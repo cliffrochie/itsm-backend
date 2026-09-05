@@ -1,10 +1,15 @@
 import type { Response, NextFunction } from "express";
 import jwt from "jsonwebtoken";
 import { UnauthorizedError } from "../types/errors";
-import { env } from "../config/env";
+import { getJwtSecret } from "../config/env";
+import { tokenService } from "../services/token.service";
 import type { AuthRequest, AuthenticatedUser } from "../types/auth";
 
-export function authenticate(req: AuthRequest, _res: Response, next: NextFunction): void {
+export async function authenticate(
+  req: AuthRequest,
+  _res: Response,
+  next: NextFunction
+): Promise<void> {
   const authHeader = req.headers.authorization;
 
   if (!authHeader || !authHeader.startsWith("Bearer ")) {
@@ -16,13 +21,19 @@ export function authenticate(req: AuthRequest, _res: Response, next: NextFunctio
     throw new UnauthorizedError("Unauthenticated.");
   }
 
-  const jwtSecret = env.JWT_SECRET || process.env.JWT_SECRET || "default-secret-32-chars-long-fallback";
-
+  let decoded: AuthenticatedUser;
   try {
-    const decoded = jwt.verify(token, jwtSecret) as AuthenticatedUser;
-    req.user = decoded;
-    next();
+    decoded = jwt.verify(token, getJwtSecret()) as AuthenticatedUser;
   } catch {
     throw new UnauthorizedError("Unauthenticated.");
   }
+
+  // A valid signature is not enough: the token must also still be one this
+  // server recognizes, so a logged-out token stops working immediately rather
+  // than lingering until it expires.
+  await tokenService.assertActive(token);
+
+  req.user = decoded;
+  req.token = token;
+  next();
 }

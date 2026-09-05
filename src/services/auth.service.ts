@@ -4,7 +4,8 @@ import { eq, or } from "drizzle-orm";
 import { db } from "../db/client";
 import { users, type User } from "../db/schema/users";
 import { UnauthorizedError } from "../types/errors";
-import { env } from "../config/env";
+import { getJwtSecret, getJwtExpiresIn } from "../config/env";
+import { tokenService } from "./token.service";
 import type { LoginInput } from "../validators/auth.validator";
 
 export class AuthService {
@@ -29,9 +30,6 @@ export class AuthService {
       throw new UnauthorizedError("Invalid credentials.");
     }
 
-    const jwtSecret = env.JWT_SECRET || process.env.JWT_SECRET || "default-secret-32-chars-long-fallback";
-    const expiresIn = (env.JWT_EXPIRES_IN || "7d") as any;
-
     const token = jwt.sign(
       {
         id: user.id,
@@ -40,9 +38,14 @@ export class AuthService {
         role: user.role,
         isActive: user.isActive,
       },
-      jwtSecret,
-      { expiresIn }
+      getJwtSecret(),
+      { expiresIn: getJwtExpiresIn() as jwt.SignOptions["expiresIn"] }
     );
+
+    // Record the issued token so logout can revoke this session specifically.
+    const decoded = jwt.decode(token) as { exp?: number } | null;
+    const expiresAt = decoded?.exp ? new Date(decoded.exp * 1000) : new Date(Date.now() + 60 * 60 * 1000);
+    await tokenService.issue(user.id, token, expiresAt);
 
     const { password: _, ...userWithoutPassword } = user;
 
@@ -52,8 +55,8 @@ export class AuthService {
     };
   }
 
-  async logout(): Promise<void> {
-    return;
+  async logout(token: string): Promise<void> {
+    await tokenService.revoke(token);
   }
 }
 

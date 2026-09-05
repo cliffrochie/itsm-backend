@@ -10,4 +10,6 @@ export interface AuthenticatedUser {
 
 export interface AuthRequest extends Request {
   user?: AuthenticatedUser;
+  /** Raw bearer token for the current request, set by `authenticate`. */
+  token?: string;
 }
