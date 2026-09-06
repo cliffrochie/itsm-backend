@@ -1,6 +1,6 @@
 | Task | Status | Notes |
 | --- | --- | --- |
-| Task 1: Extend User Validator | completed | Added optional officeId & designationId to createUserSchema and tests |
-| Task 2: Implement Auto-Creation & Linking in UserService | completed | Added transactional user + client creation/linking and tests |
-| Task 3: OpenAPI Documentation Update | completed | Verified & tested officeId/designationId in OpenAPI request schema |
-| Task 4: Feature Tests & Full Regression | completed | Added POST /api/v1/users feature tests and verified all 207 tests pass |
+| Task 1: Install pino-pretty dependency | completed | Installed pino-pretty@13.1.3 |
+| Task 2: Configure in-process transport in logger | completed | Added conditional pino-pretty transport in src/config/logger.ts |
+| Task 3: Enhance logger unit tests | completed | Verified logger bindings and silent test output in tests/unit/logger.test.ts |
+| Task 4: Full verification & manual smoke test | completed | All 210 tests passed; verified formatted logs in dev and raw JSON in prod |
