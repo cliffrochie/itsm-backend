@@ -12,6 +12,13 @@ export const envSchema = z.object({
   // refresh. The client re-authenticates when it receives a 401.
   JWT_EXPIRES_IN: z.string().default("60m"),
   CORS_ORIGIN: z.string().default("http://localhost:5173"),
+  // Exposes the API reference in production, where it is off by default. Even
+  // when enabled it stays behind an administrator bearer token: a public spec
+  // is a map of every endpoint, role and payload.
+  DOCS_ENABLED: z
+    .union([z.enum(["true", "false"]), z.literal("")])
+    .optional()
+    .transform((v) => v === "true"),
   // Optional. When unset, error monitoring stays off — development, CI and the
   // test suite must never reach an external service.
   // An empty value counts as unset: .env.example ships `SENTRY_DSN=` and dotenv

@@ -8,6 +8,7 @@ import { formatSuccess } from "./responses/envelope";
 import { NotFoundError } from "./types/errors";
 import { env } from "./config/env";
 import { logger } from "./config/logger";
+import { mountDocs } from "./docs/serveDocs";
 
 import authRouter from "./routes/v1/auth.routes";
 import usersRouter from "./routes/v1/users.routes";
@@ -54,6 +55,8 @@ export function createApp(): Express {
       )
     );
   });
+
+  mountDocs(app);
 
   // API v1 routes
   app.use("/api/v1/auth", authRouter);
