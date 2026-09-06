@@ -43,7 +43,7 @@ export const errorEnvelope = z
   .object({
     data: z.null(),
     message: z.string().openapi({ example: "Forbidden." }),
-    errors: z.record(z.array(z.string())).nullable(),
+    errors: z.record(z.string(), z.array(z.string())).nullable(),
   })
   .openapi("ErrorEnvelope");
 
@@ -51,7 +51,7 @@ export const validationErrorEnvelope = z
   .object({
     data: z.null(),
     message: z.string().openapi({ example: "Validation failed." }),
-    errors: z.record(z.array(z.string())).openapi({
+    errors: z.record(z.string(), z.array(z.string())).openapi({
       example: { email: ["Invalid email address format"] },
     }),
   })

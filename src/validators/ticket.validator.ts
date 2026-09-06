@@ -1,5 +1,7 @@
 import { z } from "zod";
 
+export const ticketPriorities = z.enum(["low", "medium", "high", "urgent"]);
+
 export const createTicketSchema = z.object({
   taskType: z.string().min(1, "Task type is required").max(100),
   title: z.string().min(1, "Title is required").max(255),
@@ -9,14 +11,20 @@ export const createTicketSchema = z.object({
   equipmentTypeOthers: z.string().optional().nullable(),
   defectsFound: z.string().optional().nullable(),
   serviceRendered: z.string().optional().nullable(),
-  priority: z.enum(["low", "medium", "high", "urgent"]).default("low"),
+  priority: ticketPriorities.default("low"),
   remarks: z.string().optional().nullable(),
   adminRemarks: z.string().optional().nullable(),
   clientId: z.coerce.number().int().positive().optional().nullable(),
   serviceEngineerId: z.coerce.number().int().positive().optional().nullable(),
 });
 
+/**
+ * `priority` is redeclared without its create-time default: Zod 4 keeps
+ * `.default()` through `.partial()`, which would otherwise reset every updated
+ * ticket back to "low".
+ */
 export const updateTicketSchema = createTicketSchema.partial().extend({
+  priority: ticketPriorities.optional(),
   serviceStatus: z.enum(["open", "in_progress", "resolved", "closed", "cancelled"]).optional(),
   rating: z.coerce.number().int().min(1).max(5).optional().nullable(),
   ratingComment: z.string().optional().nullable(),

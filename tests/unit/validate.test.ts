@@ -45,14 +45,25 @@ describe("Validation Middleware (Zod)", () => {
 
     expect(next).not.toHaveBeenCalled();
     expect(res.status).toHaveBeenCalledWith(422);
-    expect(res.json).toHaveBeenCalledWith({
-      data: null,
-      message: "Validation failed.",
-      errors: {
-        name: ["Name must be at least 3 characters"],
-        age: ["Number must be greater than 0"],
-      },
-    });
+
+    const payload = (res.json as unknown as { mock: { calls: unknown[][] } }).mock
+      .calls[0]?.[0] as {
+      data: null;
+      message: string;
+      errors: Record<string, string[]>;
+    };
+
+    expect(payload.data).toBeNull();
+    expect(payload.message).toBe("Validation failed.");
+
+    // The message this application wrote is asserted exactly.
+    expect(payload.errors.name).toEqual(["Name must be at least 3 characters"]);
+
+    // `age` has no custom message, so its text is Zod's own and changes between
+    // Zod majors. The contract is that the field maps to a non-empty array of
+    // strings, so that is what is pinned rather than upstream copy.
+    expect(Array.isArray(payload.errors.age)).toBe(true);
+    expect(payload.errors.age.length).toBeGreaterThan(0);
   });
 });
 
