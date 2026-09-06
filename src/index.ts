@@ -2,6 +2,7 @@ import http from "node:http";
 import { Server as SocketIOServer } from "socket.io";
 import { createApp } from "./app";
 import { env } from "./config/env";
+import { logger } from "./config/logger";
 
 import { setSocketServer } from "./realtime/socket";
 
@@ -27,7 +28,7 @@ const PORT = env.PORT || 5000;
 
 if (process.env.NODE_ENV !== "test") {
   server.listen(PORT, () => {
-    console.log(`ITSM API Server running on port ${PORT} [${env.NODE_ENV}]`);
+    logger.info({ port: PORT, env: env.NODE_ENV }, "ITSM API server started");
   });
 }
 

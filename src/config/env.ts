@@ -12,6 +12,9 @@ export const envSchema = z.object({
   // refresh. The client re-authenticates when it receives a 401.
   JWT_EXPIRES_IN: z.string().default("60m"),
   CORS_ORIGIN: z.string().default("http://localhost:5173"),
+  LOG_LEVEL: z
+    .enum(["fatal", "error", "warn", "info", "debug", "trace", "silent"])
+    .default("info"),
 });
 
 export type Env = z.infer<typeof envSchema>;
