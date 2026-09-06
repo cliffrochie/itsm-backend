@@ -100,40 +100,72 @@ export class UserService {
     }
 
     const hashedPassword = await bcrypt.hash(input.password, 10);
-
-    const [inserted] = await db
-      .insert(users)
-      .values({
-        username: input.username,
-        email: input.email,
-        password: hashedPassword,
-        firstName: input.firstName.toUpperCase(),
-        middleName: input.middleName ? input.middleName.toUpperCase() : null,
-        lastName: input.lastName.toUpperCase(),
-        extensionName: input.extensionName ? input.extensionName.toUpperCase() : null,
-        contactNo: input.contactNo || null,
-        avatar: input.avatar || null,
-        role: input.role,
-        isActive: input.isActive,
-      })
-      .$returningId();
-
-    // Auto-link any existing unlinked client profile with matching email
     const userEmail = input.email.trim().toLowerCase();
-    const [matchingClient] = await db
-      .select()
-      .from(clients)
-      .where(and(eq(clients.email, userEmail), isNull(clients.userId)))
-      .limit(1);
 
-    if (matchingClient) {
-      await db
-        .update(clients)
-        .set({ userId: inserted.id })
-        .where(eq(clients.id, matchingClient.id));
-    }
+    const insertedUserId = await db.transaction(async (tx) => {
+      const [inserted] = await tx
+        .insert(users)
+        .values({
+          username: input.username,
+          email: input.email,
+          password: hashedPassword,
+          firstName: input.firstName.toUpperCase(),
+          middleName: input.middleName ? input.middleName.toUpperCase() : null,
+          lastName: input.lastName.toUpperCase(),
+          extensionName: input.extensionName ? input.extensionName.toUpperCase() : null,
+          contactNo: input.contactNo || null,
+          avatar: input.avatar || null,
+          role: input.role,
+          isActive: input.isActive,
+        })
+        .$returningId();
 
-    return this.getUserById(inserted.id);
+      // Check if client with matching email exists
+      const [existingClient] = await tx
+        .select()
+        .from(clients)
+        .where(eq(clients.email, userEmail))
+        .limit(1);
+
+      if (existingClient) {
+        if (existingClient.userId !== null && existingClient.userId !== inserted.id) {
+          throw new ValidationError("Validation failed.", {
+            email: ["A client profile with this email is already linked to another user account."],
+          });
+        }
+
+        const clientUpdates: Record<string, unknown> = {
+          userId: inserted.id,
+        };
+        if (input.officeId !== undefined) {
+          clientUpdates.officeId = input.officeId;
+        }
+        if (input.designationId !== undefined) {
+          clientUpdates.designationId = input.designationId;
+        }
+
+        await tx
+          .update(clients)
+          .set(clientUpdates)
+          .where(eq(clients.id, existingClient.id));
+      } else {
+        await tx.insert(clients).values({
+          firstName: input.firstName.toUpperCase(),
+          middleName: input.middleName ? input.middleName.toUpperCase() : null,
+          lastName: input.lastName.toUpperCase(),
+          extensionName: input.extensionName ? input.extensionName.toUpperCase() : null,
+          email: userEmail,
+          contactNo: input.contactNo || null,
+          officeId: input.officeId || null,
+          designationId: input.designationId || null,
+          userId: inserted.id,
+        });
+      }
+
+      return inserted.id;
+    });
+
+    return this.getUserById(insertedUserId);
   }
 
   async updateUser(id: number, input: UpdateUserInput): Promise<Omit<User, "password">> {
@@ -228,6 +260,44 @@ export class UserService {
       chars.push(all[bytes[i]! % all.length]);
     }
     return chars.join("");
+  }
+
+  async getTotalUserRoles(): Promise<{
+    total: number;
+    totalUsers: number;
+    superAdmin: number;
+    admin: number;
+    totalAdmin: number;
+    serviceEngineer: number;
+    totalStaff: number;
+    client: number;
+    totalUser: number;
+  }> {
+    const [result] = await db
+      .select({
+        total: sql<number>`count(*)`,
+        admin: sql<number>`sum(case when ${users.role} = 'admin' then 1 else 0 end)`,
+        serviceEngineer: sql<number>`sum(case when ${users.role} in ('service_engineer', 'staff') then 1 else 0 end)`,
+        client: sql<number>`sum(case when ${users.role} = 'user' then 1 else 0 end)`,
+      })
+      .from(users);
+
+    const total = Number(result?.total || 0);
+    const admin = Number(result?.admin || 0);
+    const serviceEngineer = Number(result?.serviceEngineer || 0);
+    const client = Number(result?.client || 0);
+
+    return {
+      total,
+      totalUsers: total,
+      superAdmin: 0,
+      admin,
+      totalAdmin: admin,
+      serviceEngineer,
+      totalStaff: serviceEngineer,
+      client,
+      totalUser: client,
+    };
   }
 }
 

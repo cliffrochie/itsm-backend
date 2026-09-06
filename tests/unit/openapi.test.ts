@@ -99,6 +99,13 @@ describe("OpenAPI document", () => {
       "403"
     );
   });
+
+  it("documents officeId and designationId in POST /api/v1/users request schema", () => {
+    const postUserBody = document.paths?.["/api/v1/users"]?.post?.requestBody as any;
+    const properties = postUserBody?.content?.["application/json"]?.schema?.properties;
+    expect(properties).toHaveProperty("officeId");
+    expect(properties).toHaveProperty("designationId");
+  });
 });
 
 describe("DOCS_ENABLED configuration", () => {

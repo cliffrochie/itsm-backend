@@ -14,6 +14,8 @@ export const createUserSchema = z.object({
   avatar: z.string().optional().nullable(),
   role: userRoles.default("user"),
   isActive: z.boolean().default(false),
+  officeId: z.coerce.number().int().positive().optional().nullable(),
+  designationId: z.coerce.number().int().positive().optional().nullable(),
 });
 
 /**
@@ -24,7 +26,7 @@ export const createUserSchema = z.object({
  */
 export const updateUserSchema = createUserSchema
   .partial()
-  .omit({ password: true })
+  .omit({ password: true, officeId: true, designationId: true })
   .extend({
     role: userRoles.optional(),
     isActive: z.boolean().optional(),

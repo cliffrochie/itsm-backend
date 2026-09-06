@@ -1,5 +1,6 @@
 import { beforeEach, vi } from "vitest";
 import { tokenService } from "../src/services/token.service";
+import { db } from "../src/db/client";
 
 /**
  * The auth flow now persists and checks issued tokens, so every authenticated
@@ -12,4 +13,6 @@ import { tokenService } from "../src/services/token.service";
 beforeEach(() => {
   vi.spyOn(tokenService, "assertActive").mockResolvedValue(undefined);
   vi.spyOn(tokenService, "revoke").mockResolvedValue(undefined);
+  vi.spyOn(db, "transaction").mockImplementation((async (cb: any) => cb(db)) as any);
 });
+
