@@ -63,7 +63,9 @@ describe("Logger request serialization", () => {
   it("is silent under NODE_ENV=test so the suite stays readable", () => {
     expect(process.env.NODE_ENV).toBe("test");
     expect(logger.level).toBe("silent");
+    expect(logger.bindings()).toEqual({ service: "itsm-backend" });
   });
+
 });
 
 describe("LOG_LEVEL configuration", () => {
