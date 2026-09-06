@@ -21,6 +21,8 @@ function resolveLevel(): pino.LevelWithSilent {
   return (env.LOG_LEVEL || process.env.LOG_LEVEL || "info") as pino.LevelWithSilent;
 }
 
+const isDev = (process.env.NODE_ENV ?? "development") === "development";
+
 export const logger = pino({
   level: resolveLevel(),
   base: { service: "itsm-backend" },
@@ -39,4 +41,15 @@ export const logger = pino({
     },
     err: pino.stdSerializers.err,
   },
+  transport: isDev
+    ? {
+        target: "pino-pretty",
+        options: {
+          colorize: true,
+          translateTime: "SYS:yyyy-mm-dd HH:MM:ss",
+          ignore: "pid,hostname",
+        },
+      }
+    : undefined,
 });
+
