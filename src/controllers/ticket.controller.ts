@@ -66,7 +66,7 @@ export class TicketController {
     }
   }
 
-  async totalServiceStatus(req: AuthRequest, res: Response, next: NextFunction): Promise<void> {
+  async totalServiceStatus(_req: AuthRequest, res: Response, next: NextFunction): Promise<void> {
     try {
       const result = await ticketService.getTotalServiceStatuses();
       res.status(200).json({
@@ -78,7 +78,7 @@ export class TicketController {
     }
   }
 
-  async totalTaskType(req: AuthRequest, res: Response, next: NextFunction): Promise<void> {
+  async totalTaskType(_req: AuthRequest, res: Response, next: NextFunction): Promise<void> {
     try {
       const result = await ticketService.getTotalTaskTypes();
       res.status(200).json({
@@ -90,7 +90,7 @@ export class TicketController {
     }
   }
 
-  async totalEquipmentType(req: AuthRequest, res: Response, next: NextFunction): Promise<void> {
+  async totalEquipmentType(_req: AuthRequest, res: Response, next: NextFunction): Promise<void> {
     try {
       const result = await ticketService.getTotalEquipmentTypes();
       res.status(200).json({

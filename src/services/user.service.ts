@@ -1,6 +1,6 @@
 import { randomBytes } from "node:crypto";
 import bcrypt from "bcrypt";
-import { eq, sql, and, or, like, isNull } from "drizzle-orm";
+import { eq, sql, and, or, like } from "drizzle-orm";
 import { db } from "../db/client";
 import { users, type User } from "../db/schema/users";
 import { clients } from "../db/schema/clients";

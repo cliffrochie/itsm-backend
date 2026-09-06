@@ -12,9 +12,9 @@ export async function seedClients(params: {
   const [walkin] = await db
     .insert(clients)
     .values({
-      firstName: "MARIA",
-      middleName: "SANTOS",
-      lastName: "DELA CRUZ",
+      firstName: "Maria",
+      middleName: "Santos",
+      lastName: "Dela Cruz",
       email: "maria.delacruz@example.com",
       contactNo: "09170001122",
       officeId: params.officeId,
@@ -27,9 +27,9 @@ export async function seedClients(params: {
   const [staffClient] = await db
     .insert(clients)
     .values({
-      firstName: "SARAH",
+      firstName: "Sarah",
       middleName: null,
-      lastName: "CONNOR",
+      lastName: "Connor",
       email: "sarah.connor@itsm.local",
       contactNo: "09189998877",
       officeId: params.officeId,

@@ -19,8 +19,8 @@ export async function seedUsers(): Promise<{ adminId: number; engineerId: number
         username: "admin",
         email: "admin@itsm.local",
         password: hashedPassword,
-        firstName: "SYSTEM",
-        lastName: "ADMINISTRATOR",
+        firstName: "System",
+        lastName: "Administrator",
         role: "admin",
         isActive: true,
       })
@@ -41,8 +41,8 @@ export async function seedUsers(): Promise<{ adminId: number; engineerId: number
         username: "engineer1",
         email: "engineer@itsm.local",
         password: hashedPassword,
-        firstName: "ALEX",
-        lastName: "MERCER",
+        firstName: "Alex",
+        lastName: "Mercado",
         role: "service_engineer",
         isActive: true,
       })
@@ -63,8 +63,8 @@ export async function seedUsers(): Promise<{ adminId: number; engineerId: number
         username: "staff1",
         email: "staff@itsm.local",
         password: hashedPassword,
-        firstName: "SARAH",
-        lastName: "CONNOR",
+        firstName: "Jose",
+        lastName: "Rodriguez",
         role: "staff",
         isActive: true,
       })
