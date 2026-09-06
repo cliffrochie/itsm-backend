@@ -86,6 +86,26 @@ describe("Reference Data Endpoints (/api/v1/offices, /api/v1/designations)", () 
     expect(res.status).toBe(201);
     expect(res.body.data.name).toBe("Systems Analyst");
   });
+
+  it("POST /api/v1/designations accepts title as an alias for name and returns 201", async () => {
+    const app = createApp();
+    const createSpy = vi.spyOn(designationService, "createDesignation").mockResolvedValue({
+      id: 3,
+      name: "Network Engineer",
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    });
+
+    const res = await request(app)
+      .post("/api/v1/designations")
+      .set("Authorization", `Bearer ${adminToken}`)
+      .send({ title: "Network Engineer" });
+
+    expect(res.status).toBe(201);
+    expect(res.body.data.name).toBe("Network Engineer");
+    expect(createSpy).toHaveBeenCalledWith({ name: "Network Engineer" });
+  });
+
   it("POST /api/v1/offices forbids a non-administrator from adding reference data", async () => {
     const app = createApp();
     const createOffice = vi.spyOn(officeService, "createOffice");
