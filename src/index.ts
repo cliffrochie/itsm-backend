@@ -3,8 +3,11 @@ import { Server as SocketIOServer } from "socket.io";
 import { createApp } from "./app";
 import { env } from "./config/env";
 import { logger } from "./config/logger";
+import { initSentry, reportException, flushSentry } from "./config/sentry";
 
 import { setSocketServer } from "./realtime/socket";
+
+initSentry();
 
 const app = createApp();
 const server = http.createServer(app);
@@ -33,3 +36,15 @@ if (process.env.NODE_ENV !== "test") {
 }
 
 export { server };
+
+// A crash still gets reported before the process goes down.
+process.on("uncaughtException", (err) => {
+  logger.fatal({ err }, "Uncaught exception");
+  reportException(err);
+  void flushSentry().then(() => process.exit(1));
+});
+
+process.on("unhandledRejection", (reason) => {
+  logger.error({ err: reason }, "Unhandled promise rejection");
+  reportException(reason);
+});

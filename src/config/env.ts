@@ -12,6 +12,11 @@ export const envSchema = z.object({
   // refresh. The client re-authenticates when it receives a 401.
   JWT_EXPIRES_IN: z.string().default("60m"),
   CORS_ORIGIN: z.string().default("http://localhost:5173"),
+  // Optional. When unset, error monitoring stays off — development, CI and the
+  // test suite must never reach an external service.
+  // An empty value counts as unset: .env.example ships `SENTRY_DSN=` and dotenv
+  // reads that as "", which a bare .url() would reject and take the boot down.
+  SENTRY_DSN: z.union([z.string().url(), z.literal("")]).optional(),
   // Number of reverse proxy hops in front of the app. 0 means the app is
   // exposed directly. Behind one nginx, set 1 — otherwise every request looks
   // like it came from the proxy, which both blanks the audit trail's IP column
