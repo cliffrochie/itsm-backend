@@ -4,6 +4,7 @@ import { formatSuccess } from "../responses/envelope";
 import { ForbiddenError } from "../types/errors";
 import { requireUser } from "../authorization/roles";
 import { canManageReferenceData } from "../authorization/reference.authorization";
+import { recordAudit } from "../audit/recordAudit";
 import type { AuthRequest } from "../types/auth";
 import type { CreateOfficeInput, UpdateOfficeInput } from "../validators/office.validator";
 
@@ -36,6 +37,8 @@ export class OfficeController {
 
       const input = req.body as CreateOfficeInput;
       const created = await officeService.createOffice(input);
+
+      await recordAudit(req, { action: "created", entity: "office", entityId: created.id });
       res.status(201).json(formatSuccess(created, "Office created successfully."));
     } catch (error) {
       next(error);
@@ -52,6 +55,13 @@ export class OfficeController {
       const id = Number(req.params.id);
       const input = req.body as UpdateOfficeInput;
       const updated = await officeService.updateOffice(id, input);
+
+      await recordAudit(req, {
+        action: "updated",
+        entity: "office",
+        entityId: id,
+        details: { fields: Object.keys(input) },
+      });
       res.status(200).json(formatSuccess(updated, "Office updated successfully."));
     } catch (error) {
       next(error);
@@ -67,6 +77,8 @@ export class OfficeController {
 
       const id = Number(req.params.id);
       await officeService.deleteOffice(id);
+
+      await recordAudit(req, { action: "deleted", entity: "office", entityId: id });
       res.status(200).json(formatSuccess(null, "Office deleted successfully."));
     } catch (error) {
       next(error);

@@ -4,6 +4,7 @@ import jwt from "jsonwebtoken";
 import { createApp } from "../../src/app";
 import { authService } from "../../src/services/auth.service";
 import { tokenService } from "../../src/services/token.service";
+import { actionLogService } from "../../src/services/actionLog.service";
 import { UnauthorizedError } from "../../src/types/errors";
 
 describe("Authentication Endpoints (/api/v1/auth)", () => {
@@ -124,5 +125,43 @@ describe("Authentication Endpoints (/api/v1/auth)", () => {
 
     expect(res.status).toBe(401);
     expect(res.body.message).toBe("Unauthenticated.");
+  });
+  it("records a failed login attempt without recording the password tried", async () => {
+    const app = createApp();
+    const log = vi.spyOn(actionLogService, "log").mockResolvedValue();
+    vi.spyOn(authService, "login").mockRejectedValue(new UnauthorizedError("Invalid credentials."));
+
+    const res = await request(app)
+      .post("/api/v1/auth/login")
+      .send({ identifier: "admin", password: "hunter2" });
+
+    expect(res.status).toBe(401);
+    expect(log).toHaveBeenCalledWith(
+      expect.objectContaining({
+        action: "login_failed",
+        entity: "auth",
+        userId: null,
+        details: { identifier: "admin" },
+      })
+    );
+    expect(JSON.stringify(log.mock.calls)).not.toContain("hunter2");
+  });
+
+  it("records a successful login against the account that signed in", async () => {
+    const app = createApp();
+    const log = vi.spyOn(actionLogService, "log").mockResolvedValue();
+    vi.spyOn(authService, "login").mockResolvedValue({
+      token: "mock-token",
+      user: { id: 7, username: "admin" } as any,
+    });
+
+    const res = await request(app)
+      .post("/api/v1/auth/login")
+      .send({ identifier: "admin", password: "Password123!" });
+
+    expect(res.status).toBe(200);
+    expect(log).toHaveBeenCalledWith(
+      expect.objectContaining({ action: "login_succeeded", entity: "auth", entityId: "7" })
+    );
   });
 });
