@@ -1,8 +1,8 @@
 import type { Request, Response, NextFunction } from "express";
-import type { ZodSchema, ZodError } from "zod";
+import type { ZodType, ZodError } from "zod";
 import { formatError } from "../responses/envelope";
 
-export function validate(schema: ZodSchema, source: "body" | "query" | "params" = "body") {
+export function validate(schema: ZodType, source: "body" | "query" | "params" = "body") {
   return (req: Request, res: Response, next: NextFunction): void => {
     const result = schema.safeParse(req[source]);
     if (!result.success) {

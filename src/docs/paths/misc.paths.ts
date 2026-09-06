@@ -96,7 +96,7 @@ registry.registerPath({
         z.object({
           status: z.string().openapi({ example: "ok" }),
           uptime: z.number().openapi({ example: 1234.5 }),
-          timestamp: z.string().datetime(),
+          timestamp: z.iso.datetime(),
         }),
         "Service is healthy."
       ),

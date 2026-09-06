@@ -26,9 +26,9 @@ function registerReferenceDomain(config: {
   tag: string;
   path: string;
   noun: string;
-  entity: z.ZodTypeAny;
-  createSchema: z.ZodTypeAny;
-  updateSchema: z.ZodTypeAny;
+  entity: z.ZodType;
+  createSchema: z.ZodType;
+  updateSchema: z.ZodType;
 }) {
   const tags = [config.tag];
   const { path, noun, entity } = config;

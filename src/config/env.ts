@@ -23,7 +23,7 @@ export const envSchema = z.object({
   // test suite must never reach an external service.
   // An empty value counts as unset: .env.example ships `SENTRY_DSN=` and dotenv
   // reads that as "", which a bare .url() would reject and take the boot down.
-  SENTRY_DSN: z.union([z.string().url(), z.literal("")]).optional(),
+  SENTRY_DSN: z.union([z.url(), z.literal("")]).optional(),
   // Number of reverse proxy hops in front of the app. 0 means the app is
   // exposed directly. Behind one nginx, set 1 — otherwise every request looks
   // like it came from the proxy, which both blanks the audit trail's IP column
@@ -41,7 +41,7 @@ export type Env = z.infer<typeof envSchema>;
 export function validateEnv(rawEnv: Record<string, unknown> = process.env): Env {
   const result = envSchema.safeParse(rawEnv);
   if (!result.success) {
-    const errorDetails = result.error.flatten().fieldErrors;
+    const errorDetails = z.flattenError(result.error).fieldErrors;
     console.error("Environment validation error:", errorDetails);
     throw new Error(`Invalid environment configuration: ${JSON.stringify(errorDetails)}`);
   }

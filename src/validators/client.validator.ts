@@ -5,7 +5,7 @@ export const createClientSchema = z.object({
   middleName: z.string().optional().nullable(),
   lastName: z.string().min(1, "Last name is required").max(100),
   extensionName: z.string().optional().nullable(),
-  email: z.string().email("Invalid email address format").max(191).optional().nullable(),
+  email: z.email("Invalid email address format").max(191).optional().nullable(),
   contactNo: z.string().optional().nullable(),
   officeId: z.coerce.number().int().positive().optional().nullable(),
   designationId: z.coerce.number().int().positive().optional().nullable(),
