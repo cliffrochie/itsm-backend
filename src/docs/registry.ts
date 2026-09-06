@@ -17,7 +17,7 @@ export const bearerAuth = registry.registerComponent("securitySchemes", "bearerA
  * spelled out at ~40 call sites where they could drift apart.
  */
 
-export function successEnvelope(data: z.ZodTypeAny, message: string) {
+export function successEnvelope(data: z.ZodType, message: string) {
   return z.object({
     data,
     message: z.string().openapi({ example: message }),
@@ -25,7 +25,7 @@ export function successEnvelope(data: z.ZodTypeAny, message: string) {
   });
 }
 
-export function paginatedEnvelope(item: z.ZodTypeAny, message: string) {
+export function paginatedEnvelope(item: z.ZodType, message: string) {
   return z.object({
     data: z.array(item),
     meta: z.object({
@@ -59,7 +59,7 @@ export const validationErrorEnvelope = z
 
 interface JsonResponse {
   description: string;
-  content: { "application/json": { schema: z.ZodTypeAny } };
+  content: { "application/json": { schema: z.ZodType } };
 }
 
 function errorResponse(description: string): JsonResponse {
@@ -100,11 +100,11 @@ export function errorResponses(options: ErrorOptions = {}) {
   return responses;
 }
 
-export function jsonBody(schema: z.ZodTypeAny) {
+export function jsonBody(schema: z.ZodType) {
   return { body: { content: { "application/json": { schema } } } };
 }
 
-export function okResponse(schema: z.ZodTypeAny, description: string) {
+export function okResponse(schema: z.ZodType, description: string) {
   return { description, content: { "application/json": { schema } } };
 }
 

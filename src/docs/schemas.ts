@@ -14,8 +14,8 @@ import "./registry";
  */
 
 const timestamps = {
-  createdAt: z.string().datetime().openapi({ example: "2026-09-01T02:00:00.000Z" }),
-  updatedAt: z.string().datetime().openapi({ example: "2026-09-01T02:00:00.000Z" }),
+  createdAt: z.iso.datetime().openapi({ example: "2026-09-01T02:00:00.000Z" }),
+  updatedAt: z.iso.datetime().openapi({ example: "2026-09-01T02:00:00.000Z" }),
 };
 
 export const userSchema = z
@@ -30,7 +30,7 @@ export const userSchema = z
     role: z.enum(["admin", "service_engineer", "staff", "user"]),
     isActive: z.boolean(),
     ...timestamps,
-    email: z.string().email().optional().openapi({
+    email: z.email().optional().openapi({
       description: "Present only for administrators, staff, and the account owner.",
     }),
     contactNo: z.string().nullable().optional().openapi({
@@ -46,7 +46,7 @@ export const clientSchema = z
     middleName: z.string().nullable(),
     lastName: z.string(),
     extensionName: z.string().nullable(),
-    email: z.string().email().nullable(),
+    email: z.email().nullable(),
     contactNo: z.string().nullable(),
     officeId: z.number().nullable(),
     designationId: z.number().nullable(),
@@ -81,7 +81,7 @@ export const ticketHistorySchema = z
     notes: z.string().nullable().optional().openapi({
       description: "Internal. Present only for administrators, staff and service engineers.",
     }),
-    createdAt: z.string().datetime(),
+    createdAt: z.iso.datetime(),
   })
   .openapi("ServiceTicketHistory");
 
@@ -122,7 +122,7 @@ export const notificationSchema = z
     title: z.string(),
     message: z.string(),
     isRead: z.boolean(),
-    createdAt: z.string().datetime(),
+    createdAt: z.iso.datetime(),
   })
   .openapi("Notification");
 
@@ -137,7 +137,7 @@ export const actionLogSchema = z
       description: "Hand-built per action. Never contains credentials or request bodies.",
     }),
     ipAddress: z.string().nullable(),
-    createdAt: z.string().datetime(),
+    createdAt: z.iso.datetime(),
   })
   .openapi("ActionLog");
 
@@ -152,7 +152,7 @@ export const authenticatedUserSchema = z
   .object({
     id: z.number(),
     username: z.string(),
-    email: z.string().email(),
+    email: z.email(),
     role: z.enum(["admin", "service_engineer", "staff", "user"]),
     isActive: z.boolean(),
   })
