@@ -84,3 +84,13 @@ export function canViewTicket(
   }
   return ticket.clientId !== null && actorClientIds.includes(ticket.clientId);
 }
+
+/**
+ * Internal working fields — the admin remarks column and the free-text notes on
+ * history entries — belong to the service desk, not the requester. The schema
+ * carries `remarks` separately from `adminRemarks` precisely so there is a
+ * requester-facing field and an internal one.
+ */
+export function canViewTicketInternals(actor: AuthenticatedUser): boolean {
+  return canViewAllTickets(actor);
+}
