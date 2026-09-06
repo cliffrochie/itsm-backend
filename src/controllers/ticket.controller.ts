@@ -2,6 +2,7 @@ import type { Response, NextFunction } from "express";
 import { ticketService } from "../services/ticket.service";
 import { clientService } from "../services/client.service";
 import { formatSuccess, formatPaginated } from "../responses/envelope";
+import { mapTicketResponse, mapTicketListResponse } from "../responses/ticket.response";
 import { ForbiddenError } from "../types/errors";
 import { requireUser } from "../authorization/roles";
 import {
@@ -11,6 +12,7 @@ import {
   canSubmitTicketFeedback,
   canViewAllTickets,
   canViewTicket,
+  canViewTicketInternals,
   type TicketPrincipals,
 } from "../authorization/ticket.authorization";
 import type { AuthenticatedUser, AuthRequest } from "../types/auth";
@@ -49,7 +51,7 @@ export class TicketController {
       const result = await ticketService.listTickets(query, requesterScope);
       res.status(200).json(
         formatPaginated(
-          result.tickets,
+          mapTicketListResponse(result.tickets, actor),
           {
             currentPage: result.page,
             lastPage: result.lastPage,
@@ -78,7 +80,9 @@ export class TicketController {
         throw new ForbiddenError("You may only view your own service tickets.");
       }
 
-      res.status(200).json(formatSuccess(ticket, "Service ticket retrieved successfully."));
+      res
+        .status(200)
+        .json(formatSuccess(mapTicketResponse(ticket, actor), "Service ticket retrieved successfully."));
     } catch (error) {
       next(error);
     }
@@ -86,9 +90,21 @@ export class TicketController {
 
   async store(req: AuthRequest, res: Response, next: NextFunction): Promise<void> {
     try {
+      const actor = requireUser(req.user);
       const input = req.body as CreateTicketInput;
-      const created = await ticketService.createTicket(input, req.user?.id);
-      res.status(201).json(formatSuccess(created, "Service ticket created successfully."));
+
+      // `adminRemarks` is the service desk's own field. Filing a ticket is open
+      // to everyone, so the requester must not be able to author it.
+      const setsAdminRemarks =
+        input.adminRemarks !== undefined && input.adminRemarks !== null && input.adminRemarks !== "";
+      if (setsAdminRemarks && !canViewTicketInternals(actor)) {
+        throw new ForbiddenError("Only the service desk can set admin remarks.");
+      }
+
+      const created = await ticketService.createTicket(input, actor.id);
+      res
+        .status(201)
+        .json(formatSuccess(mapTicketResponse(created, actor), "Service ticket created successfully."));
     } catch (error) {
       next(error);
     }
@@ -119,7 +135,9 @@ export class TicketController {
       }
 
       const updated = await ticketService.updateTicket(id, input, actor.id);
-      res.status(200).json(formatSuccess(updated, "Service ticket updated successfully."));
+      res
+        .status(200)
+        .json(formatSuccess(mapTicketResponse(updated, actor), "Service ticket updated successfully."));
     } catch (error) {
       next(error);
     }
@@ -137,7 +155,11 @@ export class TicketController {
       }
 
       const updated = await ticketService.updateStatus(id, serviceStatus, notes, actor.id);
-      res.status(200).json(formatSuccess(updated, "Service ticket status updated successfully."));
+      res
+        .status(200)
+        .json(
+          formatSuccess(mapTicketResponse(updated, actor), "Service ticket status updated successfully.")
+        );
     } catch (error) {
       next(error);
     }
@@ -153,7 +175,9 @@ export class TicketController {
       const id = Number(req.params.id);
       const { serviceEngineerId, notes } = req.body as AssignEngineerInput;
       const updated = await ticketService.assignEngineer(id, serviceEngineerId, notes, actor.id);
-      res.status(200).json(formatSuccess(updated, "Service engineer assigned successfully."));
+      res
+        .status(200)
+        .json(formatSuccess(mapTicketResponse(updated, actor), "Service engineer assigned successfully."));
     } catch (error) {
       next(error);
     }
@@ -172,7 +196,9 @@ export class TicketController {
       }
 
       const updated = await ticketService.submitFeedback(id, rating, ratingComment);
-      res.status(200).json(formatSuccess(updated, "Feedback submitted successfully."));
+      res
+        .status(200)
+        .json(formatSuccess(mapTicketResponse(updated, actor), "Feedback submitted successfully."));
     } catch (error) {
       next(error);
     }

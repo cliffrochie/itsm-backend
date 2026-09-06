@@ -281,4 +281,70 @@ describe("Service Tickets Endpoints (/api/v1/service-tickets)", () => {
 
     expect(res.status).toBe(200);
   });
+  it("GET /:id does not leak admin remarks to the requester", async () => {
+    const app = createApp();
+    vi.spyOn(ticketService, "getTicketById").mockResolvedValue({
+      ...assignedTicket,
+      remarks: "Happens every time",
+      adminRemarks: "Escalate to procurement",
+      histories: [{ id: 11, action: "status_changed", notes: "Out of warranty", createdAt: new Date() }],
+    } as any);
+    vi.spyOn(clientService, "findClientIdsForUser").mockResolvedValue([]);
+
+    const res = await request(app)
+      .get("/api/v1/service-tickets/1")
+      .set("Authorization", `Bearer ${requesterToken}`);
+
+    expect(res.status).toBe(200);
+    expect(res.body.data).not.toHaveProperty("adminRemarks");
+    expect(res.body.data.remarks).toBe("Happens every time");
+    expect(res.body.data.histories[0]).not.toHaveProperty("notes");
+    expect(res.body.data.histories[0].action).toBe("status_changed");
+  });
+
+  it("GET /:id still shows admin remarks to the assigned engineer", async () => {
+    const app = createApp();
+    vi.spyOn(ticketService, "getTicketById").mockResolvedValue({
+      ...assignedTicket,
+      adminRemarks: "Escalate to procurement",
+    } as any);
+
+    const res = await request(app)
+      .get("/api/v1/service-tickets/1")
+      .set("Authorization", `Bearer ${assignedEngineerToken}`);
+
+    expect(res.status).toBe(200);
+    expect(res.body.data.adminRemarks).toBe("Escalate to procurement");
+  });
+
+  it("POST / refuses a requester trying to author admin remarks", async () => {
+    const app = createApp();
+    const createTicket = vi.spyOn(ticketService, "createTicket");
+
+    const res = await request(app)
+      .post("/api/v1/service-tickets")
+      .set("Authorization", `Bearer ${requesterToken}`)
+      .send({ taskType: "repair", title: "Printer jam", adminRemarks: "Mark as urgent please" });
+
+    expect(res.status).toBe(403);
+    expect(createTicket).not.toHaveBeenCalled();
+  });
+
+  it("POST / still lets a requester file a normal ticket", async () => {
+    const app = createApp();
+    vi.spyOn(ticketService, "createTicket").mockResolvedValue({
+      id: 2,
+      ticketNo: "ST-202609-0002",
+      title: "Printer jam",
+      adminRemarks: null,
+    } as any);
+
+    const res = await request(app)
+      .post("/api/v1/service-tickets")
+      .set("Authorization", `Bearer ${requesterToken}`)
+      .send({ taskType: "repair", title: "Printer jam" });
+
+    expect(res.status).toBe(201);
+    expect(res.body.data).not.toHaveProperty("adminRemarks");
+  });
 });
