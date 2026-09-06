@@ -10,6 +10,9 @@ export class DesignationService {
   }
 
   async getDesignationById(id: number): Promise<Designation> {
+    if (!id || isNaN(id) || id <= 0) {
+      throw new NotFoundError(`Designation with ID ${id} not found.`);
+    }
     const [designation] = await db.select().from(designations).where(eq(designations.id, id)).limit(1);
     if (!designation) {
       throw new NotFoundError(`Designation with ID ${id} not found.`);

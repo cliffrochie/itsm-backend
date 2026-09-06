@@ -6,7 +6,7 @@ import { eq } from "drizzle-orm";
 export async function seedUsers(): Promise<{ adminId: number; engineerId: number; staffId: number }> {
   console.log("Seeding users...");
 
-  const hashedPassword = await bcrypt.hash("Admin123!", 10);
+  const hashedPassword = await bcrypt.hash(process.env.ADMIN_PASSWORD || "Admin123!", 10);
 
   // Admin user
   const existingAdmin = await db.select().from(users).where(eq(users.username, "admin")).limit(1);

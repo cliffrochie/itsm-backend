@@ -6,6 +6,7 @@ import { authService } from "../../src/services/auth.service";
 import { tokenService } from "../../src/services/token.service";
 import { actionLogService } from "../../src/services/actionLog.service";
 import { UnauthorizedError } from "../../src/types/errors";
+import { userService } from "../../src/services/user.service";
 
 describe("Authentication Endpoints (/api/v1/auth)", () => {
   it("POST /api/v1/auth/login returns 422 on invalid payload", async () => {
@@ -76,6 +77,44 @@ describe("Authentication Endpoints (/api/v1/auth)", () => {
     expect(res.status).toBe(200);
     expect(res.body.data.username).toBe("admin");
     expect(res.body.data.id).toBe(1);
+  });
+
+  it("GET /api/v1/auth/me returns full user profile including firstName and lastName", async () => {
+    const app = createApp();
+    const token = jwt.sign(
+      {
+        id: 42,
+        username: "jdoe",
+        email: "jdoe@itsm.local",
+        role: "user",
+        isActive: true,
+      },
+      "this-is-a-valid-32-characters-jwt-secret-string"
+    );
+
+    vi.spyOn(userService, "getUserById").mockResolvedValue({
+      id: 42,
+      username: "jdoe",
+      email: "jdoe@itsm.local",
+      firstName: "JOHN",
+      middleName: "M",
+      lastName: "DOE",
+      extensionName: null,
+      contactNo: "1234567890",
+      avatar: null,
+      role: "user",
+      isActive: true,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    } as any);
+
+    const res = await request(app)
+      .get("/api/v1/auth/me")
+      .set("Authorization", `Bearer ${token}`);
+
+    expect(res.status).toBe(200);
+    expect(res.body.data.firstName).toBe("JOHN");
+    expect(res.body.data.lastName).toBe("DOE");
   });
 
   it("DELETE /api/v1/auth/logout returns 200 success envelope", async () => {

@@ -3,7 +3,7 @@ import { ticketService } from "../services/ticket.service";
 import { clientService } from "../services/client.service";
 import { formatSuccess, formatPaginated } from "../responses/envelope";
 import { mapTicketResponse, mapTicketListResponse } from "../responses/ticket.response";
-import { ForbiddenError } from "../types/errors";
+import { ForbiddenError, NotFoundError } from "../types/errors";
 import { requireUser } from "../authorization/roles";
 import {
   canUpdateTicket,
@@ -66,10 +66,49 @@ export class TicketController {
     }
   }
 
+  async totalServiceStatus(req: AuthRequest, res: Response, next: NextFunction): Promise<void> {
+    try {
+      const result = await ticketService.getTotalServiceStatuses();
+      res.status(200).json({
+        ...result,
+        ...formatSuccess(result, "Total service statuses retrieved successfully."),
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  async totalTaskType(req: AuthRequest, res: Response, next: NextFunction): Promise<void> {
+    try {
+      const result = await ticketService.getTotalTaskTypes();
+      res.status(200).json({
+        ...result,
+        ...formatSuccess(result, "Total task types retrieved successfully."),
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  async totalEquipmentType(req: AuthRequest, res: Response, next: NextFunction): Promise<void> {
+    try {
+      const result = await ticketService.getTotalEquipmentTypes();
+      res.status(200).json({
+        ...result,
+        ...formatSuccess(result, "Total equipment types retrieved successfully."),
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
   async show(req: AuthRequest, res: Response, next: NextFunction): Promise<void> {
     try {
       const actor = requireUser(req.user);
       const id = Number(req.params.id);
+      if (isNaN(id) || id <= 0 || !Number.isInteger(id)) {
+        throw new NotFoundError(`Service ticket with ID ${req.params.id} not found.`);
+      }
       const ticket = await ticketService.getTicketById(id);
 
       const actorClientIds = canViewAllTickets(actor)
@@ -114,6 +153,9 @@ export class TicketController {
     try {
       const actor = requireUser(req.user);
       const id = Number(req.params.id);
+      if (isNaN(id) || id <= 0 || !Number.isInteger(id)) {
+        throw new NotFoundError(`Service ticket with ID ${req.params.id} not found.`);
+      }
       const input = req.body as UpdateTicketInput;
       const ticket = await ticketService.getTicketById(id);
 
@@ -147,6 +189,9 @@ export class TicketController {
     try {
       const actor = requireUser(req.user);
       const id = Number(req.params.id);
+      if (isNaN(id) || id <= 0 || !Number.isInteger(id)) {
+        throw new NotFoundError(`Service ticket with ID ${req.params.id} not found.`);
+      }
       const { serviceStatus, notes } = req.body as UpdateTicketStatusInput;
       const ticket = await ticketService.getTicketById(id);
 
@@ -173,6 +218,9 @@ export class TicketController {
       }
 
       const id = Number(req.params.id);
+      if (isNaN(id) || id <= 0 || !Number.isInteger(id)) {
+        throw new NotFoundError(`Service ticket with ID ${req.params.id} not found.`);
+      }
       const { serviceEngineerId, notes } = req.body as AssignEngineerInput;
       const updated = await ticketService.assignEngineer(id, serviceEngineerId, notes, actor.id);
       res
@@ -187,6 +235,9 @@ export class TicketController {
     try {
       const actor = requireUser(req.user);
       const id = Number(req.params.id);
+      if (isNaN(id) || id <= 0 || !Number.isInteger(id)) {
+        throw new NotFoundError(`Service ticket with ID ${req.params.id} not found.`);
+      }
       const { rating, ratingComment } = req.body as TicketFeedbackInput;
       const ticket = await ticketService.getTicketById(id);
 
@@ -199,6 +250,19 @@ export class TicketController {
       res
         .status(200)
         .json(formatSuccess(mapTicketResponse(updated, actor), "Feedback submitted successfully."));
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  async destroy(req: AuthRequest, res: Response, next: NextFunction): Promise<void> {
+    try {
+      const id = Number(req.params.id);
+      if (isNaN(id) || id <= 0 || !Number.isInteger(id)) {
+        throw new NotFoundError(`Service ticket with ID ${req.params.id} not found.`);
+      }
+      await ticketService.deleteTicket(id);
+      res.status(200).json(formatSuccess(null, "Service ticket deleted successfully."));
     } catch (error) {
       next(error);
     }

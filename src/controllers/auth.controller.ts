@@ -1,5 +1,6 @@
 import type { Response, NextFunction } from "express";
 import { authService } from "../services/auth.service";
+import { userService } from "../services/user.service";
 import { formatSuccess } from "../responses/envelope";
 import { recordAudit } from "../audit/recordAudit";
 import { UnauthorizedError } from "../types/errors";
@@ -41,7 +42,15 @@ export class AuthController {
 
   async me(req: AuthRequest, res: Response, next: NextFunction): Promise<void> {
     try {
-      res.status(200).json(formatSuccess(req.user, "User profile retrieved successfully."));
+      if (!req.user) {
+        throw new UnauthorizedError("Unauthenticated.");
+      }
+      try {
+        const fullUser = await userService.getUserById(req.user.id);
+        res.status(200).json(formatSuccess(fullUser, "User profile retrieved successfully."));
+      } catch {
+        res.status(200).json(formatSuccess(req.user, "User profile retrieved successfully."));
+      }
     } catch (error) {
       next(error);
     }

@@ -347,4 +347,89 @@ describe("Service Tickets Endpoints (/api/v1/service-tickets)", () => {
     expect(res.status).toBe(201);
     expect(res.body.data).not.toHaveProperty("adminRemarks");
   });
+
+  it("GET /api/v1/service-tickets/invalid-id returns 404 instead of server error", async () => {
+    const app = createApp();
+    const res = await request(app)
+      .get("/api/v1/service-tickets/not-a-number")
+      .set("Authorization", `Bearer ${adminToken}`);
+
+    expect(res.status).toBe(404);
+    expect(res.body.data).toBeNull();
+    expect(res.body.message).toContain("not found");
+  });
+
+  it("GET /api/v1/service-tickets/total-service-status returns 200 with status metrics", async () => {
+    const app = createApp();
+    const mockTotals = {
+      totalTickets: 10,
+      totalOpenedTickets: 4,
+      totalAssignedTickets: 3,
+      totalInProgressTickets: 2,
+      totalOnHoldTickets: 0,
+      totalEscalatedTickets: 0,
+      totalCanceledTickets: 1,
+      totalReOpenedTickets: 0,
+      totalResolvedTickets: 1,
+      totalClosedTickets: 2,
+    };
+
+    vi.spyOn(ticketService, "getTotalServiceStatuses").mockResolvedValue(mockTotals);
+
+    const res = await request(app)
+      .get("/api/v1/service-tickets/total-service-status")
+      .set("Authorization", `Bearer ${adminToken}`);
+
+    expect(res.status).toBe(200);
+    expect(res.body.totalTickets).toBe(10);
+    expect(res.body.totalOpenedTickets).toBe(4);
+    expect(res.body.data.totalTickets).toBe(10);
+  });
+
+  it("GET /api/v1/service-tickets/total-task-type returns 200 with task type metrics", async () => {
+    const app = createApp();
+    const mockTotals = {
+      totalTickets: 5,
+      totalIncident: 3,
+      totalServiceRequest: 2,
+      totalAssetRequest: 0,
+      totalMaintenance: 0,
+      totalConsultation: 0,
+      totalAccessibility: 0,
+    };
+
+    vi.spyOn(ticketService, "getTotalTaskTypes").mockResolvedValue(mockTotals);
+
+    const res = await request(app)
+      .get("/api/v1/service-tickets/total-task-type")
+      .set("Authorization", `Bearer ${adminToken}`);
+
+    expect(res.status).toBe(200);
+    expect(res.body.totalIncident).toBe(3);
+    expect(res.body.data.totalIncident).toBe(3);
+  });
+
+  it("GET /api/v1/service-tickets/total-equipment-type returns 200 with equipment type metrics", async () => {
+    const app = createApp();
+    const mockTotals = {
+      totalTickets: 5,
+      totalComputer: 2,
+      totalPrinter: 1,
+      totalScanner: 0,
+      totalMobileDevice: 1,
+      totalNetworkRelated: 1,
+      totalSoftwareApplication: 0,
+      totalOthers: 0,
+    };
+
+    vi.spyOn(ticketService, "getTotalEquipmentTypes").mockResolvedValue(mockTotals);
+
+    const res = await request(app)
+      .get("/api/v1/service-tickets/total-equipment-type")
+      .set("Authorization", `Bearer ${adminToken}`);
+
+    expect(res.status).toBe(200);
+    expect(res.body.totalComputer).toBe(2);
+    expect(res.body.data.totalComputer).toBe(2);
+  });
 });

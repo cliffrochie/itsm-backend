@@ -1,3 +1,4 @@
+import "./nodePolyfills";
 import { z } from "zod";
 import dotenv from "dotenv";
 
@@ -39,7 +40,21 @@ export const envSchema = z.object({
 export type Env = z.infer<typeof envSchema>;
 
 export function validateEnv(rawEnv: Record<string, unknown> = process.env): Env {
-  const result = envSchema.safeParse(rawEnv);
+  const envToValidate = { ...rawEnv };
+
+  if (!envToValidate.DATABASE_URL && (envToValidate.DATABASE_HOST || envToValidate.DATABASE_NAME)) {
+    const user = envToValidate.DATABASE_USER ? encodeURIComponent(String(envToValidate.DATABASE_USER)) : "root";
+    const pass =
+      envToValidate.DATABASE_PASS !== undefined && envToValidate.DATABASE_PASS !== ""
+        ? `:${encodeURIComponent(String(envToValidate.DATABASE_PASS))}`
+        : "";
+    const host = envToValidate.DATABASE_HOST || "localhost";
+    const port = envToValidate.DATABASE_PORT || 3306;
+    const dbName = envToValidate.DATABASE_NAME || "";
+    envToValidate.DATABASE_URL = `mysql://${user}${pass}@${host}:${port}/${dbName}`;
+  }
+
+  const result = envSchema.safeParse(envToValidate);
   if (!result.success) {
     const errorDetails = z.flattenError(result.error).fieldErrors;
     console.error("Environment validation error:", errorDetails);

@@ -70,6 +70,9 @@ export class ClientService {
   }
 
   async getClientById(id: number): Promise<Client> {
+    if (!id || isNaN(id) || id <= 0) {
+      throw new NotFoundError(`Client with ID ${id} not found.`);
+    }
     const [client] = await db.select().from(clients).where(eq(clients.id, id)).limit(1);
     if (!client) {
       throw new NotFoundError(`Client with ID ${id} not found.`);
