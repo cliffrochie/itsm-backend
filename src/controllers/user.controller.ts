@@ -2,7 +2,7 @@ import type { Response, NextFunction } from "express";
 import { userService } from "../services/user.service";
 import { formatSuccess, formatPaginated } from "../responses/envelope";
 import { mapUserResponse, mapUserListResponse } from "../responses/user.response";
-import { ForbiddenError } from "../types/errors";
+import { ForbiddenError, NotFoundError } from "../types/errors";
 import { requireUser } from "../authorization/roles";
 import {
   canCreateUser,
@@ -45,10 +45,25 @@ export class UserController {
     }
   }
 
+  async totalUserRole(_req: AuthRequest, res: Response, next: NextFunction): Promise<void> {
+    try {
+      const result = await userService.getTotalUserRoles();
+      res.status(200).json({
+        ...result,
+        ...formatSuccess(result, "Total user roles retrieved successfully."),
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
   async show(req: AuthRequest, res: Response, next: NextFunction): Promise<void> {
     try {
       const actor = requireUser(req.user);
       const id = Number(req.params.id);
+      if (isNaN(id) || id <= 0 || !Number.isInteger(id)) {
+        throw new NotFoundError(`User with ID ${req.params.id} not found.`);
+      }
       const user = await userService.getUserById(id);
       res
         .status(200)

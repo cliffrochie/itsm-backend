@@ -438,4 +438,44 @@ describe("Users Endpoints (/api/v1/users)", () => {
       expect.objectContaining({ action: "password_reset", entity: "user" })
     );
   });
+
+  it("GET /api/v1/users/total-user-role returns 200 with role metrics", async () => {
+    const app = createApp();
+    const mockTotals = {
+      total: 10,
+      totalUsers: 10,
+      superAdmin: 0,
+      admin: 2,
+      totalAdmin: 2,
+      serviceEngineer: 3,
+      totalStaff: 3,
+      client: 5,
+      totalUser: 5,
+    };
+
+    vi.spyOn(userService, "getTotalUserRoles").mockResolvedValue(mockTotals);
+
+    const res = await request(app)
+      .get("/api/v1/users/total-user-role")
+      .set("Authorization", `Bearer ${adminToken}`);
+
+    expect(res.status).toBe(200);
+    expect(res.body.total).toBe(10);
+    expect(res.body.admin).toBe(2);
+    expect(res.body.totalAdmin).toBe(2);
+    expect(res.body.serviceEngineer).toBe(3);
+    expect(res.body.client).toBe(5);
+    expect(res.body.data.total).toBe(10);
+  });
+
+  it("GET /api/v1/users/:id with non-numeric id returns 404", async () => {
+    const app = createApp();
+
+    const res = await request(app)
+      .get("/api/v1/users/abc")
+      .set("Authorization", `Bearer ${adminToken}`);
+
+    expect(res.status).toBe(404);
+    expect(res.body.message).toContain("User with ID abc not found");
+  });
 });

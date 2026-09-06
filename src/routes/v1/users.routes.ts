@@ -22,6 +22,14 @@ router.post("/", validate(createUserSchema, "body"), (req, res, next) => {
   userController.store(req, res, next);
 });
 
+router.get("/total-user-role", (req, res, next) => {
+  userController.totalUserRole(req, res, next);
+});
+
+router.get("/total-user-roles", (req, res, next) => {
+  userController.totalUserRole(req, res, next);
+});
+
 router.get("/:id", (req, res, next) => {
   userController.show(req, res, next);
 });
