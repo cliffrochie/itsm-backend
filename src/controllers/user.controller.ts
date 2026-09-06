@@ -1,6 +1,7 @@
 import type { Response, NextFunction } from "express";
 import { userService } from "../services/user.service";
 import { formatSuccess, formatPaginated } from "../responses/envelope";
+import { mapUserResponse, mapUserListResponse } from "../responses/user.response";
 import { ForbiddenError } from "../types/errors";
 import { requireUser } from "../authorization/roles";
 import {
@@ -23,11 +24,12 @@ import type {
 export class UserController {
   async index(req: AuthRequest, res: Response, next: NextFunction): Promise<void> {
     try {
+      const actor = requireUser(req.user);
       const query = req.query as unknown as UserQueryInput;
       const result = await userService.listUsers(query);
       res.status(200).json(
         formatPaginated(
-          result.users,
+          mapUserListResponse(result.users, actor),
           {
             currentPage: result.page,
             lastPage: result.lastPage,
@@ -44,9 +46,12 @@ export class UserController {
 
   async show(req: AuthRequest, res: Response, next: NextFunction): Promise<void> {
     try {
+      const actor = requireUser(req.user);
       const id = Number(req.params.id);
       const user = await userService.getUserById(id);
-      res.status(200).json(formatSuccess(user, "User retrieved successfully."));
+      res
+        .status(200)
+        .json(formatSuccess(mapUserResponse(user, actor), "User retrieved successfully."));
     } catch (error) {
       next(error);
     }

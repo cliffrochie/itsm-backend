@@ -301,4 +301,36 @@ describe("Users Endpoints (/api/v1/users)", () => {
       expect(resetPassword).toHaveBeenCalledWith(99);
     });
   });
+  it("GET /api/v1/users withholds contact details from a non-privileged viewer", async () => {
+    const app = createApp();
+    vi.spyOn(userService, "listUsers").mockResolvedValue({
+      users: [
+        {
+          id: 1,
+          username: "admin",
+          email: "admin@itsm.local",
+          firstName: "ADMIN",
+          middleName: null,
+          lastName: "USER",
+          extensionName: null,
+          contactNo: "09999999999",
+          avatar: null,
+          role: "admin",
+          isActive: true,
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        },
+      ] as any,
+      total: 1, page: 1, limit: 15, lastPage: 1,
+    });
+
+    const res = await request(app)
+      .get("/api/v1/users")
+      .set("Authorization", `Bearer ${regularToken}`);
+
+    expect(res.status).toBe(200);
+    expect(res.body.data[0].firstName).toBe("ADMIN");
+    expect(res.body.data[0]).not.toHaveProperty("email");
+    expect(res.body.data[0]).not.toHaveProperty("contactNo");
+  });
 });

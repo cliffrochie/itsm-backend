@@ -1,4 +1,4 @@
-import { isAdmin } from "./roles";
+import { isAdmin, isStaff } from "./roles";
 import type { AuthenticatedUser } from "../types/auth";
 
 /**
@@ -39,4 +39,16 @@ export function canChangeUserPassword(actor: AuthenticatedUser, targetUserId: nu
 
 export function canDeleteUser(actor: AuthenticatedUser): boolean {
   return isAdmin(actor);
+}
+
+/**
+ * Email addresses and contact numbers are only for the people who need to
+ * reach users — administrators and service desk staff — plus the account
+ * owner. Everyone else sees the directory fields without the contact details.
+ */
+export function canViewUserContactDetails(
+  actor: AuthenticatedUser,
+  targetUserId: number
+): boolean {
+  return isAdmin(actor) || isStaff(actor) || actor.id === targetUserId;
 }

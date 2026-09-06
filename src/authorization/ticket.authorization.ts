@@ -1,4 +1,4 @@
-import { isAdmin } from "./roles";
+import { isAdmin, isStaff, isServiceEngineer } from "./roles";
 import type { AuthenticatedUser } from "../types/auth";
 
 /**
@@ -57,4 +57,30 @@ export function canSubmitTicketFeedback(
     return true;
   }
   return actorOwnsTicketClient;
+}
+
+/**
+ * Everyone running the service desk sees the whole queue — engineers need to
+ * see unassigned work to pick it up. A plain user sees only their own tickets.
+ */
+export function canViewAllTickets(actor: AuthenticatedUser): boolean {
+  return isAdmin(actor) || isStaff(actor) || isServiceEngineer(actor);
+}
+
+/**
+ * A ticket is the requester's own if they filed it, or if it was filed for a
+ * client profile they own — staff routinely file on a client's behalf.
+ */
+export function canViewTicket(
+  actor: AuthenticatedUser,
+  ticket: TicketPrincipals,
+  actorClientIds: number[]
+): boolean {
+  if (canViewAllTickets(actor)) {
+    return true;
+  }
+  if (ticket.createdById !== null && ticket.createdById === actor.id) {
+    return true;
+  }
+  return ticket.clientId !== null && actorClientIds.includes(ticket.clientId);
 }

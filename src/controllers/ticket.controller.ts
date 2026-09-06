@@ -9,6 +9,8 @@ import {
   canChangeTicketStatus,
   canAssignServiceEngineer,
   canSubmitTicketFeedback,
+  canViewAllTickets,
+  canViewTicket,
   type TicketPrincipals,
 } from "../authorization/ticket.authorization";
 import type { AuthenticatedUser, AuthRequest } from "../types/auth";
@@ -35,8 +37,16 @@ async function actorOwnsTicketClient(
 export class TicketController {
   async index(req: AuthRequest, res: Response, next: NextFunction): Promise<void> {
     try {
+      const actor = requireUser(req.user);
       const query = req.query as unknown as TicketQueryInput;
-      const result = await ticketService.listTickets(query);
+
+      // A plain user only ever sees tickets they filed, or that were filed for
+      // a client profile they own.
+      const requesterScope = canViewAllTickets(actor)
+        ? undefined
+        : { userId: actor.id, clientIds: await clientService.findClientIdsForUser(actor.id) };
+
+      const result = await ticketService.listTickets(query, requesterScope);
       res.status(200).json(
         formatPaginated(
           result.tickets,
@@ -56,8 +66,18 @@ export class TicketController {
 
   async show(req: AuthRequest, res: Response, next: NextFunction): Promise<void> {
     try {
+      const actor = requireUser(req.user);
       const id = Number(req.params.id);
       const ticket = await ticketService.getTicketById(id);
+
+      const actorClientIds = canViewAllTickets(actor)
+        ? []
+        : await clientService.findClientIdsForUser(actor.id);
+
+      if (!canViewTicket(actor, ticket, actorClientIds)) {
+        throw new ForbiddenError("You may only view your own service tickets.");
+      }
+
       res.status(200).json(formatSuccess(ticket, "Service ticket retrieved successfully."));
     } catch (error) {
       next(error);
