@@ -3,10 +3,11 @@ import { ZodError } from "zod";
 import { AppError } from "../types/errors";
 import { formatError } from "../responses/envelope";
 import { logger } from "../config/logger";
+import { reportException } from "../config/sentry";
 
 export function errorHandler(
   err: unknown,
-  _req: Request,
+  req: Request,
   res: Response,
   _next: NextFunction
 ): void {
@@ -34,5 +35,13 @@ export function errorHandler(
   }
 
   logger.error({ err }, "Unhandled server error");
+
+  // Only genuinely unexpected failures reach Sentry. The branches above —
+  // validation, auth, not-found, malformed JSON — returned already.
+  reportException(err, {
+    userId: (req as Request & { user?: { id?: number } }).user?.id ?? null,
+    route: req.originalUrl,
+    method: req.method,
+  });
   res.status(500).json(formatError("Internal server error.", null));
 }
