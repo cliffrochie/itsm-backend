@@ -1,23 +1,10 @@
-import { UnauthorizedError } from "../types/errors";
+import { isAdmin } from "./roles";
 import type { AuthenticatedUser } from "../types/auth";
 
 /**
- * Authorization guards for the user domain.
- *
- * These are authoritative: role-aware routing in the web and mobile clients is
- * UX only. Every user mutation must pass through a guard here.
+ * Authorization guards for the user domain. Shared role predicates and
+ * `requireUser` live in `./roles`.
  */
-
-export function requireUser(actor: AuthenticatedUser | undefined): AuthenticatedUser {
-  if (!actor) {
-    throw new UnauthorizedError("Unauthenticated.");
-  }
-  return actor;
-}
-
-export function isAdmin(actor: AuthenticatedUser): boolean {
-  return actor.role === "admin";
-}
 
 export function canCreateUser(actor: AuthenticatedUser): boolean {
   return isAdmin(actor);

@@ -2,8 +2,8 @@ import type { Response, NextFunction } from "express";
 import { userService } from "../services/user.service";
 import { formatSuccess, formatPaginated } from "../responses/envelope";
 import { ForbiddenError } from "../types/errors";
+import { requireUser } from "../authorization/roles";
 import {
-  requireUser,
   canCreateUser,
   canUpdateUser,
   canManageUserRole,

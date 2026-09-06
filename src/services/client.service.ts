@@ -131,6 +131,17 @@ export class ClientService {
     return this.getClientById(id);
   }
 
+  /** Whether `userId` is the account linked to client `clientId`. */
+  async isClientOwnedByUser(clientId: number, userId: number): Promise<boolean> {
+    const rows = await db
+      .select({ id: clients.id })
+      .from(clients)
+      .where(and(eq(clients.id, clientId), eq(clients.userId, userId)))
+      .limit(1);
+
+    return Boolean(rows[0]);
+  }
+
   async deleteClient(id: number): Promise<void> {
     await this.getClientById(id);
     await db.delete(clients).where(eq(clients.id, id));
