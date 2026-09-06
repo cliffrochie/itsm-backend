@@ -3,6 +3,8 @@ import request from "supertest";
 import jwt from "jsonwebtoken";
 import { createApp } from "../../src/app";
 import { authService } from "../../src/services/auth.service";
+import { tokenService } from "../../src/services/token.service";
+import { UnauthorizedError } from "../../src/types/errors";
 
 describe("Authentication Endpoints (/api/v1/auth)", () => {
   it("POST /api/v1/auth/login returns 422 on invalid payload", async () => {
@@ -87,6 +89,40 @@ describe("Authentication Endpoints (/api/v1/auth)", () => {
       .set("Authorization", `Bearer ${token}`);
 
     expect(res.status).toBe(200);
+
     expect(res.body.message).toContain("Logged out");
+  });
+  it("DELETE /api/v1/auth/logout revokes the token used on that request", async () => {
+    const app = createApp();
+    const token = jwt.sign(
+      { id: 1, username: "admin", email: "admin@itsm.local", role: "admin", isActive: true },
+      "this-is-a-valid-32-characters-jwt-secret-string"
+    );
+    const revoke = vi.spyOn(tokenService, "revoke").mockResolvedValue();
+
+    const res = await request(app)
+      .delete("/api/v1/auth/logout")
+      .set("Authorization", `Bearer ${token}`);
+
+    expect(res.status).toBe(200);
+    expect(revoke).toHaveBeenCalledWith(token);
+  });
+
+  it("GET /api/v1/auth/me rejects a correctly signed but revoked token", async () => {
+    const app = createApp();
+    const token = jwt.sign(
+      { id: 1, username: "admin", email: "admin@itsm.local", role: "admin", isActive: true },
+      "this-is-a-valid-32-characters-jwt-secret-string"
+    );
+    vi.spyOn(tokenService, "assertActive").mockRejectedValue(
+      new UnauthorizedError("Unauthenticated.")
+    );
+
+    const res = await request(app)
+      .get("/api/v1/auth/me")
+      .set("Authorization", `Bearer ${token}`);
+
+    expect(res.status).toBe(401);
+    expect(res.body.message).toBe("Unauthenticated.");
   });
 });

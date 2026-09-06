@@ -15,6 +15,13 @@
       "when": 1788491466141,
       "tag": "0001_rare_quasimodo",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "5",
+      "when": 1788632540727,
+      "tag": "0002_new_tarantula",
+      "breakpoints": true
     }
   ]
 }

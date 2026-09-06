@@ -23,9 +23,9 @@ export class AuthController {
     }
   }
 
-  async logout(_req: AuthRequest, res: Response, next: NextFunction): Promise<void> {
+  async logout(req: AuthRequest, res: Response, next: NextFunction): Promise<void> {
     try {
-      await authService.logout();
+      await authService.logout(req.token as string);
       res.status(200).json(formatSuccess(null, "Logged out successfully."));
     } catch (error) {
       next(error);
