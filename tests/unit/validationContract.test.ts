@@ -48,8 +48,8 @@ describe("Unknown keys are stripped from a validated body", () => {
   });
 
   it("drops a privileged field that the update schema deliberately omits", () => {
-    // updateUserSchema is createUserSchema.partial().omit({ password: true }).
-    // A password must not be settable through the update endpoint.
+    // updateUserSchema omits password. It must not be settable through the
+    // update endpoint, only through the dedicated password flows.
     const { req, next } = runValidate(updateUserSchema, {
       firstName: "Renamed",
       password: "smuggled-password",
@@ -156,6 +156,46 @@ describe("The 422 error contract", () => {
       firstName: "X",
       lastName: "Y",
       role: "superadmin",
+    });
+
+    expect(result.success).toBe(false);
+  });
+});
+
+describe("Email acceptance", () => {
+  /**
+   * Zod 4 tightened email validation. These are the shapes real accounts use,
+   * pinned so a future change cannot quietly start rejecting people who can
+   * currently sign in.
+   */
+  const accepted = [
+    "juan@itsm.local",
+    "juan.dela-cruz@dof.gov.ph",
+    "user+tag@example.com",
+    "first.last@sub.domain.example.org",
+    "user_name@example-site.com",
+    "JUAN@ITSM.LOCAL",
+  ];
+
+  it.each(accepted)("accepts %s", (email) => {
+    const result = createUserSchema.safeParse({
+      username: "someone",
+      email,
+      password: "Password123!",
+      firstName: "Some",
+      lastName: "One",
+    });
+
+    expect(result.success).toBe(true);
+  });
+
+  it("still rejects a value that is not an email at all", () => {
+    const result = createUserSchema.safeParse({
+      username: "someone",
+      email: "not-an-email",
+      password: "Password123!",
+      firstName: "Some",
+      lastName: "One",
     });
 
     expect(result.success).toBe(false);

@@ -133,7 +133,7 @@ export const actionLogSchema = z
     action: z.string().openapi({ example: "password_changed" }),
     entity: z.string().openapi({ example: "user" }),
     entityId: z.string().nullable().openapi({ example: "42" }),
-    details: z.record(z.unknown()).nullable().openapi({
+    details: z.record(z.string(), z.unknown()).nullable().openapi({
       description: "Hand-built per action. Never contains credentials or request bodies.",
     }),
     ipAddress: z.string().nullable(),

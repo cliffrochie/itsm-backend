@@ -1,5 +1,7 @@
 import { z } from "zod";
 
+export const userRoles = z.enum(["admin", "service_engineer", "staff", "user"]);
+
 export const createUserSchema = z.object({
   username: z.string().min(3, "Username must be at least 3 characters").max(50),
   email: z.string().email("Invalid email address format"),
@@ -10,17 +12,29 @@ export const createUserSchema = z.object({
   extensionName: z.string().optional().nullable(),
   contactNo: z.string().optional().nullable(),
   avatar: z.string().optional().nullable(),
-  role: z.enum(["admin", "service_engineer", "staff", "user"]).default("user"),
+  role: userRoles.default("user"),
   isActive: z.boolean().default(false),
 });
 
-export const updateUserSchema = createUserSchema.partial().omit({ password: true });
+/**
+ * Zod 4 keeps `.default()` through `.partial()`, so deriving this straight from
+ * createUserSchema would inject role: "user" and isActive: false into every
+ * update — silently demoting and deactivating anyone whose name was edited.
+ * Both fields are redeclared here without their create-time defaults.
+ */
+export const updateUserSchema = createUserSchema
+  .partial()
+  .omit({ password: true })
+  .extend({
+    role: userRoles.optional(),
+    isActive: z.boolean().optional(),
+  });
 
 export const userQuerySchema = z.object({
   page: z.coerce.number().int().positive().default(1),
   limit: z.coerce.number().int().positive().default(15),
   search: z.string().optional(),
-  role: z.enum(["admin", "service_engineer", "staff", "user"]).optional(),
+  role: userRoles.optional(),
   isActive: z
     .string()
     .transform((val) => val === "true")
