@@ -7,6 +7,8 @@ import {
   canManageUserRole,
   canToggleUserStatus,
   canDeleteUser,
+  canResetUserPassword,
+  canChangeUserPassword,
 } from "../../src/authorization/user.authorization";
 import { UnauthorizedError } from "../../src/types/errors";
 import type { AuthenticatedUser } from "../../src/types/auth";
@@ -82,5 +84,17 @@ describe("User authorization guards", () => {
     expect(canDeleteUser(admin)).toBe(true);
     expect(canDeleteUser(engineer)).toBe(false);
     expect(canDeleteUser(regular)).toBe(false);
+  });
+
+  it("restricts admin-mediated password resets to administrators", () => {
+    expect(canResetUserPassword(admin)).toBe(true);
+    expect(canResetUserPassword(engineer)).toBe(false);
+    expect(canResetUserPassword(regular)).toBe(false);
+  });
+
+  it("allows a password change only on the actor's own account, even for an admin", () => {
+    expect(canChangeUserPassword(regular, regular.id)).toBe(true);
+    expect(canChangeUserPassword(regular, admin.id)).toBe(false);
+    expect(canChangeUserPassword(admin, regular.id)).toBe(false);
   });
 });
