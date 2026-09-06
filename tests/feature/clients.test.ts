@@ -13,6 +13,16 @@ describe("Clients Endpoints (/api/v1/clients)", () => {
     secret
   );
 
+  const staffToken = jwt.sign(
+    { id: 2, username: "staff", email: "staff@itsm.local", role: "staff", isActive: true },
+    secret
+  );
+
+  const regularToken = jwt.sign(
+    { id: 5, username: "regular", email: "regular@itsm.local", role: "user", isActive: true },
+    secret
+  );
+
   it("GET /api/v1/clients returns paginated clients list", async () => {
     const app = createApp();
     const mockClients = [
@@ -141,5 +151,41 @@ describe("Clients Endpoints (/api/v1/clients)", () => {
     expect(res.status).toBe(201);
     expect(res.body.data.email).toBe("charlie.brown@example.com");
     expect(res.body.data.userId).toBe(10);
+  });
+  it("POST /api/v1/clients lets service desk staff add a client", async () => {
+    const app = createApp();
+    vi.spyOn(clientService, "createClient").mockResolvedValue({ id: 9, firstName: "NEW" } as any);
+
+    const res = await request(app)
+      .post("/api/v1/clients")
+      .set("Authorization", `Bearer ${staffToken}`)
+      .send({ firstName: "New", lastName: "Requester" });
+
+    expect(res.status).toBe(201);
+  });
+
+  it("POST /api/v1/clients forbids a regular user from adding a client", async () => {
+    const app = createApp();
+    const createClient = vi.spyOn(clientService, "createClient");
+
+    const res = await request(app)
+      .post("/api/v1/clients")
+      .set("Authorization", `Bearer ${regularToken}`)
+      .send({ firstName: "New", lastName: "Requester" });
+
+    expect(res.status).toBe(403);
+    expect(createClient).not.toHaveBeenCalled();
+  });
+
+  it("DELETE /api/v1/clients/:id forbids staff, since tickets reference the client", async () => {
+    const app = createApp();
+    const deleteClient = vi.spyOn(clientService, "deleteClient");
+
+    const res = await request(app)
+      .delete("/api/v1/clients/1")
+      .set("Authorization", `Bearer ${staffToken}`);
+
+    expect(res.status).toBe(403);
+    expect(deleteClient).not.toHaveBeenCalled();
   });
 });

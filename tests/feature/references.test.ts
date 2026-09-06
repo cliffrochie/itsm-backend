@@ -14,6 +14,11 @@ describe("Reference Data Endpoints (/api/v1/offices, /api/v1/designations)", () 
     secret
   );
 
+  const staffToken = jwt.sign(
+    { id: 2, username: "staff", email: "staff@itsm.local", role: "staff", isActive: true },
+    secret
+  );
+
   it("GET /api/v1/offices returns all offices", async () => {
     const app = createApp();
     vi.spyOn(officeService, "listOffices").mockResolvedValue([
@@ -80,5 +85,29 @@ describe("Reference Data Endpoints (/api/v1/offices, /api/v1/designations)", () 
 
     expect(res.status).toBe(201);
     expect(res.body.data.name).toBe("Systems Analyst");
+  });
+  it("POST /api/v1/offices forbids a non-administrator from adding reference data", async () => {
+    const app = createApp();
+    const createOffice = vi.spyOn(officeService, "createOffice");
+
+    const res = await request(app)
+      .post("/api/v1/offices")
+      .set("Authorization", `Bearer ${staffToken}`)
+      .send({ name: "Rogue Office", code: "ROGUE" });
+
+    expect(res.status).toBe(403);
+    expect(createOffice).not.toHaveBeenCalled();
+  });
+
+  it("DELETE /api/v1/designations/:id forbids a non-administrator", async () => {
+    const app = createApp();
+    const deleteDesignation = vi.spyOn(designationService, "deleteDesignation");
+
+    const res = await request(app)
+      .delete("/api/v1/designations/1")
+      .set("Authorization", `Bearer ${staffToken}`);
+
+    expect(res.status).toBe(403);
+    expect(deleteDesignation).not.toHaveBeenCalled();
   });
 });

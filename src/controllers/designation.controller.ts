@@ -1,6 +1,9 @@
 import type { Response, NextFunction } from "express";
 import { designationService } from "../services/designation.service";
 import { formatSuccess } from "../responses/envelope";
+import { ForbiddenError } from "../types/errors";
+import { requireUser } from "../authorization/roles";
+import { canManageReferenceData } from "../authorization/reference.authorization";
 import type { AuthRequest } from "../types/auth";
 import type { CreateDesignationInput, UpdateDesignationInput } from "../validators/designation.validator";
 
@@ -26,6 +29,11 @@ export class DesignationController {
 
   async store(req: AuthRequest, res: Response, next: NextFunction): Promise<void> {
     try {
+      const actor = requireUser(req.user);
+      if (!canManageReferenceData(actor)) {
+        throw new ForbiddenError("Only administrators can manage designations.");
+      }
+
       const input = req.body as CreateDesignationInput;
       const created = await designationService.createDesignation(input);
       res.status(201).json(formatSuccess(created, "Designation created successfully."));
@@ -36,6 +44,11 @@ export class DesignationController {
 
   async update(req: AuthRequest, res: Response, next: NextFunction): Promise<void> {
     try {
+      const actor = requireUser(req.user);
+      if (!canManageReferenceData(actor)) {
+        throw new ForbiddenError("Only administrators can manage designations.");
+      }
+
       const id = Number(req.params.id);
       const input = req.body as UpdateDesignationInput;
       const updated = await designationService.updateDesignation(id, input);
@@ -47,6 +60,11 @@ export class DesignationController {
 
   async destroy(req: AuthRequest, res: Response, next: NextFunction): Promise<void> {
     try {
+      const actor = requireUser(req.user);
+      if (!canManageReferenceData(actor)) {
+        throw new ForbiddenError("Only administrators can manage designations.");
+      }
+
       const id = Number(req.params.id);
       await designationService.deleteDesignation(id);
       res.status(200).json(formatSuccess(null, "Designation deleted successfully."));

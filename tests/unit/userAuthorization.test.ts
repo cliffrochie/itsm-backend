@@ -1,7 +1,6 @@
 import { describe, it, expect } from "vitest";
+import { requireUser, isAdmin } from "../../src/authorization/roles";
 import {
-  requireUser,
-  isAdmin,
   canCreateUser,
   canUpdateUser,
   canManageUserRole,

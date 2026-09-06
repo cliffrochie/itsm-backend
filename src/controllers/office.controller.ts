@@ -1,6 +1,9 @@
 import type { Response, NextFunction } from "express";
 import { officeService } from "../services/office.service";
 import { formatSuccess } from "../responses/envelope";
+import { ForbiddenError } from "../types/errors";
+import { requireUser } from "../authorization/roles";
+import { canManageReferenceData } from "../authorization/reference.authorization";
 import type { AuthRequest } from "../types/auth";
 import type { CreateOfficeInput, UpdateOfficeInput } from "../validators/office.validator";
 
@@ -26,6 +29,11 @@ export class OfficeController {
 
   async store(req: AuthRequest, res: Response, next: NextFunction): Promise<void> {
     try {
+      const actor = requireUser(req.user);
+      if (!canManageReferenceData(actor)) {
+        throw new ForbiddenError("Only administrators can manage offices.");
+      }
+
       const input = req.body as CreateOfficeInput;
       const created = await officeService.createOffice(input);
       res.status(201).json(formatSuccess(created, "Office created successfully."));
@@ -36,6 +44,11 @@ export class OfficeController {
 
   async update(req: AuthRequest, res: Response, next: NextFunction): Promise<void> {
     try {
+      const actor = requireUser(req.user);
+      if (!canManageReferenceData(actor)) {
+        throw new ForbiddenError("Only administrators can manage offices.");
+      }
+
       const id = Number(req.params.id);
       const input = req.body as UpdateOfficeInput;
       const updated = await officeService.updateOffice(id, input);
@@ -47,6 +60,11 @@ export class OfficeController {
 
   async destroy(req: AuthRequest, res: Response, next: NextFunction): Promise<void> {
     try {
+      const actor = requireUser(req.user);
+      if (!canManageReferenceData(actor)) {
+        throw new ForbiddenError("Only administrators can manage offices.");
+      }
+
       const id = Number(req.params.id);
       await officeService.deleteOffice(id);
       res.status(200).json(formatSuccess(null, "Office deleted successfully."));
