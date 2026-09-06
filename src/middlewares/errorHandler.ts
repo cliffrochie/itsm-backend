@@ -2,6 +2,7 @@ import type { Request, Response, NextFunction } from "express";
 import { ZodError } from "zod";
 import { AppError } from "../types/errors";
 import { formatError } from "../responses/envelope";
+import { logger } from "../config/logger";
 
 export function errorHandler(
   err: unknown,
@@ -32,6 +33,6 @@ export function errorHandler(
     return;
   }
 
-  console.error("Unhandled Server Error:", err);
+  logger.error({ err }, "Unhandled server error");
   res.status(500).json(formatError("Internal server error.", null));
 }

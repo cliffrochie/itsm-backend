@@ -2,10 +2,12 @@ import "./config/nodePolyfills";
 import express, { type Express, type Request, type Response } from "express";
 import cors from "cors";
 import helmet from "helmet";
+import pinoHttp from "pino-http";
 import { errorHandler } from "./middlewares/errorHandler";
 import { formatSuccess } from "./responses/envelope";
 import { NotFoundError } from "./types/errors";
 import { env } from "./config/env";
+import { logger } from "./config/logger";
 
 import authRouter from "./routes/v1/auth.routes";
 import usersRouter from "./routes/v1/users.routes";
@@ -18,6 +20,10 @@ import actionLogsRouter from "./routes/v1/actionLogs.routes";
 
 export function createApp(): Express {
   const app: Express = express();
+
+  // Structured request logging. Mounted first so every request is accounted
+  // for, including ones rejected by the security middlewares below.
+  app.use(pinoHttp({ logger }));
 
   // Security & standard middlewares
   app.use(helmet());
