@@ -1,4 +1,4 @@
-import { eq, sql, and, or, like, desc } from "drizzle-orm";
+import { eq, sql, and, or, like, desc, inArray } from "drizzle-orm";
 import { db } from "../db/client";
 import { serviceTickets, type ServiceTicket } from "../db/schema/serviceTickets";
 import { serviceTicketHistories, type ServiceTicketHistory } from "../db/schema/serviceTicketHistories";
@@ -11,7 +11,15 @@ import type {
 } from "../validators/ticket.validator";
 
 export class TicketService {
-  async listTickets(query: TicketQueryInput): Promise<{
+  /**
+   * `requesterScope` restricts the result set to one requester's own tickets.
+   * Omit it for viewers entitled to the whole queue. Scoping happens in the
+   * query, not after it, so pagination totals stay correct.
+   */
+  async listTickets(
+    query: TicketQueryInput,
+    requesterScope?: { userId: number; clientIds: number[] }
+  ): Promise<{
     tickets: ServiceTicket[];
     total: number;
     page: number;
@@ -45,6 +53,14 @@ export class TicketService {
           like(serviceTickets.equipmentType, searchPattern)
         )
       );
+    }
+
+    if (requesterScope) {
+      const ownership = [eq(serviceTickets.createdById, requesterScope.userId)];
+      if (requesterScope.clientIds.length > 0) {
+        ownership.push(inArray(serviceTickets.clientId, requesterScope.clientIds));
+      }
+      conditions.push(or(...ownership));
     }
 
     const whereClause = conditions.length > 0 ? and(...conditions) : undefined;

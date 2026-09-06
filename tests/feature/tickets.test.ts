@@ -222,4 +222,63 @@ describe("Service Tickets Endpoints (/api/v1/service-tickets)", () => {
     expect(res.status).toBe(403);
     expect(submitFeedback).not.toHaveBeenCalled();
   });
+  it("GET / passes no scope for staff-side roles, so they see the whole queue", async () => {
+    const app = createApp();
+    const listTickets = vi.spyOn(ticketService, "listTickets").mockResolvedValue({
+      tickets: [], total: 0, page: 1, limit: 15, lastPage: 1,
+    } as any);
+
+    const res = await request(app)
+      .get("/api/v1/service-tickets")
+      .set("Authorization", `Bearer ${assignedEngineerToken}`);
+
+    expect(res.status).toBe(200);
+    expect(listTickets).toHaveBeenCalledWith(expect.anything(), undefined);
+  });
+
+  it("GET / scopes the query itself for a plain user, so totals stay honest", async () => {
+    const app = createApp();
+    vi.spyOn(clientService, "findClientIdsForUser").mockResolvedValue([70]);
+    const listTickets = vi.spyOn(ticketService, "listTickets").mockResolvedValue({
+      tickets: [], total: 0, page: 1, limit: 15, lastPage: 1,
+    } as any);
+
+    const res = await request(app)
+      .get("/api/v1/service-tickets")
+      .set("Authorization", `Bearer ${requesterToken}`);
+
+    expect(res.status).toBe(200);
+    expect(listTickets).toHaveBeenCalledWith(expect.anything(), {
+      userId: 5,
+      clientIds: [70],
+    });
+  });
+
+  it("GET /:id refuses a user reading someone else's ticket", async () => {
+    const app = createApp();
+    vi.spyOn(ticketService, "getTicketById").mockResolvedValue({
+      ...assignedTicket,
+      createdById: 999,
+      clientId: 888,
+    } as any);
+    vi.spyOn(clientService, "findClientIdsForUser").mockResolvedValue([70]);
+
+    const res = await request(app)
+      .get("/api/v1/service-tickets/1")
+      .set("Authorization", `Bearer ${requesterToken}`);
+
+    expect(res.status).toBe(403);
+  });
+
+  it("GET /:id still lets the requester read their own ticket", async () => {
+    const app = createApp();
+    vi.spyOn(ticketService, "getTicketById").mockResolvedValue(assignedTicket as any);
+    vi.spyOn(clientService, "findClientIdsForUser").mockResolvedValue([]);
+
+    const res = await request(app)
+      .get("/api/v1/service-tickets/1")
+      .set("Authorization", `Bearer ${requesterToken}`);
+
+    expect(res.status).toBe(200);
+  });
 });

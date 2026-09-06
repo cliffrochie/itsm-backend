@@ -131,6 +131,19 @@ export class ClientService {
     return this.getClientById(id);
   }
 
+  /**
+   * Client profiles linked to this account. `clients.user_id` is not unique, so
+   * an account can own more than one profile.
+   */
+  async findClientIdsForUser(userId: number): Promise<number[]> {
+    const rows = await db
+      .select({ id: clients.id })
+      .from(clients)
+      .where(eq(clients.userId, userId));
+
+    return rows.map((row) => row.id);
+  }
+
   /** Whether `userId` is the account linked to client `clientId`. */
   async isClientOwnedByUser(clientId: number, userId: number): Promise<boolean> {
     const rows = await db
