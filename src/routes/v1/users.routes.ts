@@ -7,6 +7,7 @@ import {
   updateUserSchema,
   userQuerySchema,
   toggleStatusSchema,
+  changePasswordSchema,
 } from "../../validators/user.validator";
 
 const router = Router();
@@ -31,6 +32,18 @@ router.put("/:id", validate(updateUserSchema, "body"), (req, res, next) => {
 
 router.patch("/:id/status", validate(toggleStatusSchema, "body"), (req, res, next) => {
   userController.toggleStatus(req, res, next);
+});
+
+router.patch(
+  "/:id/change-password",
+  validate(changePasswordSchema, "body"),
+  (req, res, next) => {
+    userController.changePassword(req, res, next);
+  }
+);
+
+router.post("/:id/reset-password", (req, res, next) => {
+  userController.resetPassword(req, res, next);
 });
 
 router.delete("/:id", (req, res, next) => {

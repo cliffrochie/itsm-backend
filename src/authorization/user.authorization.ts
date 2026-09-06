@@ -36,6 +36,20 @@ export function canToggleUserStatus(actor: AuthenticatedUser): boolean {
   return isAdmin(actor);
 }
 
+/** Admin-only: reset another user's password when they are locked out. */
+export function canResetUserPassword(actor: AuthenticatedUser): boolean {
+  return isAdmin(actor);
+}
+
+/**
+ * A password change requires proving knowledge of the current password, so it
+ * is always self-only — an admin who needs to act on someone else uses the
+ * reset flow instead.
+ */
+export function canChangeUserPassword(actor: AuthenticatedUser, targetUserId: number): boolean {
+  return actor.id === targetUserId;
+}
+
 export function canDeleteUser(actor: AuthenticatedUser): boolean {
   return isAdmin(actor);
 }

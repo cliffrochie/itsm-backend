@@ -31,7 +31,23 @@ export const toggleStatusSchema = z.object({
   isActive: z.boolean(),
 });
 
+/**
+ * Password rules for the self-service change flow (and the yardstick the
+ * admin-reset temporary password is generated to meet): at least 8 characters
+ * with a letter and a digit. Deliberately stricter than the min-6 used when an
+ * admin provisions an account.
+ */
+export const changePasswordSchema = z.object({
+  currentPassword: z.string().min(1, "Current password is required"),
+  newPassword: z
+    .string()
+    .min(8, "New password must be at least 8 characters")
+    .regex(/[A-Za-z]/, "New password must contain at least one letter")
+    .regex(/[0-9]/, "New password must contain at least one number"),
+});
+
 export type CreateUserInput = z.infer<typeof createUserSchema>;
 export type UpdateUserInput = z.infer<typeof updateUserSchema>;
 export type UserQueryInput = z.infer<typeof userQuerySchema>;
 export type ToggleStatusInput = z.infer<typeof toggleStatusSchema>;
+export type ChangePasswordInput = z.infer<typeof changePasswordSchema>;

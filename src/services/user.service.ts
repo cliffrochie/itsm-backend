@@ -1,9 +1,11 @@
+import { randomBytes } from "node:crypto";
 import bcrypt from "bcrypt";
 import { eq, sql, and, or, like, isNull } from "drizzle-orm";
 import { db } from "../db/client";
 import { users, type User } from "../db/schema/users";
 import { clients } from "../db/schema/clients";
-import { NotFoundError, ValidationError } from "../types/errors";
+import { NotFoundError, UnauthorizedError, ValidationError } from "../types/errors";
+import { tokenService } from "./token.service";
 import type {
   CreateUserInput,
   UpdateUserInput,
@@ -163,6 +165,69 @@ export class UserService {
   async deleteUser(id: number): Promise<void> {
     await this.getUserById(id);
     await db.delete(users).where(eq(users.id, id));
+  }
+
+  /**
+   * Self-service password change: the caller proves they know the current
+   * password, then every other session is dropped. `currentToken` is the
+   * request's own bearer token and is spared so the caller stays signed in.
+   */
+  async changePassword(
+    id: number,
+    currentPassword: string,
+    newPassword: string,
+    currentToken?: string
+  ): Promise<void> {
+    const [user] = await db.select().from(users).where(eq(users.id, id)).limit(1);
+    if (!user) {
+      throw new NotFoundError(`User with ID ${id} not found.`);
+    }
+
+    const matches = await bcrypt.compare(currentPassword, user.password);
+    if (!matches) {
+      throw new UnauthorizedError("Current password is incorrect.");
+    }
+
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+    await db.update(users).set({ password: hashedPassword }).where(eq(users.id, id));
+    await tokenService.revokeAllForUser(id, currentToken);
+  }
+
+  /**
+   * Admin-mediated reset for a locked-out user. The server mints a one-time
+   * temporary password, returns it once for the admin to relay, and revokes
+   * every session the target user holds.
+   */
+  async resetPassword(id: number): Promise<{ temporaryPassword: string }> {
+    await this.getUserById(id);
+
+    const temporaryPassword = this.generateTemporaryPassword();
+    const hashedPassword = await bcrypt.hash(temporaryPassword, 10);
+    await db.update(users).set({ password: hashedPassword }).where(eq(users.id, id));
+    await tokenService.revokeAllForUser(id);
+
+    return { temporaryPassword };
+  }
+
+  /**
+   * A 16-character password that always satisfies the change/reset policy
+   * (at least one letter and one digit). Ambiguous glyphs (0/O, 1/l/I) are
+   * left out so it survives being read aloud or copied by hand.
+   */
+  private generateTemporaryPassword(length = 16): string {
+    const letters = "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnpqrstuvwxyz";
+    const digits = "23456789";
+    const all = letters + digits;
+    const bytes = randomBytes(length);
+
+    const chars = [
+      letters[bytes[0]! % letters.length],
+      digits[bytes[1]! % digits.length],
+    ];
+    for (let i = 2; i < length; i++) {
+      chars.push(all[bytes[i]! % all.length]);
+    }
+    return chars.join("");
   }
 }
 

@@ -1,5 +1,5 @@
 import { createHash } from "node:crypto";
-import { and, eq, isNull, lt } from "drizzle-orm";
+import { and, eq, isNull, lt, ne } from "drizzle-orm";
 import { db } from "../db/client";
 import { personalAccessTokens } from "../db/schema/personalAccessTokens";
 import { UnauthorizedError } from "../types/errors";
@@ -42,6 +42,27 @@ export class TokenService {
     if (!rows[0]) {
       throw new UnauthorizedError("Unauthenticated.");
     }
+  }
+
+  /**
+   * Revokes every active token a user holds, so a password change or admin
+   * reset drops their other sessions immediately. Pass the request's own token
+   * as `exceptToken` to keep the caller signed in while cutting the rest.
+   */
+  async revokeAllForUser(userId: number, exceptToken?: string): Promise<void> {
+    const conditions = [
+      eq(personalAccessTokens.userId, userId),
+      isNull(personalAccessTokens.revokedAt),
+    ];
+
+    if (exceptToken) {
+      conditions.push(ne(personalAccessTokens.tokenHash, this.hashToken(exceptToken)));
+    }
+
+    await db
+      .update(personalAccessTokens)
+      .set({ revokedAt: new Date() })
+      .where(and(...conditions));
   }
 
   /** Revokes only the token supplied, leaving the user's other sessions alive. */

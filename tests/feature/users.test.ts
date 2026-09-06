@@ -218,4 +218,87 @@ describe("Users Endpoints (/api/v1/users)", () => {
     expect(res.status).toBe(403);
     expect(deleteUser).not.toHaveBeenCalled();
   });
+
+  describe("PATCH /api/v1/users/:id/change-password", () => {
+    it("rejects unauthenticated requests with 401", async () => {
+      const app = createApp();
+      const res = await request(app)
+        .patch("/api/v1/users/2/change-password")
+        .send({ currentPassword: "old-one", newPassword: "Str0ngPass" });
+
+      expect(res.status).toBe(401);
+    });
+
+    it("returns 422 when the new password fails the policy", async () => {
+      const app = createApp();
+      const changePassword = vi.spyOn(userService, "changePassword");
+
+      const res = await request(app)
+        .patch("/api/v1/users/2/change-password")
+        .set("Authorization", `Bearer ${regularToken}`)
+        .send({ currentPassword: "old-one", newPassword: "weak" });
+
+      expect(res.status).toBe(422);
+      expect(res.body.errors.newPassword).toBeDefined();
+      expect(changePassword).not.toHaveBeenCalled();
+    });
+
+    it("forbids changing another user's password", async () => {
+      const app = createApp();
+      const changePassword = vi.spyOn(userService, "changePassword");
+
+      const res = await request(app)
+        .patch("/api/v1/users/1/change-password")
+        .set("Authorization", `Bearer ${regularToken}`)
+        .send({ currentPassword: "old-one", newPassword: "Str0ngPass" });
+
+      expect(res.status).toBe(403);
+      expect(changePassword).not.toHaveBeenCalled();
+    });
+
+    it("changes the caller's own password and passes the request token through", async () => {
+      const app = createApp();
+      const changePassword = vi
+        .spyOn(userService, "changePassword")
+        .mockResolvedValue(undefined);
+
+      const res = await request(app)
+        .patch("/api/v1/users/2/change-password")
+        .set("Authorization", `Bearer ${regularToken}`)
+        .send({ currentPassword: "old-one", newPassword: "Str0ngPass" });
+
+      expect(res.status).toBe(200);
+      expect(res.body.data).toBeNull();
+      expect(changePassword).toHaveBeenCalledWith(2, "old-one", "Str0ngPass", regularToken);
+    });
+  });
+
+  describe("POST /api/v1/users/:id/reset-password", () => {
+    it("forbids a non-admin from resetting a password", async () => {
+      const app = createApp();
+      const resetPassword = vi.spyOn(userService, "resetPassword");
+
+      const res = await request(app)
+        .post("/api/v1/users/99/reset-password")
+        .set("Authorization", `Bearer ${regularToken}`);
+
+      expect(res.status).toBe(403);
+      expect(resetPassword).not.toHaveBeenCalled();
+    });
+
+    it("lets an admin reset a password and returns the temporary password once", async () => {
+      const app = createApp();
+      const resetPassword = vi
+        .spyOn(userService, "resetPassword")
+        .mockResolvedValue({ temporaryPassword: "Tmp0raryPass" });
+
+      const res = await request(app)
+        .post("/api/v1/users/99/reset-password")
+        .set("Authorization", `Bearer ${adminToken}`);
+
+      expect(res.status).toBe(200);
+      expect(res.body.data.temporaryPassword).toBe("Tmp0raryPass");
+      expect(resetPassword).toHaveBeenCalledWith(99);
+    });
+  });
 });

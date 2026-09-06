@@ -9,9 +9,16 @@ import {
   canManageUserRole,
   canToggleUserStatus,
   canDeleteUser,
+  canResetUserPassword,
+  canChangeUserPassword,
 } from "../authorization/user.authorization";
 import type { AuthRequest } from "../types/auth";
-import type { CreateUserInput, UpdateUserInput, UserQueryInput } from "../validators/user.validator";
+import type {
+  CreateUserInput,
+  UpdateUserInput,
+  UserQueryInput,
+  ChangePasswordInput,
+} from "../validators/user.validator";
 
 export class UserController {
   async index(req: AuthRequest, res: Response, next: NextFunction): Promise<void> {
@@ -92,6 +99,48 @@ export class UserController {
       const { isActive } = req.body;
       const updated = await userService.toggleStatus(id, isActive);
       res.status(200).json(formatSuccess(updated, "User status updated successfully."));
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  async changePassword(req: AuthRequest, res: Response, next: NextFunction): Promise<void> {
+    try {
+      const actor = requireUser(req.user);
+      const id = Number(req.params.id);
+      if (!canChangeUserPassword(actor, id)) {
+        throw new ForbiddenError("You may only change your own password.");
+      }
+
+      const { currentPassword, newPassword } = req.body as ChangePasswordInput;
+      await userService.changePassword(id, currentPassword, newPassword, req.token);
+      res
+        .status(200)
+        .json(
+          formatSuccess(null, "Password changed successfully. Other sessions have been signed out.")
+        );
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  async resetPassword(req: AuthRequest, res: Response, next: NextFunction): Promise<void> {
+    try {
+      const actor = requireUser(req.user);
+      if (!canResetUserPassword(actor)) {
+        throw new ForbiddenError("Only administrators can reset user passwords.");
+      }
+
+      const id = Number(req.params.id);
+      const result = await userService.resetPassword(id);
+      res
+        .status(200)
+        .json(
+          formatSuccess(
+            result,
+            "Password reset. Share this temporary password with the user; it will not be shown again."
+          )
+        );
     } catch (error) {
       next(error);
     }
