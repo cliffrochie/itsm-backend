@@ -13,6 +13,7 @@ import {
   canResetUserPassword,
   canChangeUserPassword,
 } from "../authorization/user.authorization";
+import { recordAudit } from "../audit/recordAudit";
 import type { AuthRequest } from "../types/auth";
 import type {
   CreateUserInput,
@@ -66,6 +67,13 @@ export class UserController {
 
       const input = req.body as CreateUserInput;
       const created = await userService.createUser(input);
+
+      await recordAudit(req, {
+        action: "created",
+        entity: "user",
+        entityId: created.id,
+        details: { username: created.username, role: created.role, isActive: created.isActive },
+      });
       res.status(201).json(formatSuccess(created, "User created successfully."));
     } catch (error) {
       next(error);
@@ -87,6 +95,14 @@ export class UserController {
       }
 
       const updated = await userService.updateUser(id, input);
+
+      await recordAudit(req, {
+        action: "updated",
+        entity: "user",
+        entityId: id,
+        // Field names, plus the two values that carry privilege.
+        details: { fields: Object.keys(input), role: input.role, isActive: input.isActive },
+      });
       res.status(200).json(formatSuccess(updated, "User updated successfully."));
     } catch (error) {
       next(error);
@@ -103,6 +119,13 @@ export class UserController {
       const id = Number(req.params.id);
       const { isActive } = req.body;
       const updated = await userService.toggleStatus(id, isActive);
+
+      await recordAudit(req, {
+        action: "status_changed",
+        entity: "user",
+        entityId: id,
+        details: { isActive },
+      });
       res.status(200).json(formatSuccess(updated, "User status updated successfully."));
     } catch (error) {
       next(error);
@@ -119,6 +142,15 @@ export class UserController {
 
       const { currentPassword, newPassword } = req.body as ChangePasswordInput;
       await userService.changePassword(id, currentPassword, newPassword, req.token);
+
+      // Records that it happened and to whom. The passwords themselves are
+      // deliberately absent.
+      await recordAudit(req, {
+        action: "password_changed",
+        entity: "user",
+        entityId: id,
+        details: { self: actor.id === id },
+      });
       res
         .status(200)
         .json(
@@ -138,6 +170,9 @@ export class UserController {
 
       const id = Number(req.params.id);
       const result = await userService.resetPassword(id);
+
+      // `result` carries the generated temporary password; it is never logged.
+      await recordAudit(req, { action: "password_reset", entity: "user", entityId: id });
       res
         .status(200)
         .json(
@@ -160,6 +195,8 @@ export class UserController {
 
       const id = Number(req.params.id);
       await userService.deleteUser(id);
+
+      await recordAudit(req, { action: "deleted", entity: "user", entityId: id });
       res.status(200).json(formatSuccess(null, "User deleted successfully."));
     } catch (error) {
       next(error);

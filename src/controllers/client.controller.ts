@@ -8,6 +8,7 @@ import {
   canUpdateClient,
   canDeleteClient,
 } from "../authorization/client.authorization";
+import { recordAudit } from "../audit/recordAudit";
 import type { AuthRequest } from "../types/auth";
 import type { CreateClientInput, UpdateClientInput, ClientQueryInput } from "../validators/client.validator";
 
@@ -52,6 +53,8 @@ export class ClientController {
 
       const input = req.body as CreateClientInput;
       const created = await clientService.createClient(input);
+
+      await recordAudit(req, { action: "created", entity: "client", entityId: created.id });
       res.status(201).json(formatSuccess(created, "Client created successfully."));
     } catch (error) {
       next(error);
@@ -68,6 +71,13 @@ export class ClientController {
       const id = Number(req.params.id);
       const input = req.body as UpdateClientInput;
       const updated = await clientService.updateClient(id, input);
+
+      await recordAudit(req, {
+        action: "updated",
+        entity: "client",
+        entityId: id,
+        details: { fields: Object.keys(input) },
+      });
       res.status(200).json(formatSuccess(updated, "Client updated successfully."));
     } catch (error) {
       next(error);
@@ -83,6 +93,8 @@ export class ClientController {
 
       const id = Number(req.params.id);
       await clientService.deleteClient(id);
+
+      await recordAudit(req, { action: "deleted", entity: "client", entityId: id });
       res.status(200).json(formatSuccess(null, "Client deleted successfully."));
     } catch (error) {
       next(error);

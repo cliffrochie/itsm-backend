@@ -3,6 +3,7 @@ import request from "supertest";
 import jwt from "jsonwebtoken";
 import { createApp } from "../../src/app";
 import { userService } from "../../src/services/user.service";
+import { actionLogService } from "../../src/services/actionLog.service";
 
 describe("Users Endpoints (/api/v1/users)", () => {
   const secret = "this-is-a-valid-32-characters-jwt-secret-string";
@@ -332,5 +333,55 @@ describe("Users Endpoints (/api/v1/users)", () => {
     expect(res.body.data[0].firstName).toBe("ADMIN");
     expect(res.body.data[0]).not.toHaveProperty("email");
     expect(res.body.data[0]).not.toHaveProperty("contactNo");
+  });
+  it("records an audit entry when an administrator deactivates an account", async () => {
+    const app = createApp();
+    const log = vi.spyOn(actionLogService, "log").mockResolvedValue();
+    vi.spyOn(userService, "toggleStatus").mockResolvedValue({ id: 2, isActive: false } as any);
+
+    const res = await request(app)
+      .patch("/api/v1/users/2/status")
+      .set("Authorization", `Bearer ${adminToken}`)
+      .send({ isActive: false });
+
+    expect(res.status).toBe(200);
+    expect(log).toHaveBeenCalledWith(
+      expect.objectContaining({
+        userId: 1,
+        action: "status_changed",
+        entity: "user",
+        entityId: "2",
+      })
+    );
+  });
+
+  it("writes no audit entry when the action was refused", async () => {
+    const app = createApp();
+    const log = vi.spyOn(actionLogService, "log").mockResolvedValue();
+
+    const res = await request(app)
+      .delete("/api/v1/users/99")
+      .set("Authorization", `Bearer ${regularToken}`);
+
+    expect(res.status).toBe(403);
+    expect(log).not.toHaveBeenCalled();
+  });
+
+  it("keeps the generated temporary password out of the audit trail", async () => {
+    const app = createApp();
+    const log = vi.spyOn(actionLogService, "log").mockResolvedValue();
+    vi.spyOn(userService, "resetPassword").mockResolvedValue({
+      temporaryPassword: "Tmp-Sup3rSecret!",
+    } as any);
+
+    const res = await request(app)
+      .post("/api/v1/users/2/reset-password")
+      .set("Authorization", `Bearer ${adminToken}`);
+
+    expect(res.status).toBe(200);
+    expect(JSON.stringify(log.mock.calls)).not.toContain("Tmp-Sup3rSecret!");
+    expect(log).toHaveBeenCalledWith(
+      expect.objectContaining({ action: "password_reset", entity: "user" })
+    );
   });
 });

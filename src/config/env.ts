@@ -12,6 +12,13 @@ export const envSchema = z.object({
   // refresh. The client re-authenticates when it receives a 401.
   JWT_EXPIRES_IN: z.string().default("60m"),
   CORS_ORIGIN: z.string().default("http://localhost:5173"),
+  // Number of reverse proxy hops in front of the app. 0 means the app is
+  // exposed directly. Behind one nginx, set 1 — otherwise every request looks
+  // like it came from the proxy, which both blanks the audit trail's IP column
+  // and makes the login rate limiter count the whole internet as one client.
+  // Never set this higher than the real hop count: it lets clients forge
+  // X-Forwarded-For.
+  TRUST_PROXY: z.coerce.number().int().min(0).default(0),
   LOG_LEVEL: z
     .enum(["fatal", "error", "warn", "info", "debug", "trace", "silent"])
     .default("info"),

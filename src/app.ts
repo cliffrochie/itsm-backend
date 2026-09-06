@@ -21,6 +21,10 @@ import actionLogsRouter from "./routes/v1/actionLogs.routes";
 export function createApp(): Express {
   const app: Express = express();
 
+  // Governs what req.ip resolves to, which both the audit trail and the login
+  // rate limiter depend on. See TRUST_PROXY in config/env.ts.
+  app.set("trust proxy", env.TRUST_PROXY ?? 0);
+
   // Structured request logging. Mounted first so every request is accounted
   // for, including ones rejected by the security middlewares below.
   app.use(pinoHttp({ logger }));
