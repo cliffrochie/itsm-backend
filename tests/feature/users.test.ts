@@ -113,6 +113,60 @@ describe("Users Endpoints (/api/v1/users)", () => {
     expect(res.body.message).toContain("User created successfully");
   });
 
+  it("POST /api/v1/users passes optional officeId and designationId to userService", async () => {
+    const app = createApp();
+    const createUserSpy = vi.spyOn(userService, "createUser").mockResolvedValue({
+      id: 3,
+      username: "officeuser",
+      email: "officeuser@itsm.local",
+      firstName: "OFFICE",
+      lastName: "USER",
+      role: "user",
+      isActive: true,
+    } as any);
+
+    const res = await request(app)
+      .post("/api/v1/users")
+      .set("Authorization", `Bearer ${adminToken}`)
+      .send({
+        username: "officeuser",
+        email: "officeuser@itsm.local",
+        password: "Password123!",
+        firstName: "Office",
+        lastName: "User",
+        role: "user",
+        isActive: true,
+        officeId: 1,
+        designationId: 2,
+      });
+
+    expect(res.status).toBe(201);
+    expect(createUserSpy).toHaveBeenCalledWith(
+      expect.objectContaining({
+        officeId: 1,
+        designationId: 2,
+      })
+    );
+  });
+
+  it("POST /api/v1/users rejects invalid non-positive officeId with 422", async () => {
+    const app = createApp();
+    const res = await request(app)
+      .post("/api/v1/users")
+      .set("Authorization", `Bearer ${adminToken}`)
+      .send({
+        username: "baduser",
+        email: "baduser@itsm.local",
+        password: "Password123!",
+        firstName: "Bad",
+        lastName: "User",
+        officeId: -5,
+      });
+
+    expect(res.status).toBe(422);
+    expect(res.body.errors.officeId).toBeDefined();
+  });
+
   it("PATCH /api/v1/users/:id/status toggles user active status", async () => {
     const app = createApp();
     vi.spyOn(userService, "toggleStatus").mockResolvedValue({
