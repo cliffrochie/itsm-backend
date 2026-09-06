@@ -4,6 +4,8 @@ export interface AuthenticatedUser {
   id: number;
   username: string;
   email: string;
+  firstName?: string;
+  lastName?: string;
   role: "admin" | "service_engineer" | "staff" | "user";
   isActive: boolean;
 }

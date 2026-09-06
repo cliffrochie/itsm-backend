@@ -10,6 +10,9 @@ export class OfficeService {
   }
 
   async getOfficeById(id: number): Promise<Office> {
+    if (!id || isNaN(id) || id <= 0) {
+      throw new NotFoundError(`Office with ID ${id} not found.`);
+    }
     const [office] = await db.select().from(offices).where(eq(offices.id, id)).limit(1);
     if (!office) {
       throw new NotFoundError(`Office with ID ${id} not found.`);

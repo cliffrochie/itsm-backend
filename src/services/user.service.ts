@@ -76,6 +76,9 @@ export class UserService {
   }
 
   async getUserById(id: number): Promise<Omit<User, "password">> {
+    if (!id || isNaN(id) || id <= 0) {
+      throw new NotFoundError(`User with ID ${id} not found.`);
+    }
     const [user] = await db.select().from(users).where(eq(users.id, id)).limit(1);
     if (!user) {
       throw new NotFoundError(`User with ID ${id} not found.`);

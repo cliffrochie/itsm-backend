@@ -23,6 +23,18 @@ router.post("/", validate(createTicketSchema, "body"), (req, res, next) => {
   ticketController.store(req, res, next);
 });
 
+router.get("/total-service-status", (req, res, next) => {
+  ticketController.totalServiceStatus(req, res, next);
+});
+
+router.get("/total-task-type", (req, res, next) => {
+  ticketController.totalTaskType(req, res, next);
+});
+
+router.get("/total-equipment-type", (req, res, next) => {
+  ticketController.totalEquipmentType(req, res, next);
+});
+
 router.get("/:id", (req, res, next) => {
   ticketController.show(req, res, next);
 });
@@ -41,6 +53,10 @@ router.patch("/:id/assign", validate(assignEngineerSchema, "body"), (req, res, n
 
 router.post("/:id/feedback", validate(ticketFeedbackSchema, "body"), (req, res, next) => {
   ticketController.feedback(req, res, next);
+});
+
+router.delete("/:id", (req, res, next) => {
+  ticketController.destroy(req, res, next);
 });
 
 export default router;

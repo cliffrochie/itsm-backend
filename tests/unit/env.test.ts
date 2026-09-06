@@ -37,4 +37,18 @@ describe("Environment Configuration (Zod)", () => {
     expect(parsed.NODE_ENV).toBe("test");
     expect(parsed.JWT_SECRET).toBe("this-is-a-valid-32-characters-jwt-secret-string");
   });
+
+  it("constructs DATABASE_URL from individual DATABASE_* variables when DATABASE_URL is not explicitly set", () => {
+    const parsed = validateEnv({
+      DATABASE_HOST: "localhost",
+      DATABASE_NAME: "itsm",
+      DATABASE_USER: "root",
+      DATABASE_PASS: "blackhole",
+      PORT: "5000",
+      JWT_SECRET: "this-is-a-valid-32-characters-jwt-secret-string",
+    });
+
+    expect(parsed.DATABASE_URL).toBe("mysql://root:blackhole@localhost:3306/itsm");
+  });
 });
+
